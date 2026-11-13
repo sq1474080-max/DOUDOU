@@ -9,6 +9,8 @@
     <title>星值任务打卡</title>
     <!-- 引入 Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 引入 Tesseract.js 用于前端 OCR 识别 -->
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
 
@@ -435,7 +437,7 @@
         .exam-item {
             background: #fdfbf7;
             border-radius: 20px;
-            padding: 16px;
+            padding: 12px 16px;
             margin-bottom: 12px;
             border: 1px solid #f0e6d6;
             display: flex;
@@ -444,9 +446,9 @@
             box-shadow: 0 2px 8px rgba(180, 160, 140, 0.08);
         }
         .exam-score-input {
-            width: 80px;
-            padding: 6px;
-            border-radius: 10px;
+            width: 90px;
+            padding: 8px;
+            border-radius: 12px;
             border: 2px solid #f0e6d6;
             text-align: center;
             font-weight: 800;
@@ -454,6 +456,7 @@
             color: #4a3b32;
             outline: none;
             background: #fff;
+            transition: 0.2s;
         }
         .exam-score-input:focus { border-color: #d48a3d; }
         .exam-score-input:disabled {
@@ -464,7 +467,7 @@
         }
         .exam-stars {
             font-weight: 800;
-            font-size: 16px;
+            font-size: 15px;
             color: #d48a3d;
         }
         .exam-stars.zero { color: #a68f7b; }
@@ -680,7 +683,7 @@
 
         (function() {
             const STORAGE_KEY = 'star_task_app_v1';
-            const ADMIN_PASSWORD = '111';
+            const ADMIN_PASSWORD = '111'; // 修改为 111
 
             // 北京时间
             function getBeijingNow() {
@@ -1037,7 +1040,6 @@
             }
 
             function renderTaskItem(task, completed, overdue) {
-                // 管理员可以编辑，儿童不可
                 const showAdminActions = (currentRole === 'admin' && isAdminAuthenticated);
                 
                 let tagsHtml = '';
@@ -1124,30 +1126,31 @@
                 container.innerHTML = sortedExams.map(exam => {
                     const stars = exam.score !== null ? getExamStars(exam.score) : 0;
                     const isZero = stars === 0;
-                    const starText = exam.score !== null ? `获得 ${stars} 🌟` : '未录入分数';
+                    const starText = exam.score !== null ? `获得 ${stars} 🌟` : '未录入';
                     
-                    // 管理员可以修改已录入的分数，儿童只能在未录入时输入
                     const canEditScore = (currentRole === 'admin' && isAdminAuthenticated) || (exam.score === null);
-                    const isDisabled = !canEditScore;
 
                     const scoreHtml = canEditScore
                         ? `<input type="number" step="0.5" min="0" max="100" class="exam-score-input" data-exam-id="${exam.id}" value="${exam.score !== null ? exam.score : ''}" placeholder="输入分数">`
-                        : `<span style="font-weight:800; color:#4a3b32; font-size:16px;">${exam.score}分</span>`;
+                        : `<span style="font-weight:800; color:#4a3b32; font-size:16px; margin-left:4px;">${exam.score}分</span>`;
                         
                     return `
                         <div class="exam-item">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div style="font-weight:800; font-size:16px; color:#33261d;">${escapeHtml(exam.name)}</div>
-                                <div style="font-size:12px; color:#a68f7b; font-weight:700;">${exam.date}</div>
+                                <div style="font-weight:800; font-size:16px; color:#33261d; display:flex; align-items:center; gap:8px;">
+                                    <span>📝 ${escapeHtml(exam.name)}</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span class="exam-stars ${isZero ? 'zero' : ''}">${starText}</span>
+                                    <span style="font-size:12px; color:#a68f7b; font-weight:700;">${exam.date}</span>
+                                </div>
                             </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
                                 <div>${scoreHtml}</div>
-                                <div class="exam-stars ${isZero ? 'zero' : ''}">${starText}</div>
+                                ${currentRole === 'admin' && isAdminAuthenticated ? `
+                                <button class="icon-btn" data-action="delete-exam" data-exam-id="${exam.id}" style="color:#cd5c5c; width:32px; height:32px; font-size:14px;">删除</button>
+                                ` : ''}
                             </div>
-                            ${currentRole === 'admin' && isAdminAuthenticated ? `
-                            <div style="text-align:right; margin-top:-4px;">
-                                <button class="icon-btn" data-action="delete-exam" data-exam-id="${exam.id}" style="color:#cd5c5c; width:28px; height:28px; font-size:14px;">删除</button>
-                            </div>` : ''}
                         </div>
                     `;
                 }).join('');
@@ -1162,7 +1165,7 @@
 
                 const overdueTasks = state.tasks.filter(task => {
                     if (task.daily) return false;
-                    if (task.category !== '校内作业') return false; // 只统计校内作业
+                    if (task.category !== '校内作业') return false;
                     if (todayCheckTaskIds.has(task.id)) return false;
                     return !canTaskCheck(task);
                 });
@@ -1352,22 +1355,36 @@
                 overlay.className = 'modal-overlay';
                 const modal = document.createElement('div');
                 modal.className = 'modal-content';
+                
+                // 如果 cancelText 为空字符串，则不显示取消按钮
+                const cancelBtnHtml = cancelText 
+                    ? `<button class="btn-cancel" id="modalCancel">${cancelText}</button>` 
+                    : '';
+                
+                // 如果只有确认按钮，让确认按钮占满
+                const actionStyle = cancelText ? '' : 'width: 100%;';
+
                 modal.innerHTML = `
                     <h3>${escapeHtml(title)}</h3>
                     <div id="modalBody">${contentHTML || `<p style="margin-bottom:20px; color:#6b5b4e; font-weight:600;">${escapeHtml(content || '')}</p>`}</div>
                     <div class="modal-actions">
-                        <button class="btn-cancel" id="modalCancel">${cancelText}</button>
-                        <button class="${danger ? 'btn-danger' : 'btn-confirm'}" id="modalConfirm">${confirmText}</button>
+                        ${cancelBtnHtml}
+                        <button class="${danger ? 'btn-danger' : 'btn-confirm'}" id="modalConfirm" style="${actionStyle}">${confirmText}</button>
                     </div>
                 `;
                 overlay.appendChild(modal);
                 modalRoot.appendChild(overlay);
 
                 const closeModal = () => overlay.remove();
-                document.getElementById('modalCancel').onclick = () => {
-                    if (onCancel && onCancel() === false) return;
-                    closeModal();
-                };
+                
+                const cancelBtn = document.getElementById('modalCancel');
+                if (cancelBtn) {
+                    cancelBtn.onclick = () => {
+                        if (onCancel && onCancel() === false) return;
+                        closeModal();
+                    };
+                }
+                
                 document.getElementById('modalConfirm').onclick = () => {
                     if (onConfirm && onConfirm() === false) return;
                     closeModal();
@@ -1453,7 +1470,6 @@
             };
 
             function openTaskModal(editTask = null) {
-                // 管理员可编辑，儿童仅可新增
                 if (editTask && !(currentRole === 'admin' && isAdminAuthenticated)) return;
 
                 const isEdit = !!editTask;
@@ -1580,38 +1596,86 @@
                 });
             }
 
-            // --- OCR (仅管理员) ---
+            // --- OCR (仅管理员) 及 真实 OCR 识别 ---
             function openOcrModal() {
                 if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
                 const today = getBeijingDateStr();
+                
                 showModal({
-                    title: 'OCR 识别',
+                    title: '拍照 / 相册 OCR 识别',
                     contentHTML: `
-                        <div style="margin-bottom:16px;">
-                            <label class="btn-outline" style="display:inline-flex; cursor:pointer;">
-                                📷 拍照/相册
-                                <input type="file" accept="image/*" capture="environment" id="ocrFileInput" style="display:none;">
+                        <div style="margin-bottom:16px; text-align:center;">
+                            <label class="btn-outline" style="display:inline-flex; cursor:pointer; padding:10px 20px; font-size:15px;">
+                                📷 选择图片 / 拍照
+                                <input type="file" accept="image/*" id="ocrFileInput" style="display:none;">
                             </label>
+                            <div id="ocrStatus" style="margin-top:10px; font-size:13px; color:#a68f7b; font-weight:700;"></div>
+                        </div>
+                        <div id="ocrPreviewContainer" style="display:none; margin-bottom:16px; text-align:center;">
+                            <img id="ocrPreviewImg" style="max-width:100%; max-height:150px; border-radius:12px; border:2px solid #f0e6d6;">
                         </div>
                         <label>识别文字（可修改）</label>
-                        <textarea id="ocrResult" rows="3">数学作业本 第5页</textarea>
+                        <textarea id="ocrResult" rows="4" placeholder="识别结果会显示在这里..."></textarea>
                     `,
                     confirmText: '生成任务',
                     onConfirm: () => {
                         const text = document.getElementById('ocrResult').value.trim();
-                        if (!text) return false;
+                        if (!text) { showToast('请先识别或输入文字', false); return false; }
                         state.tasks.push({
                             id: 'task_ocr_' + Date.now(),
                             name: text, daily: false, note: 'OCR生成', category: '校内作业', subject: '其它', createdDate: today
                         });
                         saveState();
                         renderAll();
-                        showToast('已生成任务');
+                        showToast('已根据识别结果生成任务');
                     }
                 });
+
                 setTimeout(() => {
-                    document.getElementById('ocrFileInput')?.addEventListener('change', () => {
-                        document.getElementById('ocrResult').value = '【模拟识别】数学练习册 P12';
+                    const fileInput = document.getElementById('ocrFileInput');
+                    const statusEl = document.getElementById('ocrStatus');
+                    const previewContainer = document.getElementById('ocrPreviewContainer');
+                    const previewImg = document.getElementById('ocrPreviewImg');
+                    const resultEl = document.getElementById('ocrResult');
+
+                    if (!fileInput) return;
+
+                    fileInput.addEventListener('change', async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+
+                        // 预览图片
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            previewContainer.style.display = 'block';
+                            previewImg.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+
+                        // 开始真实 OCR 识别
+                        statusEl.innerHTML = '⏳ 正在识别中，请稍候...（首次加载语言包可能需要几秒）';
+                        resultEl.value = '';
+                        
+                        try {
+                            const { data: { text } } = await Tesseract.recognize(
+                                file,
+                                'chi_sim+eng', // 简体中文+英文
+                                { logger: m => {
+                                    if (m.status === 'recognizing text') {
+                                        statusEl.innerHTML = `⏳ 识别进度：${Math.round(m.progress * 100)}%`;
+                                    }
+                                }}
+                            );
+                            const cleanText = text.trim().replace(/\s+/g, ' ');
+                            resultEl.value = cleanText;
+                            statusEl.innerHTML = '✅ 识别完成，请核对文字';
+                            if (!cleanText) {
+                                statusEl.innerHTML = '⚠️ 未能识别出文字，请重试或手动输入';
+                            }
+                        } catch (error) {
+                            console.error('OCR Error:', error);
+                            statusEl.innerHTML = '❌ 识别失败，请检查网络或重试';
+                        }
                     });
                 }, 100);
             }
@@ -1648,7 +1712,6 @@
 
                 document.body.addEventListener('change', (e) => {
                     if (e.target.matches('.exam-score-input')) {
-                        // 如果分数已经存在且不是管理员，则不允许修改
                         const examId = e.target.dataset.examId;
                         const exam = state.exams.find(x => x.id === examId);
                         if (exam && exam.score !== null && !(currentRole === 'admin' && isAdminAuthenticated)) {
@@ -1697,7 +1760,6 @@
                     } else if (action === 'toggle-extra') {
                         toggleExtraCheck(target.dataset.extraId);
                     } else if (action === 'edit-task') {
-                        // 只有管理员可以点击编辑按钮
                         if (currentRole === 'admin' && isAdminAuthenticated) {
                             const task = state.tasks.find(t => t.id === target.dataset.taskId);
                             if (task) openTaskModal(task);
@@ -1777,50 +1839,64 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
                 
+                // 统计弹窗逻辑（判断是否显示清零）
                 document.getElementById('bottomStats').addEventListener('click', () => {
                     const monthData = calcMonthStars();
-                    showModal({
-                        title: '📊 星值统计',
-                        contentHTML: `
-                            <div style="padding: 10px;">
-                                <div style="font-size:18px; font-weight:800; color:#4a3b32; margin-bottom:12px; display:flex; justify-content:space-between;">
-                                    <span>今日获得：</span>
-                                    <span style="color:#d48a3d;">${calcTodayStars()} 🌟</span>
-                                </div>
-                                <div style="font-size:18px; font-weight:800; color:#4a3b32; margin-bottom:12px; display:flex; justify-content:space-between;">
-                                    <span>本月累计：</span>
-                                    <span style="color:#d48a3d;">${monthData.total} 🌟</span>
-                                </div>
-                                <div style="font-size:18px; font-weight:800; color:#4a3b32; margin-bottom:12px; display:flex; justify-content:space-between;">
-                                    <span>本月奖励：</span>
-                                    <span style="color:#2e8b57;">${monthData.total} 元</span>
-                                </div>
+                    const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
+                    
+                    let html = `
+                        <div style="padding: 10px;">
+                            <div style="font-size:18px; font-weight:800; color:#4a3b32; margin-bottom:12px; display:flex; justify-content:space-between;">
+                                <span>今日获得：</span>
+                                <span style="color:#d48a3d;">${calcTodayStars()} 🌟</span>
                             </div>
-                        `,
-                        confirmText: '知道了',
-                        cancelText: '清零',
-                        onCancel: () => {
-                            setTimeout(() => {
-                                showModal({
-                                    title: '⚠️ 清零确认',
-                                    content: '确定要清空现有所有任务、打卡记录、额外任务和考试记录吗？清零后不影响后续新增。',
-                                    confirmText: '确认',
-                                    cancelText: '取消',
-                                    danger: true,
-                                    onConfirm: () => {
-                                        // 清空现有所有任务和记录，但不做月份拦截，也不影响后续新增
-                                        state.tasks = [];
-                                        state.checkins = [];
-                                        state.extraTasks = [];
-                                        state.exams = [];
-                                        saveState();
-                                        renderAll();
-                                        showToast('已清空现有所有记录');
-                                    }
-                                });
-                            }, 50);
-                        }
-                    });
+                            <div style="font-size:18px; font-weight:800; color:#4a3b32; margin-bottom:12px; display:flex; justify-content:space-between;">
+                                <span>本月累计：</span>
+                                <span style="color:#d48a3d;">${monthData.total} 🌟</span>
+                            </div>
+                            <div style="font-size:18px; font-weight:800; color:#4a3b32; margin-bottom:12px; display:flex; justify-content:space-between;">
+                                <span>本月奖励：</span>
+                                <span style="color:#2e8b57;">${monthData.total} 元</span>
+                            </div>
+                        </div>
+                    `;
+
+                    if (isAdmin) {
+                        showModal({
+                            title: '📊 星值统计',
+                            contentHTML: html,
+                            confirmText: '知道了',
+                            cancelText: '清零',
+                            onCancel: () => {
+                                setTimeout(() => {
+                                    showModal({
+                                        title: '⚠️ 清零确认',
+                                        content: '确定要清空现有所有任务、打卡记录、额外任务和考试记录吗？清零后不影响后续新增。',
+                                        confirmText: '确认',
+                                        cancelText: '取消',
+                                        danger: true,
+                                        onConfirm: () => {
+                                            state.tasks = [];
+                                            state.checkins = [];
+                                            state.extraTasks = [];
+                                            state.exams = [];
+                                            saveState();
+                                            renderAll();
+                                            showToast('已清空现有所有记录');
+                                        }
+                                    });
+                                }, 50);
+                            }
+                        });
+                    } else {
+                        // 儿童模式：隐藏清零按钮
+                        showModal({
+                            title: '📊 星值统计',
+                            contentHTML: html,
+                            confirmText: '知道了',
+                            cancelText: '' // 传入空字符串隐藏
+                        });
+                    }
                 });
             }
 
