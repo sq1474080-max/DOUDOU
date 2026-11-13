@@ -456,6 +456,12 @@
             background: #fff;
         }
         .exam-score-input:focus { border-color: #d48a3d; }
+        .exam-score-input:disabled {
+            background: #f0e6d6;
+            color: #a68f7b;
+            cursor: not-allowed;
+            border-color: transparent;
+        }
         .exam-stars {
             font-weight: 800;
             font-size: 16px;
@@ -608,9 +614,9 @@
     <div class="section-title">
         <div class="title-left">
             <span>📋 今日任务</span>
-            <span id="taskCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;" class="hidden">0项</span>
+            <span id="taskCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
         </div>
-        <button class="btn-outline btn-sm hidden" id="todayAddTaskBtn">+ 新增</button>
+        <button class="btn-outline btn-sm" id="todayAddTaskBtn">+ 新增</button>
     </div>
     <div id="todayTaskGroups"></div>
 
@@ -624,7 +630,7 @@
     <!-- 第五栏：考试任务 -->
     <div class="section-title" style="margin-top:24px;">
         <div class="title-left"><span>📝 考试任务</span></div>
-        <button class="btn-outline btn-sm hidden" id="addExamBtn">+ 新增考试</button>
+        <button class="btn-outline btn-sm" id="addExamBtn">+ 新增考试</button>
     </div>
     <div id="examTaskList"></div>
 
@@ -636,7 +642,7 @@
     <div id="overdueTaskList" class="task-list"></div>
 
     <!-- 第七栏：任务库管理（仅管理员） -->
-    <div id="adminTaskLibrarySection">
+    <div id="adminTaskLibrarySection" class="hidden">
         <div class="section-title" style="margin-top:24px;">
             <span>📚 任务库管理</span>
             <button class="btn-outline btn-sm" id="openCreateTaskBtn">+ 新增任务</button>
@@ -674,7 +680,7 @@
 
         (function() {
             const STORAGE_KEY = 'star_task_app_v1';
-            const ADMIN_PASSWORD = '413623';
+            const ADMIN_PASSWORD = '111';
 
             // 北京时间
             function getBeijingNow() {
@@ -700,8 +706,7 @@
                 checkins: [],
                 exams: [],
                 extraTasks: [],
-                profile: { name: 'HEIDI', avatar: '' },
-                clearedMonths: []
+                profile: { name: 'HEIDI', avatar: '' }
             };
 
             function loadStateLocal() {
@@ -718,7 +723,6 @@
                         if (!parsed.exams) parsed.exams = [];
                         if (!parsed.extraTasks) parsed.extraTasks = [];
                         if (!parsed.checkins) parsed.checkins = [];
-                        if (!parsed.clearedMonths) parsed.clearedMonths = [];
                         return parsed;
                     } catch (e) {}
                 }
@@ -737,12 +741,9 @@
             let saveTimeout = null;
             let isSyncingFromCloud = false;
 
-            // 本地保存并推送到云端
             function saveState() {
-                // 1. 始终优先保存到本地缓存，防丢失
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
-                // 2. 防抖推送到云端
                 if (supabaseClient && !isSyncingFromCloud) {
                     if (saveTimeout) clearTimeout(saveTimeout);
                     saveTimeout = setTimeout(async () => {
@@ -755,11 +756,10 @@
                         } catch (error) {
                             console.error('☁️ 云端同步失败:', error);
                         }
-                    }, 800); // 800ms 防抖，避免狂点频繁请求
+                    }, 800);
                 }
             }
 
-            // 从云端拉取
             async function fetchCloudState() {
                 if (!supabaseClient) return;
                 try {
@@ -775,16 +775,14 @@
                         isSyncingFromCloud = true;
                         state = data.state_data;
                         
-                        // 数据兼容处理
                         state.tasks = (state.tasks || []).map(t => {
                             if (t.category === '课外辅导') t.category = '校外作业';
                             if (!t.subject) t.subject = t.category === '校内作业' ? '其它' : (t.category === '校外作业' ? '口语' : '');
                             return { ...t, createdDate: t.createdDate || '2026-11-01' };
                         });
-                        if (!state.clearedMonths) state.clearedMonths = [];
                         
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                        renderAll(); // 渲染云端数据
+                        renderAll();
                         console.log('☁️ 已拉取云端数据并更新界面');
                         isSyncingFromCloud = false;
                     }
@@ -793,7 +791,6 @@
                 }
             }
 
-            // 监听 Realtime 实时推送
             function setupRealtime() {
                 if (!supabaseClient) return;
                 supabaseClient
@@ -805,17 +802,15 @@
                             isSyncingFromCloud = true;
                             state = newState;
                             
-                            // 兼容处理
                             state.tasks = (state.tasks || []).map(t => {
                                 if (t.category === '课外辅导') t.category = '校外作业';
                                 if (!t.subject) t.subject = t.category === '校内作业' ? '其它' : (t.category === '校外作业' ? '口语' : '');
                                 return { ...t, createdDate: t.createdDate || '2026-11-01' };
                             });
-                            if (!state.clearedMonths) state.clearedMonths = [];
                             
                             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                             renderAll();
-                            setTimeout(() => { isSyncingFromCloud = false; }, 100); // 防死循环
+                            setTimeout(() => { isSyncingFromCloud = false; }, 100);
                         }
                     })
                     .subscribe((status) => {
@@ -823,8 +818,7 @@
                     });
             }
 
-            // --- 以下为完全保留的原业务逻辑 ---
-            
+            // --- 业务逻辑 ---
             function escapeHtml(text) {
                 if (!text) return '';
                 const div = document.createElement('div');
@@ -842,9 +836,6 @@
 
             function calcTodayStars() {
                 const today = getBeijingDateStr();
-                const currentMonthStr = today.slice(0,7);
-                if (state.clearedMonths && state.clearedMonths.includes(currentMonthStr)) return 0;
-
                 let sum = 0;
                 state.checkins.forEach(c => {
                     if (c.date === today && c.isExtra) sum += (c.reward || 0);
@@ -858,10 +849,6 @@
             function calcMonthStars() {
                 const bj = getBeijingNow();
                 const prefix = `${bj.getFullYear()}-${String(bj.getMonth()+1).padStart(2,'0')}`;
-                if (state.clearedMonths && state.clearedMonths.includes(prefix)) {
-                    return { total: 0, hasHomework: false, extraSum: 0, examSum: 0, bonus: 0 };
-                }
-
                 const todayDate = bj.getDate();
                 
                 let extraSum = 0;
@@ -875,7 +862,6 @@
                     if (e.date.startsWith(prefix)) examSum += getExamStars(e.score);
                 });
                 
-                // 满一个月打卡（自月初到今日，每天都有校内作业打卡记录）
                 const homeworkDates = new Set();
                 state.checkins.forEach(c => {
                     if (!c.date.startsWith(prefix) || c.isExtra) return;
@@ -898,7 +884,6 @@
                 }
                 
                 const bonus = isFullMonth ? 20 : 0;
-                
                 return { total: extraSum + examSum + bonus, hasHomework: isFullMonth, extraSum, examSum, bonus };
             }
 
@@ -920,7 +905,7 @@
                 return now.getTime() < deadline.getTime();
             }
 
-            // --- 渲染资料 ---
+            // --- 渲染相关 ---
             function renderProfile() {
                 const name = state.profile.name || 'HEIDI';
                 const avatar = state.profile.avatar || '';
@@ -942,7 +927,6 @@
                 }
             }
 
-            // --- 渲染日历 ---
             function renderCalendar() {
                 const monthLabel = document.getElementById('calendarMonth');
                 monthLabel.textContent = `${calendarYear}年${calendarMonth + 1}月`;
@@ -975,7 +959,6 @@
                 `).join('');
             }
 
-            // --- 获取标签颜色 ---
             function getTagClass(text) {
                 if (text === '校内作业') return 'tag-green';
                 if (text === '校外作业') return 'tag-orange';
@@ -987,17 +970,8 @@
                 return 'tag-green';
             }
 
-            // --- 渲染今日任务 ---
             function renderTodayTasks() {
                 const container = document.getElementById('todayTaskGroups');
-                const currentMonthStr = getBeijingDateStr().slice(0,7);
-                
-                if (state.clearedMonths && state.clearedMonths.includes(currentMonthStr)) {
-                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">🧹 本月任务已清零，下月重新开始</div>`;
-                    document.getElementById('taskCountBadge').textContent = `0项`;
-                    return;
-                }
-
                 const today = getBeijingDateStr();
                 const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
 
@@ -1062,8 +1036,8 @@
                 container.innerHTML = html;
             }
 
-            // --- 渲染单个任务卡片 ---
             function renderTaskItem(task, completed, overdue) {
+                // 管理员可以编辑，儿童不可
                 const showAdminActions = (currentRole === 'admin' && isAdminAuthenticated);
                 
                 let tagsHtml = '';
@@ -1102,17 +1076,10 @@
                 `;
             }
 
-            // --- 渲染额外任务 ---
             function renderExtraTasks() {
                 const container = document.getElementById('extraTaskList');
                 if (!container) return;
                 
-                const currentMonthStr = getBeijingDateStr().slice(0,7);
-                if (state.clearedMonths && state.clearedMonths.includes(currentMonthStr)) {
-                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">🧹 本月已清零</div>`;
-                    return;
-                }
-
                 const today = getBeijingDateStr();
                 const todayExtras = state.extraTasks.filter(t => t.createdDate === today);
                 
@@ -1143,16 +1110,9 @@
                 }).join('');
             }
 
-            // --- 渲染考试任务 ---
             function renderExams() {
                 const container = document.getElementById('examTaskList');
                 if (!container) return;
-
-                const currentMonthStr = getBeijingDateStr().slice(0,7);
-                if (state.clearedMonths && state.clearedMonths.includes(currentMonthStr)) {
-                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">🧹 本月已清零</div>`;
-                    return;
-                }
                 
                 if (state.exams.length === 0) {
                     container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">暂无考试记录</div>`;
@@ -1166,9 +1126,13 @@
                     const isZero = stars === 0;
                     const starText = exam.score !== null ? `获得 ${stars} 🌟` : '未录入分数';
                     
-                    const scoreHtml = currentRole === 'admin' && isAdminAuthenticated 
+                    // 管理员可以修改已录入的分数，儿童只能在未录入时输入
+                    const canEditScore = (currentRole === 'admin' && isAdminAuthenticated) || (exam.score === null);
+                    const isDisabled = !canEditScore;
+
+                    const scoreHtml = canEditScore
                         ? `<input type="number" step="0.5" min="0" max="100" class="exam-score-input" data-exam-id="${exam.id}" value="${exam.score !== null ? exam.score : ''}" placeholder="输入分数">`
-                        : `<span style="font-weight:800; color:#4a3b32; font-size:16px;">${exam.score !== null ? exam.score + '分' : '未出分'}</span>`;
+                        : `<span style="font-weight:800; color:#4a3b32; font-size:16px;">${exam.score}分</span>`;
                         
                     return `
                         <div class="exam-item">
@@ -1189,17 +1153,9 @@
                 }).join('');
             }
 
-            // --- 渲染未完成任务 ---
             function renderOverdueTasks() {
                 const container = document.getElementById('overdueTaskList');
                 if (!container) return;
-
-                const currentMonthStr = getBeijingDateStr().slice(0,7);
-                if (state.clearedMonths && state.clearedMonths.includes(currentMonthStr)) {
-                    document.getElementById('overdueCountBadge').textContent = `0项`;
-                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">🧹 本月已清零</div>`;
-                    return;
-                }
 
                 const today = getBeijingDateStr();
                 const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
@@ -1234,7 +1190,6 @@
                 `).join('');
             }
 
-            // --- 渲染任务库 ---
             function renderTaskLibrary() {
                 const container = document.getElementById('taskLibraryList');
                 if (!container) return;
@@ -1259,7 +1214,6 @@
                 `).join('');
             }
 
-            // --- 更新星值统计 ---
             function renderStats() {
                 const todaySum = calcTodayStars();
                 const monthData = calcMonthStars();
@@ -1272,23 +1226,17 @@
                 const btnAdmin = document.getElementById('btnAdminMode');
                 const btnChild = document.getElementById('btnChildMode');
                 const adminSection = document.getElementById('adminTaskLibrarySection');
-                const todayAddBtn = document.getElementById('todayAddTaskBtn');
-                const addExamBtn = document.getElementById('addExamBtn');
                 const addExtraBtn = document.getElementById('addExtraBtn');
 
                 if (currentRole === 'admin' && isAdminAuthenticated) {
                     btnAdmin.classList.add('active');
                     btnChild.classList.remove('active');
                     adminSection.classList.remove('hidden');
-                    todayAddBtn.classList.remove('hidden');
-                    addExamBtn.classList.remove('hidden');
                     addExtraBtn.classList.remove('hidden');
                 } else {
                     btnAdmin.classList.remove('active');
                     btnChild.classList.add('active');
                     adminSection.classList.add('hidden');
-                    todayAddBtn.classList.add('hidden');
-                    addExamBtn.classList.add('hidden');
                     addExtraBtn.classList.add('hidden');
                 }
             }
@@ -1320,7 +1268,7 @@
                 }, 2000);
             }
 
-            // --- 业务逻辑 ---
+            // --- 打卡业务 ---
             function toggleTaskCheck(taskId) {
                 const today = getBeijingDateStr();
                 const task = state.tasks.find(t => t.id === taskId);
@@ -1389,7 +1337,7 @@
                     onConfirm: () => {
                         state.checkins = []; 
                         state.extraTasks = [];
-                        state.exams.forEach(e => e.score = null);
+                        state.exams = [];
                         saveState();
                         renderAll();
                         showToast('已重置归零');
@@ -1505,7 +1453,9 @@
             };
 
             function openTaskModal(editTask = null) {
-                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                // 管理员可编辑，儿童仅可新增
+                if (editTask && !(currentRole === 'admin' && isAdminAuthenticated)) return;
+
                 const isEdit = !!editTask;
                 const task = editTask || { name: '', daily: true, note: '', category: '校内作业', subject: '语文' };
                 const today = getBeijingDateStr();
@@ -1565,7 +1515,7 @@
                 }, 0);
             }
 
-            // --- 新增额外任务 ---
+            // --- 新增额外任务 (仅管理员) ---
             function openExtraModal() {
                 if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
                 const today = getBeijingDateStr();
@@ -1598,9 +1548,8 @@
                 });
             }
 
-            // --- 新增考试任务 ---
+            // --- 新增考试任务 (儿童、管理员均可) ---
             function openExamModal() {
-                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
                 const today = getBeijingDateStr();
                 showModal({
                     title: '新增考试任务',
@@ -1631,7 +1580,7 @@
                 });
             }
 
-            // --- OCR ---
+            // --- OCR (仅管理员) ---
             function openOcrModal() {
                 if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
                 const today = getBeijingDateStr();
@@ -1699,7 +1648,15 @@
 
                 document.body.addEventListener('change', (e) => {
                     if (e.target.matches('.exam-score-input')) {
+                        // 如果分数已经存在且不是管理员，则不允许修改
                         const examId = e.target.dataset.examId;
+                        const exam = state.exams.find(x => x.id === examId);
+                        if (exam && exam.score !== null && !(currentRole === 'admin' && isAdminAuthenticated)) {
+                            showToast('无法修改已录入的分数', false);
+                            renderExams();
+                            return;
+                        }
+
                         let val = parseFloat(e.target.value);
                         if (e.target.value.trim() === '') {
                             val = null;
@@ -1708,7 +1665,6 @@
                             renderExams();
                             return;
                         }
-                        const exam = state.exams.find(x => x.id === examId);
                         if (exam) {
                             exam.score = val;
                             saveState();
@@ -1720,11 +1676,14 @@
                     }
                 });
 
-                document.getElementById('addExtraBtn').addEventListener('click', openExtraModal);
+                // 这些按钮对儿童模式开放
                 document.getElementById('addExamBtn').addEventListener('click', openExamModal);
-                document.getElementById('editProfileBtn').addEventListener('click', openProfileModal);
                 document.getElementById('todayAddTaskBtn').addEventListener('click', () => openTaskModal(null));
                 document.getElementById('openCreateTaskBtn').addEventListener('click', () => openTaskModal(null));
+
+                // 以下仅限管理员
+                document.getElementById('addExtraBtn').addEventListener('click', openExtraModal);
+                document.getElementById('editProfileBtn').addEventListener('click', openProfileModal);
                 document.getElementById('ocrBtn').addEventListener('click', openOcrModal);
                 document.getElementById('resetStarsBtn').addEventListener('click', resetStarsConfirm);
 
@@ -1738,6 +1697,7 @@
                     } else if (action === 'toggle-extra') {
                         toggleExtraCheck(target.dataset.extraId);
                     } else if (action === 'edit-task') {
+                        // 只有管理员可以点击编辑按钮
                         if (currentRole === 'admin' && isAdminAuthenticated) {
                             const task = state.tasks.find(t => t.id === target.dataset.taskId);
                             if (task) openTaskModal(task);
@@ -1843,22 +1803,19 @@
                             setTimeout(() => {
                                 showModal({
                                     title: '⚠️ 清零确认',
-                                    content: '确定要清零本月所有任务记录吗？清零后本月任务将不再显示，待下月重新记录。',
+                                    content: '确定要清空现有所有任务、打卡记录、额外任务和考试记录吗？清零后不影响后续新增。',
                                     confirmText: '确认',
                                     cancelText: '取消',
                                     danger: true,
                                     onConfirm: () => {
-                                        const currentMonthStr = getBeijingDateStr().slice(0,7);
-                                        if (!state.clearedMonths) state.clearedMonths = [];
-                                        if (!state.clearedMonths.includes(currentMonthStr)) {
-                                            state.clearedMonths.push(currentMonthStr);
-                                        }
-                                        state.checkins = state.checkins.filter(c => !c.date.startsWith(currentMonthStr));
-                                        state.extraTasks = state.extraTasks.filter(t => !t.createdDate.startsWith(currentMonthStr));
-                                        state.exams = state.exams.filter(e => !e.date.startsWith(currentMonthStr));
+                                        // 清空现有所有任务和记录，但不做月份拦截，也不影响后续新增
+                                        state.tasks = [];
+                                        state.checkins = [];
+                                        state.extraTasks = [];
+                                        state.exams = [];
                                         saveState();
                                         renderAll();
-                                        showToast('已清零本月数据');
+                                        showToast('已清空现有所有记录');
                                     }
                                 });
                             }, 50);
@@ -1872,18 +1829,15 @@
                 if (!state.exams) state.exams = [];
                 if (!state.extraTasks) state.extraTasks = [];
                 if (!state.profile) state.profile = { name: 'HEIDI', avatar: '' };
-                if (!state.clearedMonths) state.clearedMonths = [];
                 
                 state.tasks = state.tasks.map(t => {
                     if (!t.subject) t.subject = t.category === '校内作业' ? '其它' : (t.category === '校外作业' ? '口语' : '');
                     return { ...t, createdDate: t.createdDate || '2026-11-01' };
                 });
                 
-                // 先渲染本地缓存（保证秒开）
                 bindEvents();
                 renderAll();
                 
-                // 然后从云端拉取，并开启实时监听
                 if (supabaseClient) {
                     fetchCloudState();
                     setupRealtime();
