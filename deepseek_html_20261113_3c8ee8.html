@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="星值打卡">
+    <title>星值任务打卡</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f7f1e5;
+            background-image: radial-gradient(#efe4d1 1px, transparent 1px), radial-gradient(#efe4d1 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            min-height: 100vh;
+            padding: 12px 12px 80px;
+            padding-top: max(12px, env(safe-area-inset-top));
+            padding-bottom: calc(80px + env(safe-area-inset-bottom));
+            display: flex;
+            flex-direction: column;
+            color: #4a3b32;
+        }
+
+        /* 顶部导航 */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            background: #fdfbf7;
+            border-radius: 20px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(180, 160, 140, 0.15);
+            border: 1px solid #f0e6d6;
+        }
+
+        .header-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            color: #6b5b4e;
+            padding: 6px 12px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .header-btn:active { background: #f0e6d6; }
+        .header-btn.active { color: #d48a3d; }
+        
+        /* 第一栏：头像+名字 | 星值 */
+        .profile-stats-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: stretch;
+        }
+
+        .profile-card {
+            background: #fdfbf7;
+            border-radius: 24px;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 6px 16px rgba(180, 160, 140, 0.15);
+            flex: 0 0 auto;
+            min-width: 110px;
+            border: 2px solid #f4ead9;
+        }
+
+        .avatar-container {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid #f6e3b4;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,#a1c4fd,#c2e9fb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            font-weight: 800;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .profile-name {
+            font-weight: 800;
+            font-size: 15px;
+            color: #5c4535;
+            text-align: center;
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            letter-spacing: 1px;
+        }
+
+        .edit-profile-btn {
+            background: #f0e6d6;
+            border: none;
+            color: #8c7661;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .stats-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .stats-card {
+            background: linear-gradient(90deg, #d6e8f7, #b8d8f7);
+            border-radius: 20px;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(140, 170, 200, 0.2);
+            border: 2px solid #e8f4ff;
+        }
+
+        .stats-label {
+            font-size: 16px;
+            font-weight: 800;
+            color: #2c527a;
+            letter-spacing: 1px;
+        }
+
+        .stats-number {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e3a8a;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stats-number span { font-size: 22px; }
+
+        /* 第二栏：日历 */
+        .calendar-card {
+            background: #fdfbf7;
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 16px rgba(180, 160, 140, 0.15);
+            border: 2px solid #f4ead9;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .calendar-card::before {
+            content: '✧ ✦ ✧';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            color: #f0e6d6;
+            letter-spacing: 5px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .calendar-header .month-label {
+            font-weight: 800;
+            color: #4a3b32;
+            font-size: 20px;
+        }
+
+        .calendar-nav-btn {
+            position: absolute;
+            background: transparent;
+            border: none;
+            width: 32px;
+            height: 32px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #a68f7b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #prevMonth { left: 0; }
+        #nextMonth { right: 0; }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7,1fr);
+            text-align: center;
+            font-size: 14px;
+            color: #7a6b5d;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7,1fr);
+            gap: 6px;
+        }
+
+        .calendar-day {
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 50%;
+            color: #4a3b32;
+        }
+
+        .calendar-day.other-month { color: #d1c5b8; }
+        
+        .calendar-day.today {
+            background: #b8d8f7;
+            color: #fff;
+            font-weight: 800;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(140, 170, 200, 0.4);
+        }
+        .calendar-day.today::after {
+            content: '🐾';
+            position: absolute;
+            font-size: 28px;
+            opacity: 0.3;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* 通用 */
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0 12px;
+            font-weight: 800;
+            color: #5c4535;
+            font-size: 18px;
+        }
+        .section-title .title-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sub-title {
+            font-size: 14px; 
+            color: #8c7661; 
+            font-weight: 800; 
+            margin: 12px 0 6px 6px;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .task-item {
+            background: #f7f0e3;
+            border-radius: 20px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 2px 8px rgba(180, 160, 140, 0.08);
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .task-item.completed {
+            background: #e9f5ee;
+            border-color: #c5e8d3;
+            opacity: 0.85;
+        }
+        
+        .task-item.overdue {
+            background: #fef5e6;
+            border-color: #f5dcc0;
+        }
+
+        .task-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            font-size: 24px;
+        }
+
+        .task-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .task-name {
+            font-weight: 800;
+            font-size: 17px;
+            color: #33261d;
+            word-break: break-word;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .tag-green { background: #c3e6cb; color: #2b6a3d; } 
+        .tag-purple { background: #e2d4f0; color: #5a3d77; } 
+        .tag-pink { background: #f5c6cb; color: #8a3a44; } 
+        .tag-blue { background: #cce5ff; color: #2b4e7a; } 
+        .tag-orange { background: #ffe5b4; color: #8a632b; } 
+        .tag-date { background: #e0e0e0; color: #666; }
+
+        .task-check {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #d1c5b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: 0.2s;
+            background: #fff;
+        }
+        .task-item.completed .task-check {
+            background: #72c293;
+            border-color: #72c293;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 4px;
+            margin-left: 4px;
+        }
+        .icon-btn {
+            background: #fff;
+            border: 1px solid #e8dcc8;
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #8c7661;
+            font-size: 16px;
+        }
+
+        .overdue-badge {
+            background: #ff9800;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .btn-outline {
+            background: #fff;
+            border: 2px solid #f0e6d6;
+            color: #8c7661;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .btn-sm { padding: 6px 12px; font-size: 13px; }
+
+        .hidden { display: none !important; }
+
+        /* 考试任务专属 */
+        .exam-item {
+            background: #fdfbf7;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #f0e6d6;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 2px 8px rgba(180, 160, 140, 0.08);
+        }
+        .exam-score-input {
+            width: 80px;
+            padding: 6px;
+            border-radius: 10px;
+            border: 2px solid #f0e6d6;
+            text-align: center;
+            font-weight: 800;
+            font-size: 15px;
+            color: #4a3b32;
+            outline: none;
+            background: #fff;
+        }
+        .exam-score-input:focus { border-color: #d48a3d; }
+        .exam-stars {
+            font-weight: 800;
+            font-size: 16px;
+            color: #d48a3d;
+        }
+        .exam-stars.zero { color: #a68f7b; }
+
+        /* 底部导航 */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fdfbf7;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-around;
+            border-top: 2px solid #f4ead9;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            z-index: 100;
+            box-shadow: 0 -4px 12px rgba(180, 160, 140, 0.1);
+        }
+        .bottom-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #a68f7b;
+            background: transparent;
+            border: none;
+            gap: 4px;
+            cursor: pointer;
+        }
+        .bottom-btn span { font-size: 22px; }
+        .bottom-btn.active { color: #d48a3d; }
+
+        /* 模态框 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(74, 59, 50, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: #fdfbf7;
+            border-radius: 28px;
+            padding: 24px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 2px solid #f4ead9;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-content h3 { font-size: 20px; margin-bottom: 20px; color: #4a3b32; text-align: center; font-weight: 800;}
+        .modal-content label { font-size: 14px; font-weight: 700; color: #6b5b4e; margin-bottom: 6px; display: block; }
+        .modal-content input, .modal-content textarea, .modal-content select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #f0e6d6;
+            border-radius: 16px;
+            font-size: 15px;
+            margin-bottom: 16px;
+            background: #fff;
+            outline: none;
+            color: #4a3b32;
+            font-weight: 600;
+        }
+        .modal-content input:focus, .modal-content select:focus { border-color: #d48a3d; }
+        .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
+        .modal-actions button {
+            flex: 1;
+            padding: 14px;
+            border-radius: 16px;
+            border: none;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-cancel { background: #f0e6d6; color: #8c7661; }
+        .btn-confirm { background: #d48a3d; color: white; }
+        .btn-danger { background: #e57373; color: white; }
+
+        /* Toast */
+        .toast-container { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; }
+        .toast {
+            background: rgba(74, 59, 50, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            animation: dropDown 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+        @keyframes dropDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <button class="header-btn" id="btnChildMode">🦊 儿童模式</button>
+        <button class="header-btn" id="btnAdminMode">🗝️ 管理员</button>
+        <button class="header-btn" id="exportCsvBtn">☁️ 导出CSV</button>
+    </div>
+
+    <!-- 第一栏：头像+名字 | 星值统计 -->
+    <div class="profile-stats-bar">
+        <div class="profile-card">
+            <div class="avatar-container">
+                <div class="avatar" id="avatarDisplay">小</div>
+            </div>
+            <div class="profile-name" id="profileName">小朋友</div>
+            <button class="edit-profile-btn hidden" id="editProfileBtn">编辑资料</button>
+        </div>
+        <div class="stats-group">
+            <div class="stats-card">
+                <span class="stats-label">今日获得</span>
+                <span class="stats-number" id="todayStars">0<span>🌟</span></span>
+            </div>
+            <div>
+                <div class="stats-card" style="background: linear-gradient(90deg, #e2f0f9, #d1e5f7);">
+                    <span class="stats-label">本月获得</span>
+                    <span class="stats-number" id="monthStars">0<span>🌟</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第二栏：月历 -->
+    <div class="calendar-card">
+        <div class="calendar-header">
+            <button class="calendar-nav-btn" id="prevMonth">‹</button>
+            <span class="month-label" id="calendarMonth">2026年11月</span>
+            <button class="calendar-nav-btn" id="nextMonth">›</button>
+        </div>
+        <div class="calendar-weekdays">
+            <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <!-- 第三栏：今日任务 -->
+    <div class="section-title">
+        <div class="title-left">
+            <span>📋 今日任务</span>
+            <span id="taskCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;" class="hidden">0项</span>
+        </div>
+        <button class="btn-outline btn-sm hidden" id="todayAddTaskBtn">+ 新增</button>
+    </div>
+    <div id="todayTaskGroups"></div>
+
+    <!-- 第四栏：额外任务 -->
+    <div class="section-title" style="margin-top:24px;">
+        <div class="title-left"><span>🎁 额外任务</span></div>
+        <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增额外</button>
+    </div>
+    <div id="extraTaskList" class="task-list"></div>
+
+    <!-- 第五栏：考试任务 -->
+    <div class="section-title" style="margin-top:24px;">
+        <div class="title-left"><span>📝 考试任务</span></div>
+        <button class="btn-outline btn-sm hidden" id="addExamBtn">+ 新增考试</button>
+    </div>
+    <div id="examTaskList"></div>
+
+    <!-- 第六栏：未完成任务 -->
+    <div class="section-title" style="margin-top:24px;">
+        <div class="title-left" style="font-size:16px;"><span>⏳ 未完成任务</span></div>
+        <span id="overdueCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+    </div>
+    <div id="overdueTaskList" class="task-list"></div>
+
+    <!-- 第七栏：任务库管理（仅管理员） -->
+    <div id="adminTaskLibrarySection">
+        <div class="section-title" style="margin-top:24px;">
+            <span>📚 任务库管理</span>
+            <button class="btn-outline btn-sm" id="openCreateTaskBtn">+ 新增任务</button>
+        </div>
+        <div class="flex-row" style="display:flex; gap:8px; margin-bottom:12px;">
+            <button class="btn-outline btn-sm" id="ocrBtn">📷 拍照 OCR</button>
+            <button class="btn-outline btn-sm" id="resetStarsBtn" style="color:#cd5c5c; border-color:#f5c6cb;">🔄 重置星值</button>
+        </div>
+        <div id="taskLibraryList" class="task-list"></div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-bar">
+        <button class="bottom-btn active" id="bottomHome"><span>🏠</span>今日</button>
+        <button class="bottom-btn" id="bottomStats"><span>📊</span>统计</button>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+    <div id="modalRoot"></div>
+
+    <script>
+        (function() {
+            const STORAGE_KEY = 'star_task_app_v1';
+            const ADMIN_PASSWORD = 'Qun413623';
+
+            // 北京时间
+            function getBeijingNow() {
+                const now = new Date();
+                const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+                return new Date(utc + 8 * 3600000);
+            }
+            function getBeijingDateStr() {
+                const bj = getBeijingNow();
+                return `${bj.getFullYear()}-${String(bj.getMonth()+1).padStart(2,'0')}-${String(bj.getDate()).padStart(2,'0')}`;
+            }
+
+            const defaultTasks = [
+                { id: 't1', name: '习题册', reward: 0, daily: true, note: '', category: '校内作业', subject: '语文', createdDate: '2026-11-01' },
+                { id: 't2', name: '口算', reward: 0, daily: true, note: '', category: '校内作业', subject: '数学', createdDate: '2026-11-01' },
+                { id: 't3', name: '英语阅读', reward: 0, daily: true, note: '', category: '校内作业', subject: '英语', createdDate: '2026-11-01' },
+                { id: 't4', name: '口语练习', reward: 0, daily: true, note: '', category: '校外作业', subject: '口语', createdDate: '2026-11-01' },
+                { id: 't5', name: '新东方数学', reward: 0, daily: false, note: '', category: '校外作业', subject: '新东方', createdDate: '2026-11-01' }
+            ];
+
+            function loadState() {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    try { 
+                        const parsed = JSON.parse(stored);
+                        parsed.tasks = (parsed.tasks || []).map(t => {
+                            if (t.category === '课外辅导') t.category = '校外作业';
+                            if (!t.subject) t.subject = t.category === '校内作业' ? '其它' : (t.category === '校外作业' ? '口语' : '');
+                            return { ...t, createdDate: t.createdDate || '2026-11-01' };
+                        });
+                        if (!parsed.profile) parsed.profile = { name: 'HEIDI', avatar: '' };
+                        if (!parsed.exams) parsed.exams = [];
+                        if (!parsed.extraTasks) parsed.extraTasks = [];
+                        if (!parsed.checkins) parsed.checkins = [];
+                        return parsed;
+                    } catch (e) {}
+                }
+                return {
+                    tasks: [...defaultTasks],
+                    checkins: [],
+                    exams: [],
+                    extraTasks: [],
+                    profile: { name: 'HEIDI', avatar: '' }
+                };
+            }
+
+            let state = loadState();
+            let currentRole = 'child';
+            let isAdminAuthenticated = false;
+
+            const bjInit = getBeijingNow();
+            let calendarYear = bjInit.getFullYear();
+            let calendarMonth = bjInit.getMonth();
+
+            function saveState() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function getExamStars(score) {
+                if (score === null || score === undefined || score === '') return 0;
+                const s = parseFloat(score);
+                if (s >= 100) return 50;
+                if (s >= 90) return 25;
+                return 0;
+            }
+
+            function calcTodayStars() {
+                const today = getBeijingDateStr();
+                let sum = 0;
+                state.checkins.forEach(c => {
+                    if (c.date === today && c.isExtra) sum += (c.reward || 0);
+                });
+                state.exams.forEach(e => {
+                    if (e.date === today) sum += getExamStars(e.score);
+                });
+                return sum;
+            }
+
+            function calcMonthStars() {
+                const bj = getBeijingNow();
+                const prefix = `${bj.getFullYear()}-${String(bj.getMonth()+1).padStart(2,'0')}`;
+                
+                let extraSum = 0;
+                let examSum = 0;
+                
+                state.checkins.forEach(c => {
+                    if (c.date.startsWith(prefix) && c.isExtra) extraSum += (c.reward || 0);
+                });
+                
+                state.exams.forEach(e => {
+                    if (e.date.startsWith(prefix)) examSum += getExamStars(e.score);
+                });
+                
+                const hasHomework = state.checkins.some(c => {
+                    if (!c.date.startsWith(prefix) || c.isExtra) return false;
+                    const task = state.tasks.find(t => t.id === c.taskId);
+                    return task && task.category === '校内作业';
+                });
+                const bonus = hasHomework ? 20 : 0;
+                
+                return { total: extraSum + examSum + bonus, hasHomework, extraSum, examSum, bonus };
+            }
+
+            function isTaskCheckedToday(taskId) {
+                const today = getBeijingDateStr();
+                return state.checkins.some(c => c.date === today && c.taskId === taskId);
+            }
+
+            // 判断任务是否可打卡（非每日重复且已过次日12点即不可打卡）
+            function canTaskCheck(task) {
+                if (task.daily) return true;
+                const today = getBeijingDateStr();
+                if (task.createdDate === today) return true;
+                // 检查是否过了记录日的次日中午12点
+                const now = getBeijingNow();
+                const parts = task.createdDate.split('-');
+                const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
+                deadline.setDate(deadline.getDate() + 1);
+                deadline.setHours(12, 0, 0, 0);
+                return now.getTime() < deadline.getTime();
+            }
+
+            // --- 渲染资料 ---
+            function renderProfile() {
+                const name = state.profile.name || 'HEIDI';
+                const avatar = state.profile.avatar || '';
+                const avatarEl = document.getElementById('avatarDisplay');
+                if (avatar) {
+                    avatarEl.style.backgroundImage = `url(${avatar})`;
+                    avatarEl.textContent = '';
+                } else {
+                    avatarEl.style.backgroundImage = '';
+                    avatarEl.textContent = name.charAt(0).toUpperCase();
+                }
+                document.getElementById('profileName').textContent = name;
+
+                const editBtn = document.getElementById('editProfileBtn');
+                if (currentRole === 'admin' && isAdminAuthenticated) {
+                    editBtn.classList.remove('hidden');
+                } else {
+                    editBtn.classList.add('hidden');
+                }
+            }
+
+            // --- 渲染日历 ---
+            function renderCalendar() {
+                const monthLabel = document.getElementById('calendarMonth');
+                monthLabel.textContent = `${calendarYear}年${calendarMonth + 1}月`;
+
+                const grid = document.getElementById('calendarGrid');
+                const firstDay = new Date(calendarYear, calendarMonth, 1);
+                const startWeekday = firstDay.getDay();
+                const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                const prevMonthDays = new Date(calendarYear, calendarMonth, 0).getDate();
+
+                const bj = getBeijingNow();
+                const todayY = bj.getFullYear();
+                const todayM = bj.getMonth();
+                const todayD = bj.getDate();
+
+                const cells = [];
+                for (let i = 0; i < startWeekday; i++) {
+                    cells.push({ day: prevMonthDays - startWeekday + 1 + i, otherMonth: true, isToday: false });
+                }
+                for (let d = 1; d <= daysInMonth; d++) {
+                    cells.push({ day: d, otherMonth: false, isToday: (calendarYear === todayY && calendarMonth === todayM && d === todayD) });
+                }
+                let nextDay = 1;
+                while (cells.length % 7 !== 0) {
+                    cells.push({ day: nextDay++, otherMonth: true, isToday: false });
+                }
+
+                grid.innerHTML = cells.map(c => `
+                    <div class="calendar-day ${c.otherMonth ? 'other-month' : ''} ${c.isToday ? 'today' : ''}">${c.day}</div>
+                `).join('');
+            }
+
+            // --- 获取标签颜色 ---
+            function getTagClass(text) {
+                if (text === '校内作业') return 'tag-green';
+                if (text === '校外作业') return 'tag-orange';
+                if (text === '语文') return 'tag-purple';
+                if (text === '数学') return 'tag-pink';
+                if (text === '英语') return 'tag-blue';
+                if (text === '口语') return 'tag-green';
+                if (text === '新东方') return 'tag-orange';
+                return 'tag-green';
+            }
+
+            // --- 渲染今日任务 ---
+            function renderTodayTasks() {
+                const container = document.getElementById('todayTaskGroups');
+                const today = getBeijingDateStr();
+                const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
+
+                const todayTasks = state.tasks.filter(task => {
+                    if (todayCheckTaskIds.has(task.id)) return true;
+                    return canTaskCheck(task);
+                });
+
+                document.getElementById('taskCountBadge').textContent = `${todayTasks.length}项`;
+
+                const inSchoolTasks = todayTasks.filter(t => t.category === '校内作业');
+                const outSchoolTasks = todayTasks.filter(t => t.category === '校外作业');
+                const otherTasks = todayTasks.filter(t => t.category !== '校内作业' && t.category !== '校外作业');
+
+                let html = '';
+
+                if (inSchoolTasks.length > 0) {
+                    html += `<div class="group-title" style="font-size:16px; color:#5c4535; font-weight:800; margin:10px 0 8px 4px;">🏫 校内作业</div>`;
+                    const inGroups = ['语文', '数学', '英语', '其它'];
+                    inGroups.forEach(sub => {
+                        const groupTasks = inSchoolTasks.filter(t => t.subject === sub || (!t.subject && sub === '其它'));
+                        if (groupTasks.length > 0) {
+                            html += `<div class="sub-title">📖 ${sub}</div>`;
+                            html += `<div class="task-list">`;
+                            groupTasks.forEach(task => {
+                                html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
+                            });
+                            html += `</div>`;
+                        }
+                    });
+                }
+
+                if (outSchoolTasks.length > 0) {
+                    html += `<div class="group-title" style="font-size:16px; color:#5c4535; font-weight:800; margin:16px 0 8px 4px;">🏫 校外作业</div>`;
+                    const outGroups = ['口语', '新东方'];
+                    outGroups.forEach(sub => {
+                        const groupTasks = outSchoolTasks.filter(t => t.subject === sub);
+                        if (groupTasks.length > 0) {
+                            html += `<div class="sub-title">🗣️ ${sub}</div>`;
+                            html += `<div class="task-list">`;
+                            groupTasks.forEach(task => {
+                                html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
+                            });
+                            html += `</div>`;
+                        }
+                    });
+                }
+                
+                if (otherTasks.length > 0) {
+                    html += `<div class="group-title" style="font-size:16px; color:#5c4535; font-weight:800; margin:16px 0 8px 4px;">📌 其它</div>`;
+                    html += `<div class="task-list">`;
+                    otherTasks.forEach(task => {
+                        html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
+                    });
+                    html += `</div>`;
+                }
+
+                if (html === '') {
+                    html = `<div style="text-align:center;padding:32px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">✨ 今天没有任务哦</div>`;
+                }
+
+                container.innerHTML = html;
+            }
+
+            // --- 渲染单个任务卡片 ---
+            function renderTaskItem(task, completed, overdue) {
+                const showAdminActions = (currentRole === 'admin' && isAdminAuthenticated);
+                
+                let tagsHtml = '';
+                if (task.category) {
+                    tagsHtml += `<span class="tag ${getTagClass(task.category)}">${task.category}</span>`;
+                }
+                if (task.subject && task.subject !== task.category) {
+                    tagsHtml += `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>`;
+                }
+                if (task.note) {
+                    tagsHtml += `<span class="tag tag-orange">📝 ${escapeHtml(task.note)}</span>`;
+                }
+                // 非每日重复任务，如果跨天了，显示记录日期
+                if (!task.daily && task.createdDate !== getBeijingDateStr()) {
+                    tagsHtml += `<span class="tag tag-date">📅 ${task.createdDate}</span>`;
+                }
+
+                const checkHtml = overdue 
+                    ? `<span class="overdue-badge">未完成</span>` 
+                    : `<div class="task-check" data-action="toggle-check" data-task-id="${task.id}">${completed ? '✓' : ''}</div>`;
+
+                return `
+                    <div class="task-item ${completed ? 'completed' : ''} ${overdue ? 'overdue' : ''}" data-task-id="${task.id}">
+                        <div class="task-icon">📄</div>
+                        <div class="task-info">
+                            <div class="task-name">${escapeHtml(task.name)}</div>
+                            <div class="task-meta">
+                                ${tagsHtml}
+                            </div>
+                        </div>
+                        ${showAdminActions ? `
+                        <div class="task-actions">
+                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}">📝</button>
+                        </div>` : ''}
+                        ${checkHtml}
+                    </div>
+                `;
+            }
+
+            // --- 渲染额外任务 ---
+            function renderExtraTasks() {
+                const container = document.getElementById('extraTaskList');
+                if (!container) return;
+                
+                const today = getBeijingDateStr();
+                const todayExtras = state.extraTasks.filter(t => t.createdDate === today);
+                
+                if (todayExtras.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">暂无额外任务</div>`;
+                    return;
+                }
+                
+                container.innerHTML = todayExtras.map(task => {
+                    const completed = state.checkins.some(c => c.date === today && c.taskId === task.id && c.isExtra);
+                    return `
+                        <div class="task-item ${completed ? 'completed' : ''}">
+                            <div class="task-icon">🎁</div>
+                            <div class="task-info">
+                                <div class="task-name">${escapeHtml(task.name)}</div>
+                                <div class="task-meta">
+                                    <span class="tag tag-orange">额外任务 ⭐${task.reward}</span>
+                                    <span class="tag tag-date">📅 ${task.createdDate}</span>
+                                </div>
+                            </div>
+                            ${currentRole === 'admin' && isAdminAuthenticated ? `
+                            <div class="task-actions">
+                                <button class="icon-btn" data-action="delete-extra" data-extra-id="${task.id}" style="color:#cd5c5c;">🗑️</button>
+                            </div>` : ''}
+                            <div class="task-check" data-action="toggle-extra" data-extra-id="${task.id}">${completed ? '✓' : ''}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // --- 渲染考试任务 ---
+            function renderExams() {
+                const container = document.getElementById('examTaskList');
+                if (!container) return;
+                
+                if (state.exams.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">暂无考试记录</div>`;
+                    return;
+                }
+                
+                const sortedExams = [...state.exams].sort((a,b) => b.date.localeCompare(a.date));
+                
+                container.innerHTML = sortedExams.map(exam => {
+                    const stars = exam.score !== null ? getExamStars(exam.score) : 0;
+                    const isZero = stars === 0;
+                    const starText = exam.score !== null ? `获得 ${stars} 🌟` : '未录入分数';
+                    
+                    const scoreHtml = currentRole === 'admin' && isAdminAuthenticated 
+                        ? `<input type="number" step="0.5" min="0" max="100" class="exam-score-input" data-exam-id="${exam.id}" value="${exam.score !== null ? exam.score : ''}" placeholder="输入分数">`
+                        : `<span style="font-weight:800; color:#4a3b32; font-size:16px;">${exam.score !== null ? exam.score + '分' : '未出分'}</span>`;
+                        
+                    return `
+                        <div class="exam-item">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="font-weight:800; font-size:16px; color:#33261d;">${escapeHtml(exam.name)}</div>
+                                <div style="font-size:12px; color:#a68f7b; font-weight:700;">${exam.date}</div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>${scoreHtml}</div>
+                                <div class="exam-stars ${isZero ? 'zero' : ''}">${starText}</div>
+                            </div>
+                            ${currentRole === 'admin' && isAdminAuthenticated ? `
+                            <div style="text-align:right; margin-top:-4px;">
+                                <button class="icon-btn" data-action="delete-exam" data-exam-id="${exam.id}" style="color:#cd5c5c; width:28px; height:28px; font-size:14px;">删除</button>
+                            </div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // --- 渲染未完成任务 ---
+            function renderOverdueTasks() {
+                const container = document.getElementById('overdueTaskList');
+                if (!container) return;
+
+                const today = getBeijingDateStr();
+                const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
+
+                const overdueTasks = state.tasks.filter(task => {
+                    if (task.daily) return false;
+                    if (task.category !== '校内作业') return false; // 只统计校内作业
+                    if (todayCheckTaskIds.has(task.id)) return false;
+                    return !canTaskCheck(task); // 过了死线或者无法打卡的
+                });
+
+                document.getElementById('overdueCountBadge').textContent = `${overdueTasks.length}项`;
+
+                if (overdueTasks.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">🎉 全部完成啦！</div>`;
+                    return;
+                }
+
+                container.innerHTML = overdueTasks.map(task => `
+                    <div class="task-item overdue">
+                        <div class="task-icon">📄</div>
+                        <div class="task-info">
+                            <div class="task-name">${escapeHtml(task.name)}</div>
+                            <div class="task-meta">
+                                <span class="tag tag-green">校内作业</span>
+                                ${task.subject ? `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>` : ''}
+                                <span class="tag tag-date">📅 ${task.createdDate}</span>
+                            </div>
+                        </div>
+                        <span class="overdue-badge">未完成</span>
+                    </div>
+                `).join('');
+            }
+
+            // --- 渲染任务库 ---
+            function renderTaskLibrary() {
+                const container = document.getElementById('taskLibraryList');
+                if (!container) return;
+                if (state.tasks.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;font-weight:700;">暂无任务</div>`;
+                    return;
+                }
+                container.innerHTML = state.tasks.map(task => `
+                    <div class="task-item" style="background:#fff; border:1px solid #f0e6d6;">
+                        <div class="task-info">
+                            <div class="task-name">${escapeHtml(task.name)} ${task.daily ? '🔁' : ''}</div>
+                            <div class="task-meta">
+                                <span class="tag ${getTagClass(task.category)}">${task.category}</span>
+                                ${task.subject ? `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}">✏️</button>
+                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}" style="color:#cd5c5c;">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // --- 更新星值统计 ---
+            function renderStats() {
+                const todaySum = calcTodayStars();
+                const monthData = calcMonthStars();
+                
+                document.getElementById('todayStars').innerHTML = `${todaySum}<span>🌟</span>`;
+                document.getElementById('monthStars').innerHTML = `${monthData.total}<span>🌟</span>`;
+            }
+
+            function updateRoleUI() {
+                const btnAdmin = document.getElementById('btnAdminMode');
+                const btnChild = document.getElementById('btnChildMode');
+                const adminSection = document.getElementById('adminTaskLibrarySection');
+                const todayAddBtn = document.getElementById('todayAddTaskBtn');
+                const addExamBtn = document.getElementById('addExamBtn');
+                const addExtraBtn = document.getElementById('addExtraBtn');
+
+                if (currentRole === 'admin' && isAdminAuthenticated) {
+                    btnAdmin.classList.add('active');
+                    btnChild.classList.remove('active');
+                    adminSection.classList.remove('hidden');
+                    todayAddBtn.classList.remove('hidden');
+                    addExamBtn.classList.remove('hidden');
+                    addExtraBtn.classList.remove('hidden');
+                } else {
+                    btnAdmin.classList.remove('active');
+                    btnChild.classList.add('active');
+                    adminSection.classList.add('hidden');
+                    todayAddBtn.classList.add('hidden');
+                    addExamBtn.classList.add('hidden');
+                    addExtraBtn.classList.add('hidden');
+                }
+            }
+
+            function renderAll() {
+                renderProfile();
+                renderStats();
+                renderCalendar();
+                renderTodayTasks();
+                renderExtraTasks();
+                renderExams();
+                renderOverdueTasks();
+                renderTaskLibrary();
+                updateRoleUI();
+            }
+
+            // --- Toast ---
+            function showToast(message, isSuccess = true) {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.innerHTML = `${isSuccess ? '✨' : '⚠️'} ${escapeHtml(message)}`;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-10px)';
+                    toast.style.transition = 'all 0.3s';
+                    setTimeout(() => toast.remove(), 300);
+                }, 2000);
+            }
+
+            // --- 业务逻辑 ---
+            function toggleTaskCheck(taskId) {
+                const today = getBeijingDateStr();
+                const task = state.tasks.find(t => t.id === taskId);
+                if (!task) return;
+                
+                // 安全检查：再次确认是否过期
+                if (!task.daily && !canTaskCheck(task) && !isTaskCheckedToday(taskId)) {
+                    showToast('该任务已过期无法打卡', false);
+                    return;
+                }
+
+                const existingIndex = state.checkins.findIndex(c => c.date === today && c.taskId === taskId && !c.isExtra);
+                if (existingIndex !== -1) {
+                    state.checkins.splice(existingIndex, 1);
+                    showToast(`取消完成`);
+                } else {
+                    state.checkins.push({ date: today, taskId, timestamp: Date.now() });
+                    showToast(`完成打卡`);
+                }
+                saveState();
+                renderAll();
+            }
+
+            function toggleExtraCheck(extraId) {
+                const today = getBeijingDateStr();
+                const extraTask = state.extraTasks.find(t => t.id === extraId);
+                if (!extraTask) return;
+
+                const existingIndex = state.checkins.findIndex(c => c.date === today && c.taskId === extraId && c.isExtra);
+                if (existingIndex !== -1) {
+                    state.checkins.splice(existingIndex, 1);
+                    showToast(`取消额外任务`);
+                } else {
+                    state.checkins.push({ date: today, taskId: extraId, reward: extraTask.reward, timestamp: Date.now(), isExtra: true });
+                    showToast(`完成额外任务 +${extraTask.reward}星`);
+                }
+                saveState();
+                renderAll();
+            }
+
+            function deleteTaskConfirm(taskId) {
+                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const task = state.tasks.find(t => t.id === taskId);
+                if (!task) return;
+                showModal({
+                    title: '删除任务',
+                    content: `确定要删除 "${escapeHtml(task.name)}" 吗？相关打卡也会清除。`,
+                    confirmText: '删除',
+                    danger: true,
+                    onConfirm: () => {
+                        state.tasks = state.tasks.filter(t => t.id !== taskId);
+                        state.checkins = state.checkins.filter(c => c.taskId !== taskId);
+                        saveState();
+                        renderAll();
+                        showToast('已删除');
+                    }
+                });
+            }
+
+            function resetStarsConfirm() {
+                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                showModal({
+                    title: '重置星值',
+                    content: '确定清空所有考试分数、额外任务与打卡记录吗？（今日和本月星值将归零，不可撤销）',
+                    confirmText: '重置',
+                    danger: true,
+                    onConfirm: () => {
+                        state.checkins = []; 
+                        state.extraTasks = [];
+                        state.exams.forEach(e => e.score = null);
+                        saveState();
+                        renderAll();
+                        showToast('已重置归零');
+                    }
+                });
+            }
+
+            // --- 模态框通用 ---
+            function showModal({ title, content, contentHTML, confirmText = '确认', cancelText = '取消', danger = false, onConfirm, onCancel }) {
+                const modalRoot = document.getElementById('modalRoot');
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                const modal = document.createElement('div');
+                modal.className = 'modal-content';
+                modal.innerHTML = `
+                    <h3>${escapeHtml(title)}</h3>
+                    <div id="modalBody">${contentHTML || `<p style="margin-bottom:20px; color:#6b5b4e; font-weight:600;">${escapeHtml(content || '')}</p>`}</div>
+                    <div class="modal-actions">
+                        <button class="btn-cancel" id="modalCancel">${cancelText}</button>
+                        <button class="${danger ? 'btn-danger' : 'btn-confirm'}" id="modalConfirm">${confirmText}</button>
+                    </div>
+                `;
+                overlay.appendChild(modal);
+                modalRoot.appendChild(overlay);
+
+                const closeModal = () => overlay.remove();
+                document.getElementById('modalCancel').onclick = () => {
+                    if (onCancel && onCancel() === false) return;
+                    closeModal();
+                };
+                document.getElementById('modalConfirm').onclick = () => {
+                    if (onConfirm && onConfirm() === false) return;
+                    closeModal();
+                };
+                overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+            }
+
+            // --- 编辑资料 ---
+            function openProfileModal() {
+                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const currentName = state.profile.name || 'HEIDI';
+                let pendingAvatar = state.profile.avatar || '';
+
+                showModal({
+                    title: '编辑资料',
+                    contentHTML: `
+                        <label>名字</label>
+                        <input id="profileNameInput" type="text" value="${escapeHtml(currentName)}" maxlength="10" />
+                        <label>头像</label>
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                            <div id="avatarPreview" class="avatar" style="width:64px;height:64px;border-radius:50%;border:3px solid #f6e3b4;background:#fff;font-size:24px;${pendingAvatar ? `background-image:url(${pendingAvatar});background-size:cover;` : ''}">${!pendingAvatar ? currentName.charAt(0) : ''}</div>
+                            <label class="btn-outline" style="cursor:pointer; padding:8px 16px;">
+                                上传图片
+                                <input id="avatarFileInput" type="file" accept="image/*" style="display:none;" />
+                            </label>
+                        </div>
+                    `,
+                    confirmText: '保存',
+                    onConfirm: () => {
+                        const name = document.getElementById('profileNameInput').value.trim() || 'HEIDI';
+                        state.profile.name = name;
+                        state.profile.avatar = pendingAvatar;
+                        saveState();
+                        renderAll();
+                        showToast('资料已更新');
+                    }
+                });
+
+                setTimeout(() => {
+                    const fileInput = document.getElementById('avatarFileInput');
+                    const preview = document.getElementById('avatarPreview');
+                    if (!fileInput) return;
+                    fileInput.addEventListener('change', (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const maxSize = 200;
+                                let w = img.width, h = img.height;
+                                if (w > h) { if (w > maxSize) { h = h * maxSize / w; w = maxSize; } }
+                                else { if (h > maxSize) { w = w * maxSize / h; h = maxSize; } }
+                                const canvas = document.createElement('canvas');
+                                canvas.width = w; canvas.height = h;
+                                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                                pendingAvatar = canvas.toDataURL('image/jpeg', 0.85);
+                                preview.style.backgroundImage = `url(${pendingAvatar})`;
+                                preview.textContent = '';
+                            };
+                            img.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }, 0);
+            }
+
+            // --- 新增/编辑日常任务 ---
+            window.updateSubjectOptions = function() {
+                const cat = document.getElementById('modalTaskCategory').value;
+                const subSelect = document.getElementById('modalTaskSubject');
+                const currentSub = subSelect.value;
+                
+                let options = [];
+                if (cat === '校内作业') {
+                    options = ['语文', '数学', '英语', '其它'];
+                } else if (cat === '校外作业') {
+                    options = ['口语', '新东方'];
+                }
+                
+                subSelect.innerHTML = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+                if (options.includes(currentSub)) subSelect.value = currentSub;
+            };
+
+            function openTaskModal(editTask = null) {
+                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const isEdit = !!editTask;
+                const task = editTask || { name: '', daily: true, note: '', category: '校内作业', subject: '语文' };
+                const today = getBeijingDateStr();
+
+                showModal({
+                    title: isEdit ? '编辑任务' : '新增任务',
+                    contentHTML: `
+                        <label>任务名称</label>
+                        <input id="modalTaskName" type="text" value="${escapeHtml(task.name)}" placeholder="输入任务名称" />
+                        <label>分类</label>
+                        <select id="modalTaskCategory" onchange="updateSubjectOptions()">
+                            <option value="校内作业" ${task.category === '校内作业' ? 'selected' : ''}>校内作业</option>
+                            <option value="校外作业" ${task.category === '校外作业' ? 'selected' : ''}>校外作业</option>
+                        </select>
+                        <label>学科</label>
+                        <select id="modalTaskSubject">
+                            <!-- 由JS联动渲染 -->
+                        </select>
+                        <label>是否每日重复</label>
+                        <select id="modalTaskDaily">
+                            <option value="true" ${task.daily ? 'selected' : ''}>是</option>
+                            <option value="false" ${!task.daily ? 'selected' : ''}>否</option>
+                        </select>
+                        <label>备注（可选）</label>
+                        <input id="modalTaskNote" type="text" value="${escapeHtml(task.note || '')}" />
+                        <label style="color:#a68f7b; font-size:12px;">记录日期：${isEdit ? task.createdDate : today}</label>
+                    `,
+                    confirmText: '保存',
+                    onConfirm: () => {
+                        const name = document.getElementById('modalTaskName').value.trim();
+                        const category = document.getElementById('modalTaskCategory').value;
+                        const subject = document.getElementById('modalTaskSubject').value;
+                        const daily = document.getElementById('modalTaskDaily').value === 'true';
+                        const note = document.getElementById('modalTaskNote').value.trim();
+
+                        if (!name) { alert('请输入名称'); return false; }
+
+                        if (isEdit) {
+                            const idx = state.tasks.findIndex(t => t.id === task.id);
+                            if (idx !== -1) state.tasks[idx] = { ...state.tasks[idx], name, daily, note, category, subject };
+                        } else {
+                            state.tasks.push({
+                                id: 'task_' + Date.now(),
+                                name, daily, note, category, subject, createdDate: today
+                            });
+                        }
+                        saveState();
+                        renderAll();
+                        showToast('保存成功');
+                    }
+                });
+
+                setTimeout(() => {
+                    document.getElementById('modalTaskSubject').value = task.subject;
+                    updateSubjectOptions();
+                    document.getElementById('modalTaskSubject').value = task.subject;
+                }, 0);
+            }
+
+            // --- 新增额外任务 ---
+            function openExtraModal() {
+                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const today = getBeijingDateStr();
+                showModal({
+                    title: '新增额外任务',
+                    contentHTML: `
+                        <label>任务名称</label>
+                        <input id="extraNameInput" type="text" placeholder="如：拼图奖励" />
+                        <label>星值 (0-50)</label>
+                        <input id="extraRewardInput" type="number" min="0" max="50" value="10" />
+                    `,
+                    confirmText: '添加',
+                    onConfirm: () => {
+                        const name = document.getElementById('extraNameInput').value.trim();
+                        const reward = parseInt(document.getElementById('extraRewardInput').value, 10);
+                        if (!name) { alert('请输入名称'); return false; }
+                        if (isNaN(reward) || reward < 0 || reward > 50) { alert('星值必须在0-50之间'); return false; }
+                        
+                        state.extraTasks.push({
+                            id: 'extra_' + Date.now(),
+                            name: name,
+                            reward: reward,
+                            createdDate: today
+                        });
+                        saveState();
+                        renderAll();
+                        showToast('已添加额外任务');
+                        return true;
+                    }
+                });
+            }
+
+            // --- 新增考试任务 ---
+            function openExamModal() {
+                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const today = getBeijingDateStr();
+                showModal({
+                    title: '新增考试任务',
+                    contentHTML: `
+                        <label>考试名称</label>
+                        <input id="examNameInput" type="text" placeholder="如：期中考试-数学" />
+                        <label>考试日期</label>
+                        <input id="examDateInput" type="date" value="${today}" />
+                    `,
+                    confirmText: '创建',
+                    onConfirm: () => {
+                        const name = document.getElementById('examNameInput').value.trim();
+                        const date = document.getElementById('examDateInput').value;
+                        if (!name) { alert('请输入考试名称'); return false; }
+                        if (!date) { alert('请选择日期'); return false; }
+                        
+                        state.exams.push({
+                            id: 'exam_' + Date.now(),
+                            name: name,
+                            date: date,
+                            score: null
+                        });
+                        saveState();
+                        renderAll();
+                        showToast('已添加，请录入分数');
+                        return true;
+                    }
+                });
+            }
+
+            // --- OCR ---
+            function openOcrModal() {
+                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const today = getBeijingDateStr();
+                showModal({
+                    title: 'OCR 识别',
+                    contentHTML: `
+                        <div style="margin-bottom:16px;">
+                            <label class="btn-outline" style="display:inline-flex; cursor:pointer;">
+                                📷 拍照/相册
+                                <input type="file" accept="image/*" capture="environment" id="ocrFileInput" style="display:none;">
+                            </label>
+                        </div>
+                        <label>识别文字（可修改）</label>
+                        <textarea id="ocrResult" rows="3">数学作业本 第5页</textarea>
+                    `,
+                    confirmText: '生成任务',
+                    onConfirm: () => {
+                        const text = document.getElementById('ocrResult').value.trim();
+                        if (!text) return false;
+                        state.tasks.push({
+                            id: 'task_ocr_' + Date.now(),
+                            name: text, daily: false, note: 'OCR生成', category: '校内作业', subject: '其它', createdDate: today
+                        });
+                        saveState();
+                        renderAll();
+                        showToast('已生成任务');
+                    }
+                });
+                setTimeout(() => {
+                    document.getElementById('ocrFileInput')?.addEventListener('change', () => {
+                        document.getElementById('ocrResult').value = '【模拟识别】数学练习册 P12';
+                    });
+                }, 100);
+            }
+
+            // --- 事件绑定 ---
+            function bindEvents() {
+                document.getElementById('btnChildMode').addEventListener('click', () => {
+                    currentRole = 'child';
+                    isAdminAuthenticated = false;
+                    renderAll();
+                });
+
+                document.getElementById('btnAdminMode').addEventListener('click', () => {
+                    if (isAdminAuthenticated && currentRole === 'admin') return;
+                    showModal({
+                        title: '管理员验证',
+                        contentHTML: `<input id="pwdInput" type="password" placeholder="请输入密码" autofocus />`,
+                        confirmText: '进入',
+                        onConfirm: () => {
+                            const pwd = document.getElementById('pwdInput').value;
+                            if (pwd === ADMIN_PASSWORD) {
+                                currentRole = 'admin';
+                                isAdminAuthenticated = true;
+                                renderAll();
+                                showToast('欢迎，管理员');
+                                return true;
+                            } else {
+                                alert('密码错误');
+                                return false;
+                            }
+                        }
+                    });
+                });
+
+                document.body.addEventListener('change', (e) => {
+                    if (e.target.matches('.exam-score-input')) {
+                        const examId = e.target.dataset.examId;
+                        let val = parseFloat(e.target.value);
+                        if (e.target.value.trim() === '') {
+                            val = null;
+                        } else if (isNaN(val) || val < 0 || val > 100) {
+                            showToast('请输入0-100的有效分数', false);
+                            renderExams();
+                            return;
+                        }
+                        const exam = state.exams.find(x => x.id === examId);
+                        if (exam) {
+                            exam.score = val;
+                            saveState();
+                            renderAll();
+                            if (val !== null) {
+                                showToast(`分数已录入，获得 ${getExamStars(val)} 星`);
+                            }
+                        }
+                    }
+                });
+
+                document.getElementById('addExtraBtn').addEventListener('click', openExtraModal);
+                document.getElementById('addExamBtn').addEventListener('click', openExamModal);
+                document.getElementById('editProfileBtn').addEventListener('click', openProfileModal);
+                document.getElementById('todayAddTaskBtn').addEventListener('click', () => openTaskModal(null));
+                document.getElementById('openCreateTaskBtn').addEventListener('click', () => openTaskModal(null));
+                document.getElementById('ocrBtn').addEventListener('click', openOcrModal);
+                document.getElementById('resetStarsBtn').addEventListener('click', resetStarsConfirm);
+
+                document.body.addEventListener('click', (e) => {
+                    const target = e.target.closest('[data-action]');
+                    if (!target) return;
+                    const action = target.dataset.action;
+                    
+                    if (action === 'toggle-check') {
+                        toggleTaskCheck(target.dataset.taskId);
+                    } else if (action === 'toggle-extra') {
+                        toggleExtraCheck(target.dataset.extraId);
+                    } else if (action === 'edit-task') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const task = state.tasks.find(t => t.id === target.dataset.taskId);
+                            if (task) openTaskModal(task);
+                        }
+                    } else if (action === 'delete-task') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) deleteTaskConfirm(target.dataset.taskId);
+                    } else if (action === 'delete-extra') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const extraId = target.dataset.extraId;
+                            showModal({
+                                title: '删除额外任务',
+                                content: '确定删除吗？',
+                                confirmText: '删除',
+                                danger: true,
+                                onConfirm: () => {
+                                    state.extraTasks = state.extraTasks.filter(t => t.id !== extraId);
+                                    state.checkins = state.checkins.filter(c => !(c.taskId === extraId && c.isExtra));
+                                    saveState();
+                                    renderAll();
+                                    showToast('已删除');
+                                }
+                            });
+                        }
+                    } else if (action === 'delete-exam') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const examId = target.dataset.examId;
+                            showModal({
+                                title: '删除考试',
+                                content: '确定删除该考试记录吗？',
+                                confirmText: '删除',
+                                danger: true,
+                                onConfirm: () => {
+                                    state.exams = state.exams.filter(x => x.id !== examId);
+                                    saveState();
+                                    renderAll();
+                                    showToast('已删除');
+                                }
+                            });
+                        }
+                    }
+                });
+
+                document.getElementById('prevMonth').addEventListener('click', () => {
+                    calendarMonth--; if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+                    renderCalendar();
+                });
+                document.getElementById('nextMonth').addEventListener('click', () => {
+                    calendarMonth++; if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+                    renderCalendar();
+                });
+
+                document.getElementById('exportCsvBtn').addEventListener('click', () => {
+                    const rows = [['日期', '类型', '名称', '详情/分数', '获得星值']];
+                    state.checkins.forEach(c => {
+                        if (c.isExtra) {
+                            const t = state.extraTasks.find(x => x.id === c.taskId);
+                            rows.push([c.date, '额外任务', t ? t.name : '已删除', '-', c.reward + '星']);
+                        } else {
+                            const t = state.tasks.find(x => x.id === c.taskId);
+                            rows.push([c.date, '日常打卡', t ? t.name : '已删除', '-', '见月度奖励']);
+                        }
+                    });
+                    state.exams.forEach(e => {
+                        if (e.score !== null) {
+                            rows.push([e.date, '考试', e.name, e.score + '分', getExamStars(e.score)]);
+                        }
+                    });
+                    const csv = rows.map(r => r.join(',')).join('\n');
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], {type:'text/csv'}));
+                    link.download = `星值记录_${getBeijingDateStr()}.csv`;
+                    link.click();
+                    showToast('CSV 已导出');
+                });
+
+                document.getElementById('bottomHome').addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+                
+                document.getElementById('bottomStats').addEventListener('click', () => {
+                    const monthData = calcMonthStars();
+                    showModal({
+                        title: '📊 星值统计',
+                        contentHTML: `
+                            <div style="padding: 10px;">
+                                <div style="font-size:18px; font-weight:800; color:#4a3b32; margin-bottom:12px; display:flex; justify-content:space-between;">
+                                    <span>今日获得：</span>
+                                    <span style="color:#d48a3d;">${calcTodayStars()} 🌟</span>
+                                </div>
+                                <div style="font-size:18px; font-weight:800; color:#4a3b32; margin-bottom:12px; display:flex; justify-content:space-between;">
+                                    <span>本月累计：</span>
+                                    <span style="color:#d48a3d;">${monthData.total} 🌟</span>
+                                </div>
+                                <div style="font-size:18px; font-weight:800; color:#4a3b32; margin-bottom:12px; display:flex; justify-content:space-between;">
+                                    <span>本月奖励：</span>
+                                    <span style="color:#2e8b57;">${monthData.total} 元</span>
+                                </div>
+                            </div>
+                        `,
+                        confirmText: '知道了',
+                        cancelText: '清零',
+                        onCancel: () => {
+                            showModal({
+                                title: '⚠️ 清零确认',
+                                content: '确定要清零本月所有任务记录吗？清零后本月任务将不再显示，待下月重新记录。',
+                                confirmText: '确认清零',
+                                cancelText: '取消',
+                                danger: true,
+                                onConfirm: () => {
+                                    state.checkins = [];
+                                    state.extraTasks = [];
+                                    state.exams.forEach(e => e.score = null);
+                                    saveState();
+                                    renderAll();
+                                    showToast('已清零本月数据');
+                                }
+                            });
+                        }
+                    });
+                });
+            }
+
+            function init() {
+                if (!state.checkins) state.checkins = [];
+                if (!state.exams) state.exams = [];
+                if (!state.extraTasks) state.extraTasks = [];
+                if (!state.profile) state.profile = { name: 'HEIDI', avatar: '' };
+                state.tasks = state.tasks.map(t => {
+                    if (!t.subject) t.subject = t.category === '校内作业' ? '其它' : (t.category === '校外作业' ? '口语' : '');
+                    return { ...t, createdDate: t.createdDate || '2026-11-01' };
+                });
+                
+                saveState();
+                bindEvents();
+                renderAll();
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
