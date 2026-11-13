@@ -7,7 +7,7 @@
     <!-- PWA 核心配置 -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="HEIDI STAR">
     <link rel="apple-touch-icon" href="icon.png">
     
@@ -15,43 +15,57 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        /* 引入圆润现代无衬线字体 */
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+        :root {
+            --icy-blue: #E5F3FF;
+            --soft-pink: #FFE2F4;
+            --lilac: #9883F4;
+            --aqua: #6AD5E8;
+            --coral: #F36C62;
+            --lime: #DBFB64;
+            --ink: #202536;
+            --white: #FFFFFF;
+            
+            --radius-card: 22px;
+            --radius-btn: 999px; /* 胶囊 */
+            --shadow-soft: 0 8px 24px rgba(32, 37, 54, 0.04);
+        }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-family: 'Nunito', 'URW Gothic', system-ui, -apple-system, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: #f7f1e5;
-            background-image: radial-gradient(#efe4d1 1px, transparent 1px), radial-gradient(#efe4d1 1px, transparent 1px);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
+            /* 淡蓝粉渐变背景 */
+            background: linear-gradient(135deg, #E5F3FF 0%, #FFE2F4 100%);
+            background-attachment: fixed;
             min-height: 100vh;
-            padding: 12px 12px 80px;
-            padding-top: max(12px, env(safe-area-inset-top));
-            padding-bottom: calc(80px + env(safe-area-inset-bottom));
+            padding: 12px 20px 100px; /* 安全边距20 */
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: calc(100px + env(safe-area-inset-bottom));
             display: flex;
             flex-direction: column;
-            color: #4a3b32;
+            color: var(--ink);
             user-select: none;
             -webkit-user-select: none;
         }
 
-        /* 顶部导航 */
+        /* 顶部控制区（深色胶囊） */
         .app-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            background: #fdfbf7;
-            border-radius: 20px;
-            padding: 8px;
-            box-shadow: 0 4px 12px rgba(180, 160, 140, 0.15);
-            border: 1px solid #f0e6d6;
+            margin-bottom: 24px;
+            background: var(--ink);
+            border-radius: var(--radius-btn);
+            padding: 6px 12px;
+            box-shadow: 0 10px 30px rgba(32, 37, 54, 0.1);
             flex-shrink: 0;
         }
 
@@ -61,187 +75,207 @@
             gap: 6px;
             background: transparent;
             border: none;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
-            color: #6b5b4e;
-            padding: 6px 12px;
-            border-radius: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 8px 14px;
+            border-radius: var(--radius-btn);
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.3s;
         }
-        .header-btn:active { background: #f0e6d6; }
-        .header-btn.active { color: #d48a3d; }
+        .header-btn.active { 
+            color: var(--ink); 
+            background: var(--white);
+        }
         
         /* 布局容器 */
         .layout-container {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 24px;
         }
         .left-panel, .right-panel {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 24px;
             width: 100%;
         }
 
         /* 第一栏：头像+名字 | 星值 */
         .profile-stats-bar {
             display: flex;
-            gap: 12px;
+            gap: 16px;
             align-items: stretch;
         }
 
+        /* 左侧头像卡片 */
         .profile-card {
-            background: #fdfbf7;
-            border-radius: 24px;
-            padding: 16px 12px;
+            background: var(--white);
+            border-radius: var(--radius-card);
+            padding: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            box-shadow: 0 6px 16px rgba(180, 160, 140, 0.15);
+            gap: 12px;
+            box-shadow: var(--shadow-soft);
             flex: 0 0 auto;
-            min-width: 110px;
-            border: 2px solid #f4ead9;
+            min-width: 120px;
         }
 
+        /* 标志性元素：Blob流体软形状 */
         .avatar-container {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            border: 3px solid #f6e3b4;
-            background: #fff;
+            width: 76px;
+            height: 76px;
+            background: var(--lilac);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            position: relative;
+            animation: blobFloat 4s ease-in-out infinite alternate;
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.1);
+        }
+
+        @keyframes blobFloat {
+            0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: translateY(0); }
+            100% { border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; transform: translateY(-5px); }
+        }
+
+        .avatar-eye {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--ink);
+            border-radius: 50%;
+            top: 40%;
+        }
+        .avatar-eye.left { left: 25%; }
+        .avatar-eye.right { right: 25%; }
+        
+        .avatar-smile {
+            position: absolute;
+            width: 20px;
+            height: 10px;
+            border-bottom: 3px solid var(--ink);
+            border-radius: 0 0 20px 20px;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .avatar {
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg,#a1c4fd,#c2e9fb);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: transparent;
             font-size: 28px;
-            font-weight: 800;
+            font-weight: 900;
             background-size: cover;
             background-position: center;
+            z-index: 2;
         }
+        .avatar[style*="url"] ~ .avatar-eye,
+        .avatar[style*="url"] ~ .avatar-smile { display: none; }
 
         .profile-name {
             font-weight: 800;
-            font-size: 15px;
-            color: #5c4535;
+            font-size: 16px;
+            color: var(--ink);
             text-align: center;
-            max-width: 90px;
+            max-width: 100px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            letter-spacing: 1px;
         }
 
         .edit-profile-btn {
-            background: #f0e6d6;
+            background: var(--icy-blue);
             border: none;
-            color: #8c7661;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
+            color: var(--ink);
+            padding: 6px 14px;
+            border-radius: var(--radius-btn);
+            font-size: 12px;
             cursor: pointer;
-            font-weight: 700;
+            font-weight: 800;
         }
 
+        /* 右侧星值统计 */
         .stats-group {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 8px;
+            gap: 12px;
         }
 
         .stats-card {
-            background: linear-gradient(90deg, #d6e8f7, #b8d8f7);
-            border-radius: 20px;
-            padding: 10px 16px;
+            border-radius: var(--radius-card);
+            padding: 16px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 10px rgba(140, 170, 200, 0.2);
-            border: 2px solid #e8f4ff;
+            box-shadow: var(--shadow-soft);
         }
+        .stats-card.today { background: var(--aqua); color: var(--white); }
+        .stats-card.month { background: var(--white); color: var(--ink); }
 
         .stats-label {
-            font-size: 16px;
-            font-weight: 800;
-            color: #2c527a;
-            letter-spacing: 1px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         .stats-number {
-            font-size: 24px;
-            font-weight: 800;
-            color: #1e3a8a;
+            font-size: 26px;
+            font-weight: 900;
             display: flex;
             align-items: center;
             gap: 4px;
         }
 
-        .stats-number span { font-size: 22px; }
+        .stats-number span { font-size: 20px; }
 
         /* 第二栏：日历 */
         .calendar-card {
-            background: #fdfbf7;
-            border-radius: 24px;
-            padding: 12px;
-            box-shadow: 0 4px 12px rgba(180, 160, 140, 0.15);
-            border: 2px solid #f4ead9;
-            position: relative;
-            overflow: hidden;
+            background: var(--white);
+            border-radius: var(--radius-card);
+            padding: 20px;
+            box-shadow: var(--shadow-soft);
             width: 100%;
-        }
-        
-        .calendar-card::before {
-            content: '✧ ✦ ✧';
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            font-size: 20px;
-            color: #f0e6d6;
-            letter-spacing: 5px;
         }
 
         .calendar-header {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 16px;
             position: relative;
         }
 
         .calendar-header .month-label {
             font-weight: 800;
-            color: #4a3b32;
-            font-size: 16px;
+            color: var(--ink);
+            font-size: 18px;
         }
 
         .calendar-nav-btn {
             position: absolute;
-            background: transparent;
+            background: var(--icy-blue);
             border: none;
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
             font-size: 18px;
             cursor: pointer;
-            color: #a68f7b;
+            color: var(--ink);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: bold;
         }
         #prevMonth { left: 0; }
         #nextMonth { right: 0; }
@@ -251,55 +285,46 @@
             grid-template-columns: repeat(7,1fr);
             text-align: center;
             font-size: 12px;
-            color: #7a6b5d;
-            margin-bottom: 4px;
+            color: #8892A6;
+            margin-bottom: 8px;
             font-weight: 700;
         }
 
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7,1fr);
-            gap: 2px;
+            gap: 4px;
         }
 
         .calendar-day {
-            height: 28px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             border-radius: 50%;
-            color: #4a3b32;
+            color: var(--ink);
         }
 
-        .calendar-day.other-month { color: #d1c5b8; }
+        .calendar-day.other-month { color: #D1D5E0; }
         
+        /* 今日高亮 */
         .calendar-day.today {
-            background: #b8d8f7;
-            color: #fff;
-            font-weight: 800;
-            position: relative;
-            box-shadow: 0 2px 6px rgba(140, 170, 200, 0.4);
-        }
-        .calendar-day.today::after {
-            content: '🐾';
-            position: absolute;
-            font-size: 22px;
-            opacity: 0.3;
-            z-index: -1;
-            pointer-events: none;
+            background: var(--lilac);
+            color: var(--white);
+            font-weight: 900;
         }
 
-        /* 通用 */
+        /* 通用标题 */
         .section-title {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 20px 0 12px;
+            margin: 24px 0 12px;
             font-weight: 800;
-            color: #5c4535;
-            font-size: 18px;
+            color: var(--ink);
+            font-size: 21px; /* 卡片标题21px */
             width: 100%;
         }
         .section-title .title-left {
@@ -310,26 +335,23 @@
         .section-title .title-right {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
+        
         .collapse-btn {
             background: transparent;
             border: none;
             font-size: 18px;
             cursor: pointer;
             padding: 4px;
-            color: #a68f7b;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
+            color: var(--ink);
         }
 
         .sub-title {
             font-size: 14px; 
-            color: #8c7661; 
+            color: var(--ink); 
             font-weight: 800; 
-            margin: 12px 0 6px 6px;
+            margin: 16px 0 8px 4px;
         }
 
         .task-list {
@@ -340,37 +362,41 @@
             width: 100%;
         }
 
+        /* 任务卡片 */
         .task-item {
-            background: #f7f0e3;
-            border-radius: 20px;
-            padding: 12px 16px;
+            background: var(--white);
+            border-radius: var(--radius-card);
+            padding: 16px;
             display: flex;
             align-items: center;
             gap: 14px;
-            box-shadow: 0 2px 8px rgba(180, 160, 140, 0.08);
+            box-shadow: var(--shadow-soft);
             transition: 0.2s;
-            border: 1px solid transparent;
             width: 100%;
         }
 
         .task-item.completed {
-            background: #e9f5ee;
-            border-color: #c5e8d3;
-            opacity: 0.85;
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: none;
+            opacity: 0.7;
         }
         
         .task-item.overdue {
-            background: #fef5e6;
-            border-color: #f5dcc0;
+            background: #FFF0F0;
         }
 
         .task-icon {
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 36px;
-            font-size: 24px;
+            min-width: 44px;
+            height: 44px;
+            background: var(--icy-blue);
+            border-radius: 16px;
+            font-size: 20px;
         }
+        .task-item.completed .task-icon { background: transparent; }
+        .task-item.overdue .task-icon { background: #FFD1D1; }
 
         .task-info {
             flex: 1;
@@ -381,8 +407,8 @@
 
         .task-name {
             font-weight: 800;
-            font-size: 17px;
-            color: #33261d;
+            font-size: 16px;
+            color: var(--ink);
             word-break: break-word;
         }
 
@@ -392,141 +418,156 @@
             flex-wrap: wrap;
         }
 
+        /* 情绪选择/标签胶囊 */
         .tag {
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
         }
-        .tag-green { background: #c3e6cb; color: #2b6a3d; } 
-        .tag-purple { background: #e2d4f0; color: #5a3d77; } 
-        .tag-pink { background: #f5c6cb; color: #8a3a44; } 
-        .tag-blue { background: #cce5ff; color: #2b4e7a; } 
-        .tag-orange { background: #ffe5b4; color: #8a632b; } 
-        .tag-date { background: #e0e0e0; color: #666; }
-        .tag-today { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
-        .tag-deadline { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .tag-green { background: var(--lime); color: var(--ink); } 
+        .tag-purple { background: #EDE8FF; color: var(--lilac); } 
+        .tag-pink { background: var(--soft-pink); color: var(--ink); } 
+        .tag-blue { background: var(--icy-blue); color: var(--ink); } 
+        .tag-orange { background: #FFF3D6; color: #D48A3D; } 
+        .tag-date { background: #F4F5F8; color: var(--ink); }
+        .tag-today { background: var(--lilac); color: var(--white); }
+        .tag-deadline { background: var(--aqua); color: var(--white); }
 
+        /* 打卡圆形选择点 */
         .task-check {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            border: 2px solid #d1c5b8;
+            border: 3px solid var(--icy-blue);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 18px;
-            color: white;
+            color: transparent;
             cursor: pointer;
             flex-shrink: 0;
             transition: 0.2s;
-            background: #fff;
+            background: var(--white);
         }
         .task-item.completed .task-check {
-            background: #72c293;
-            border-color: #72c293;
+            background: var(--aqua);
+            border-color: var(--aqua);
+            color: var(--white);
         }
 
         .task-actions {
             display: flex;
             gap: 4px;
-            margin-left: 4px;
         }
         .icon-btn {
-            background: #fff;
-            border: 1px solid #e8dcc8;
-            width: 34px;
-            height: 34px;
-            border-radius: 12px;
+            background: var(--white);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            color: #8c7661;
+            color: var(--ink);
             font-size: 16px;
+            box-shadow: 0 2px 8px rgba(32, 37, 54, 0.05);
         }
 
         .overdue-badge {
-            background: #ff9800;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 700;
+            background: #FFE5E5;
+            color: var(--coral);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
         }
 
-        .btn-outline {
-            background: #fff;
-            border: 2px solid #f0e6d6;
-            color: #8c7661;
-            padding: 8px 14px;
-            border-radius: 20px;
+        /* 按钮 */
+        .btn-primary {
+            background: var(--lilac);
+            border: none;
+            color: var(--white);
+            padding: 12px 20px;
+            border-radius: var(--radius-btn);
             font-weight: 800;
             font-size: 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 4px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            box-shadow: 0 4px 12px rgba(152, 131, 244, 0.3);
+            transition: 0.2s;
         }
-        .btn-sm { padding: 6px 12px; font-size: 13px; }
+        .btn-primary:active { transform: scale(0.96); }
+        
+        .btn-outline {
+            background: var(--white);
+            border: 2px solid var(--lilac);
+            color: var(--lilac);
+            padding: 10px 16px;
+            border-radius: var(--radius-btn);
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: 0.2s;
+        }
+        .btn-outline:active { background: #EDE8FF; }
+        .btn-sm { padding: 8px 14px; font-size: 13px; }
 
         .hidden { display: none !important; }
 
-        /* 考试任务专属 */
+        /* 考试任务 */
         .exam-item {
-            background: #fdfbf7;
-            border-radius: 20px;
-            padding: 12px 16px;
+            background: var(--white);
+            border-radius: var(--radius-card);
+            padding: 16px;
             margin-bottom: 12px;
-            border: 1px solid #f0e6d6;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            box-shadow: 0 2px 8px rgba(180, 160, 140, 0.08);
+            gap: 12px;
             width: 100%;
+            box-shadow: var(--shadow-soft);
         }
         .exam-score-input {
             width: 90px;
-            padding: 8px;
-            border-radius: 12px;
-            border: 2px solid #f0e6d6;
+            padding: 10px 14px;
+            border-radius: var(--radius-btn);
+            border: 2px solid var(--icy-blue);
             text-align: center;
             font-weight: 800;
             font-size: 15px;
-            color: #4a3b32;
+            color: var(--ink);
             outline: none;
-            background: #fff;
-            transition: 0.2s;
+            background: var(--icy-blue);
         }
-        .exam-score-input:focus { border-color: #d48a3d; }
-        .exam-score-input:disabled {
-            background: #f0e6d6;
-            color: #a68f7b;
-            cursor: not-allowed;
-            border-color: transparent;
-        }
+        .exam-score-input:focus { border-color: var(--lilac); background: var(--white); }
         .exam-stars {
             font-weight: 800;
-            font-size: 15px;
-            color: #d48a3d;
+            font-size: 14px;
+            color: var(--lilac);
         }
-        .exam-stars.zero { color: #a68f7b; }
+        .exam-stars.zero { color: #8892A6; }
 
-        /* 底部导航 */
+        /* 底部导航（深色胶囊） */
         .bottom-bar {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #fdfbf7;
-            padding: 12px 16px;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 400px;
+            background: var(--ink);
+            padding: 12px 20px;
             display: flex;
             justify-content: space-around;
-            border-top: 2px solid #f4ead9;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            border-radius: var(--radius-btn);
             z-index: 100;
-            box-shadow: 0 -4px 12px rgba(180, 160, 140, 0.1);
+            box-shadow: 0 10px 30px rgba(32, 37, 54, 0.2);
         }
         .bottom-btn {
             display: flex;
@@ -534,20 +575,22 @@
             align-items: center;
             font-size: 12px;
             font-weight: 700;
-            color: #a68f7b;
+            color: rgba(255, 255, 255, 0.5);
             background: transparent;
             border: none;
             gap: 4px;
             cursor: pointer;
+            transition: 0.2s;
+            padding: 4px 20px;
         }
         .bottom-btn span { font-size: 22px; }
-        .bottom-btn.active { color: #d48a3d; }
+        .bottom-btn.active { color: var(--white); transform: scale(1.1); }
 
         /* 模态框 */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(74, 59, 50, 0.4);
+            background: rgba(32, 37, 54, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -556,81 +599,77 @@
             backdrop-filter: blur(4px);
         }
         .modal-content {
-            background: #fdfbf7;
+            background: var(--white);
             border-radius: 28px;
-            padding: 24px;
+            padding: 28px;
             width: 100%;
             max-width: 380px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            border: 2px solid #f4ead9;
             max-height: 90vh;
             overflow-y: auto;
         }
-        .modal-content h3 { font-size: 20px; margin-bottom: 20px; color: #4a3b32; text-align: center; font-weight: 800;}
-        .modal-content label { font-size: 14px; font-weight: 700; color: #6b5b4e; margin-bottom: 6px; display: block; }
+        .modal-content h3 { font-size: 22px; margin-bottom: 24px; color: var(--ink); text-align: center; font-weight: 800;}
+        .modal-content label { font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 8px; display: block; }
         .modal-content input, .modal-content textarea, .modal-content select {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #f0e6d6;
+            padding: 14px 18px;
+            border: 2px solid var(--icy-blue);
             border-radius: 16px;
             font-size: 15px;
-            margin-bottom: 16px;
-            background: #fff;
+            margin-bottom: 20px;
+            background: var(--icy-blue);
             outline: none;
-            color: #4a3b32;
+            color: var(--ink);
             font-weight: 600;
+            transition: 0.2s;
         }
-        .modal-content input:focus, .modal-content select:focus { border-color: #d48a3d; }
-        
-        /* 专门修复日期选择器长度问题 */
+        .modal-content input:focus, .modal-content select:focus { border-color: var(--lilac); background: var(--white); }
         .modal-content input[type="date"] {
-            min-height: 48px;
-            padding: 10px 12px;
+            min-height: 52px;
             -webkit-appearance: none;
             display: flex;
             align-items: center;
         }
 
-        .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
+        .modal-actions { display: flex; gap: 12px; margin-top: 12px; }
         .modal-actions button {
             flex: 1;
-            padding: 14px;
-            border-radius: 16px;
+            padding: 16px;
+            border-radius: var(--radius-btn);
             border: none;
             font-weight: 800;
             font-size: 16px;
             cursor: pointer;
+            transition: 0.2s;
         }
-        .btn-cancel { background: #f0e6d6; color: #8c7661; }
-        .btn-confirm { background: #d48a3d; color: white; }
-        .btn-danger { background: #e57373; color: white; }
+        .btn-cancel { background: #F4F5F8; color: var(--ink); }
+        .btn-confirm { background: var(--lilac); color: var(--white); box-shadow: 0 4px 12px rgba(152, 131, 244, 0.3); }
+        .btn-danger { background: var(--coral); color: var(--white); }
 
         /* Toast */
         .toast-container { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; }
         .toast {
-            background: rgba(74, 59, 50, 0.9);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-weight: 700;
-            font-size: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            animation: dropDown 0.3s ease;
-            backdrop-filter: blur(4px);
+            background: var(--ink);
+            color: var(--white);
+            padding: 14px 24px;
+            border-radius: var(--radius-btn);
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 10px 30px rgba(32, 37, 54, 0.2);
+            animation: dropDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        @keyframes dropDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes dropDown { from { opacity: 0; transform: translateY(-30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
         /* --- 大屏 / iPad 横屏适配 --- */
         @media (min-width: 900px) {
-            body { padding: 24px 24px 90px; }
-            .app-header { max-width: 1200px; width: 100%; margin: 0 auto 20px auto; }
+            body { padding: 24px 40px 100px; }
+            .app-header { max-width: 1200px; width: 100%; margin: 0 auto 24px auto; }
             .layout-container { flex-direction: row; align-items: flex-start; max-width: 1200px; width: 100%; margin: 0 auto; }
-            .left-panel { flex: 0 0 340px; position: sticky; top: 24px; display: flex; flex-direction: column; gap: 16px;}
+            .left-panel { flex: 0 0 340px; position: sticky; top: 24px; display: flex; flex-direction: column; gap: 24px;}
             .right-panel { flex: 1; min-width: 0; }
             #inSchoolGroups, #outSchoolGroups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-            .sub-title { grid-column: span 2; font-size: 15px; border-bottom: 2px solid #f0e6d6; padding-bottom: 6px; margin-top: 16px; }
-            #overdueTaskList, #extraTaskList { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-            .bottom-bar { max-width: 800px; margin: 0 auto; border-radius: 40px 40px 0 0; border: 2px solid #f4ead9; border-bottom: none; }
+            .sub-title { grid-column: span 2; font-size: 15px; margin-top: 16px; }
+            #overdueTaskList, #extraTaskList { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         }
     </style>
 </head>
@@ -642,26 +681,26 @@
     </div>
 
     <div class="layout-container">
-        <!-- 左侧面板 -->
         <div class="left-panel">
             <div class="profile-stats-bar">
                 <div class="profile-card">
                     <div class="avatar-container">
-                        <div class="avatar" id="avatarDisplay">小</div>
+                        <div class="avatar" id="avatarDisplay"></div>
+                        <div class="avatar-eye left"></div>
+                        <div class="avatar-eye right"></div>
+                        <div class="avatar-smile"></div>
                     </div>
-                    <div class="profile-name" id="profileName">小朋友</div>
+                    <div class="profile-name" id="profileName">HEIDI</div>
                     <button class="edit-profile-btn hidden" id="editProfileBtn">编辑资料</button>
                 </div>
                 <div class="stats-group">
-                    <div class="stats-card">
+                    <div class="stats-card today">
                         <span class="stats-label">今日获得</span>
                         <span class="stats-number" id="todayStars">0<span>🌟</span></span>
                     </div>
-                    <div>
-                        <div class="stats-card" style="background: linear-gradient(90deg, #e2f0f9, #d1e5f7);">
-                            <span class="stats-label">本月获得</span>
-                            <span class="stats-number" id="monthStars">0<span>🌟</span></span>
-                        </div>
+                    <div class="stats-card month">
+                        <span class="stats-label">本月获得</span>
+                        <span class="stats-number" id="monthStars">0<span>🌟</span></span>
                     </div>
                 </div>
             </div>
@@ -681,19 +720,18 @@
             <div class="section-title" style="margin-top:0;">
                 <div class="title-left"><span>🎁 额外任务</span></div>
                 <div class="title-right">
-                    <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增额外</button>
+                    <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增</button>
                     <button class="collapse-btn hidden" data-target="extraTaskList">⬇️</button>
                 </div>
             </div>
             <div id="extraTaskList" class="task-list"></div>
         </div>
 
-        <!-- 右侧面板 -->
         <div class="right-panel">
             <div class="section-title" style="margin-top:0;">
                 <div class="title-left">
                     <span>🏫 校内任务</span>
-                    <span id="inSchoolCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+                    <span id="inSchoolCountBadge" style="font-size:13px; background:var(--white); color:var(--ink); padding:4px 12px; border-radius:999px; font-weight:900; box-shadow: var(--shadow-soft);">0项</span>
                 </div>
                 <div class="title-right">
                     <button class="btn-outline btn-sm" id="addInSchoolBtn">+ 新增</button>
@@ -705,7 +743,7 @@
             <div class="section-title" style="margin-top:24px;">
                 <div class="title-left">
                     <span>🏫 校外任务</span>
-                    <span id="outSchoolCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+                    <span id="outSchoolCountBadge" style="font-size:13px; background:var(--white); color:var(--ink); padding:4px 12px; border-radius:999px; font-weight:900; box-shadow: var(--shadow-soft);">0项</span>
                 </div>
                 <div class="title-right">
                     <button class="btn-outline btn-sm" id="addOutSchoolBtn">+ 新增</button>
@@ -724,9 +762,9 @@
             <div id="examTaskList"></div>
 
             <div class="section-title" style="margin-top:24px;">
-                <div class="title-left" style="font-size:16px;"><span>⏳ 未完成任务</span></div>
+                <div class="title-left" style="font-size:18px;"><span>⏳ 未完成任务</span></div>
                 <div class="title-right">
-                    <span id="overdueCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+                    <span id="overdueCountBadge" style="font-size:13px; background:var(--white); color:var(--ink); padding:4px 12px; border-radius:999px; font-weight:900; box-shadow: var(--shadow-soft);">0项</span>
                     <button class="collapse-btn hidden" data-target="overdueTaskList">⬇️</button>
                 </div>
             </div>
@@ -735,17 +773,18 @@
             <div id="adminTaskLibrarySection" class="hidden">
                 <div class="section-title" style="margin-top:24px;">
                     <span>📚 任务库管理</span>
-                    <button class="btn-outline btn-sm" id="openCreateTaskBtn">+ 新增任务</button>
+                    <button class="btn-primary btn-sm" id="openCreateTaskBtn">+ 新增任务</button>
                 </div>
-                <div class="flex-row" style="display:flex; gap:8px; margin-bottom:12px;">
+                <div class="flex-row" style="display:flex; gap:8px; margin-bottom:16px;">
                     <button class="btn-outline btn-sm" id="ocrBtn">📷 拍照 OCR</button>
-                    <button class="btn-outline btn-sm" id="resetStarsBtn" style="color:#cd5c5c; border-color:#f5c6cb;">🔄 重置星值</button>
+                    <button class="btn-outline btn-sm" id="resetStarsBtn" style="color:var(--coral); border-color:var(--coral);">🔄 重置星值</button>
                 </div>
                 <div id="taskLibraryList" class="task-list"></div>
             </div>
         </div>
     </div>
 
+    <!-- 底部导航只保留 2 个 -->
     <div class="bottom-bar">
         <button class="bottom-btn active" id="bottomHome"><span>🏠</span>今日</button>
         <button class="bottom-btn" id="bottomStats"><span>📊</span>统计</button>
@@ -986,12 +1025,13 @@
                 const name = state.profile.name || 'HEIDI';
                 const avatar = state.profile.avatar || '';
                 const avatarEl = document.getElementById('avatarDisplay');
+                
                 if (avatar) {
                     avatarEl.style.backgroundImage = `url(${avatar})`;
                     avatarEl.textContent = '';
                 } else {
                     avatarEl.style.backgroundImage = '';
-                    avatarEl.textContent = name.charAt(0).toUpperCase();
+                    avatarEl.textContent = ''; 
                 }
                 document.getElementById('profileName').textContent = name;
 
@@ -1041,8 +1081,6 @@
                 if (text === '语文') return 'tag-purple';
                 if (text === '数学') return 'tag-pink';
                 if (text === '英语') return 'tag-blue';
-                if (text === '口语') return 'tag-green';
-                if (text === '新东方') return 'tag-orange';
                 return 'tag-green';
             }
 
@@ -1067,7 +1105,7 @@
                 }
 
                 if (tasks.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">暂无${category}</div>`;
+                    container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:24px;color:var(--ink);background:var(--white);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);">暂无任务，好好休息~</div>`;
                     return;
                 }
 
@@ -1088,7 +1126,7 @@
                 }
 
                 sortedSubjects.forEach(sub => {
-                    html += `<div class="sub-title">📖 ${sub}</div>`;
+                    html += `<div class="sub-title">☁️ ${sub}</div>`;
                     html += `<div class="task-list" style="display:grid; grid-template-columns:1fr; gap:12px;">`;
                     groups[sub].forEach(task => {
                         html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
@@ -1116,22 +1154,22 @@
                     tagsHtml += `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>`;
                 }
                 if (task.note) {
-                    tagsHtml += `<span class="tag tag-orange">📝 ${escapeHtml(task.note)}</span>`;
+                    tagsHtml += `<span class="tag tag-orange">${escapeHtml(task.note)}</span>`;
                 }
                 if (task.daily) {
-                    tagsHtml += `<span class="tag tag-orange" style="background:#fce4ec; color:#c2185b;">🔁 每日</span>`;
+                    tagsHtml += `<span class="tag tag-green">🔁 每日</span>`;
                 }
                 
                 if (overdue) {
-                    tagsHtml += `<span class="tag tag-date" style="background:#ffebee; color:#c62828;">📅 原定：${task.startDate}${task.endDate ? ' 至 ' + task.endDate : ''}</span>`;
+                    tagsHtml += `<span class="tag tag-pink">原定：${task.startDate}${task.endDate ? ' 至 ' + task.endDate : ''}</span>`;
                 } else {
                     if (task.endDate) {
-                        tagsHtml += `<span class="tag tag-deadline">📅 截止：${task.endDate}</span>`;
+                        tagsHtml += `<span class="tag tag-deadline">截止：${task.endDate}</span>`;
                     } else {
                         if (task.startDate === today || task.daily) {
-                            tagsHtml += `<span class="tag tag-today">📅 今日任务</span>`;
+                            tagsHtml += `<span class="tag tag-today">今日任务</span>`;
                         } else {
-                            tagsHtml += `<span class="tag tag-date">📅 ${task.startDate}</span>`;
+                            tagsHtml += `<span class="tag tag-date">${task.startDate}</span>`;
                         }
                     }
                 }
@@ -1165,13 +1203,12 @@
                 const today = getBeijingDateStr();
                 let todayExtras = state.extraTasks.filter(t => t.createdDate === today);
                 
-                // 儿童模式只显示最近3个
                 if (currentRole !== 'admin') {
                     todayExtras = todayExtras.slice(-3);
                 }
 
                 if (todayExtras.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">暂无额外任务</div>`;
+                    container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:24px;color:var(--ink);background:var(--white);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);">暂无额外任务</div>`;
                     return;
                 }
                 
@@ -1183,14 +1220,14 @@
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(task.name)}</div>
                                 <div class="task-meta">
-                                    <span class="tag tag-orange">额外任务 ⭐${task.reward}</span>
-                                    <span class="tag tag-date">📅 ${task.createdDate}</span>
+                                    <span class="tag tag-orange">⭐${task.reward}</span>
+                                    <span class="tag tag-date">${task.createdDate}</span>
                                 </div>
                             </div>
                             ${currentRole === 'admin' && isAdminAuthenticated ? `
                             <div class="task-actions">
                                 <button class="icon-btn" data-action="edit-extra" data-extra-id="${task.id}">📝</button>
-                                <button class="icon-btn" data-action="delete-extra" data-extra-id="${task.id}" style="color:#cd5c5c;">🗑️</button>
+                                <button class="icon-btn" data-action="delete-extra" data-extra-id="${task.id}">🗑️</button>
                             </div>` : ''}
                             <div class="task-check" data-action="toggle-extra" data-extra-id="${task.id}">${completed ? '✓' : ''}</div>
                         </div>
@@ -1203,7 +1240,7 @@
                 if (!container) return;
                 
                 if (state.exams.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">暂无考试记录</div>`;
+                    container.innerHTML = `<div style="text-align:center;padding:24px;color:var(--ink);background:var(--white);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);">暂无考试记录</div>`;
                     return;
                 }
                 
@@ -1218,17 +1255,17 @@
 
                     const scoreHtml = canEditScore
                         ? `<input type="number" step="0.5" min="0" max="100" class="exam-score-input" data-exam-id="${exam.id}" value="${exam.score !== null ? exam.score : ''}" placeholder="输入分数">`
-                        : `<span style="font-weight:800; color:#4a3b32; font-size:16px; margin-left:4px;">${exam.score}分</span>`;
+                        : `<span style="font-weight:900; color:var(--ink); font-size:16px; margin-left:4px;">${exam.score}分</span>`;
                         
                     return `
                         <div class="exam-item">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div style="font-weight:800; font-size:16px; color:#33261d; display:flex; align-items:center; gap:8px;">
+                                <div style="font-weight:800; font-size:16px; color:var(--ink); display:flex; align-items:center; gap:8px;">
                                     <span>📝 ${escapeHtml(exam.name)}</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <span class="exam-stars ${isZero ? 'zero' : ''}">${starText}</span>
-                                    <span style="font-size:12px; color:#a68f7b; font-weight:700;">${exam.date}</span>
+                                    <span style="font-size:12px; color:#8892A6; font-weight:800;">${exam.date}</span>
                                 </div>
                             </div>
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
@@ -1236,7 +1273,7 @@
                                 ${currentRole === 'admin' && isAdminAuthenticated ? `
                                 <div class="task-actions">
                                     <button class="icon-btn" data-action="edit-exam" data-exam-id="${exam.id}">📝</button>
-                                    <button class="icon-btn" data-action="delete-exam" data-exam-id="${exam.id}" style="color:#cd5c5c; width:32px; height:32px; font-size:14px;">🗑️</button>
+                                    <button class="icon-btn" data-action="delete-exam" data-exam-id="${exam.id}">🗑️</button>
                                 </div>
                                 ` : ''}
                             </div>
@@ -1261,7 +1298,7 @@
                 document.getElementById('overdueCountBadge').textContent = `${overdueTasks.length}项`;
 
                 if (overdueTasks.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">🎉 全部完成啦！</div>`;
+                    container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:24px;color:var(--ink);background:var(--white);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);">🎉 全部完成啦！</div>`;
                     return;
                 }
 
@@ -1274,16 +1311,16 @@
                     `;
                     
                     if (task.daily) {
-                        tagsHtml += `<span class="tag tag-orange" style="background:#fce4ec; color:#c2185b;">🔁 每日</span>`;
+                        tagsHtml += `<span class="tag tag-green">🔁 每日</span>`;
                     }
 
                     let dateLabel = '';
                     if (task.endDate) {
-                        dateLabel = `📅 ${task.startDate} 至 ${task.endDate}`;
+                        dateLabel = `${task.startDate} 至 ${task.endDate}`;
                     } else {
-                        dateLabel = `📅 任务日：${task.startDate}`;
+                        dateLabel = `任务日：${task.startDate}`;
                     }
-                    tagsHtml += `<span class="tag tag-date" style="background:#ffebee; color:#c62828;">${dateLabel}</span>`;
+                    tagsHtml += `<span class="tag tag-pink">${dateLabel}</span>`;
 
                     return `
                         <div class="task-item overdue">
@@ -1304,11 +1341,11 @@
                 const container = document.getElementById('taskLibraryList');
                 if (!container) return;
                 if (state.tasks.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;font-weight:700;">暂无任务</div>`;
+                    container.innerHTML = `<div style="text-align:center;padding:24px;color:var(--ink);font-weight:800;">暂无任务</div>`;
                     return;
                 }
                 container.innerHTML = state.tasks.map(task => `
-                    <div class="task-item" style="background:#fff; border:1px solid #f0e6d6;">
+                    <div class="task-item">
                         <div class="task-info">
                             <div class="task-name">${escapeHtml(task.name)} ${task.daily ? '🔁' : ''}</div>
                             <div class="task-meta">
@@ -1319,7 +1356,7 @@
                         </div>
                         <div class="task-actions">
                             <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}">✏️</button>
-                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}" style="color:#cd5c5c;">🗑️</button>
+                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}">🗑️</button>
                         </div>
                     </div>
                 `).join('');
@@ -1352,7 +1389,6 @@
                     adminSection.classList.add('hidden');
                     addExtraBtn.classList.add('hidden');
                     collapseBtns.forEach(btn => btn.classList.add('hidden'));
-                    // 如果是儿童模式，强制展开所有列表防止误触
                     document.querySelectorAll('.task-list, #inSchoolGroups, #outSchoolGroups, #examTaskList').forEach(el => {
                         el.style.display = '';
                     });
@@ -1416,11 +1452,9 @@
 
                 const existingIndex = state.checkins.findIndex(c => c.date === today && c.taskId === extraId && c.isExtra);
                 if (existingIndex !== -1) {
-                    // 儿童模式次日12点后无法取消的逻辑（防止前端时间被篡改）
                     if (currentRole !== 'admin') {
                         const checkinTime = state.checkins[existingIndex].timestamp;
                         const now = Date.now();
-                        // 如果打卡时间不是今天（跨日了），则不允许取消
                         if (new Date(checkinTime).toDateString() !== new Date().toDateString()) {
                             showToast('过期的打卡不可取消', false);
                             return;
@@ -1485,7 +1519,7 @@
 
                 modal.innerHTML = `
                     <h3>${escapeHtml(title)}</h3>
-                    <div id="modalBody">${contentHTML || `<p style="margin-bottom:20px; color:#6b5b4e; font-weight:600;">${escapeHtml(content || '')}</p>`}</div>
+                    <div id="modalBody">${contentHTML || `<p style="margin-bottom:24px; color:var(--ink); font-weight:600; text-align:center;">${escapeHtml(content || '')}</p>`}</div>
                     <div class="modal-actions">
                         ${cancelBtnHtml}
                         <button class="${danger ? 'btn-danger' : 'btn-confirm'}" id="modalConfirm" style="${actionStyle}">${confirmText}</button>
@@ -1522,9 +1556,9 @@
                         <label>名字</label>
                         <input id="profileNameInput" type="text" value="${escapeHtml(currentName)}" maxlength="10" />
                         <label>头像</label>
-                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
-                            <div id="avatarPreview" class="avatar" style="width:64px;height:64px;border-radius:50%;border:3px solid #f6e3b4;background:#fff;font-size:24px;${pendingAvatar ? `background-image:url(${pendingAvatar});background-size:cover;` : ''}">${!pendingAvatar ? currentName.charAt(0) : ''}</div>
-                            <label class="btn-outline" style="cursor:pointer; padding:8px 16px;">
+                        <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+                            <div id="avatarPreview" class="avatar" style="width:72px;height:72px;border-radius:50%;background:var(--lilac);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:transparent;${pendingAvatar ? `background-image:url(${pendingAvatar});background-size:cover;` : ''}"></div>
+                            <label class="btn-outline" style="cursor:pointer; padding:10px 20px;">
                                 上传图片
                                 <input id="avatarFileInput" type="file" accept="image/*" style="display:none;" />
                             </label>
@@ -1561,7 +1595,6 @@
                                 canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                                 pendingAvatar = canvas.toDataURL('image/jpeg', 0.85);
                                 preview.style.backgroundImage = `url(${pendingAvatar})`;
-                                preview.textContent = '';
                             };
                             img.src = ev.target.result;
                         };
@@ -1624,18 +1657,18 @@
 
                         <label>学科</label>
                         <div id="subjectContainer">${subjectHtml}</div>
-                        <div style="height:16px;"></div>
+                        <div style="height:20px;"></div>
 
-                        <div style="display:flex; gap:12px; margin-bottom:16px;">
+                        <div style="display:flex; gap:12px; margin-bottom:20px;">
                             <div style="flex:1;">
                                 <label>开始时间</label>
                                 <input id="modalTaskStartDate" type="date" value="${task.startDate}" style="margin-bottom:0;" />
                             </div>
                             <div style="flex:1;">
                                 <label>结束时间(留空即当日)</label>
-                                <div style="display:flex; gap:4px;">
+                                <div style="display:flex; gap:6px;">
                                     <input id="modalTaskEndDate" type="date" value="${task.endDate}" style="margin-bottom:0;" />
-                                    <button type="button" class="btn-outline btn-sm" onclick="document.getElementById('modalTaskEndDate').value=''" style="padding:0 10px; font-size:12px; border-radius:12px;">清空</button>
+                                    <button type="button" class="btn-outline" onclick="document.getElementById('modalTaskEndDate').value=''" style="padding:0 12px; font-size:13px;">清空</button>
                                 </div>
                             </div>
                         </div>
@@ -1778,32 +1811,32 @@
                     title: '拍照 / 相册 OCR 识别',
                     contentHTML: `
                         <div style="margin-bottom:16px; text-align:center;">
-                            <label class="btn-outline" style="display:inline-flex; cursor:pointer; padding:10px 20px; font-size:15px;">
+                            <label class="btn-outline" style="display:inline-flex; cursor:pointer; padding:12px 24px; font-size:15px;">
                                 📷 选择图片 / 拍照
                                 <input type="file" accept="image/*" id="ocrFileInput" style="display:none;">
                             </label>
-                            <div id="ocrStatus" style="margin-top:10px; font-size:13px; color:#a68f7b; font-weight:700;"></div>
+                            <div id="ocrStatus" style="margin-top:12px; font-size:13px; color:var(--ink); font-weight:800;"></div>
                         </div>
                         <div id="ocrPreviewContainer" style="display:none; margin-bottom:16px; text-align:center;">
-                            <img id="ocrPreviewImg" style="max-width:100%; max-height:120px; border-radius:12px; border:2px solid #f0e6d6;">
+                            <img id="ocrPreviewImg" style="max-width:100%; max-height:120px; border-radius:16px; border:2px solid var(--icy-blue);">
                         </div>
                         
-                        <label>识别文字（可在此处编辑，按行拆分任务）</label>
+                        <label>识别文字（可编辑，按行拆分）</label>
                         <textarea id="ocrResult" rows="6" placeholder="识别结果会显示在这里..."></textarea>
                         
-                        <div style="display:flex; align-items:center; gap:6px; margin-bottom:12px;">
-                            <input type="checkbox" id="ocrSplitCheck" checked style="width:auto; margin:0;" />
-                            <label for="ocrSplitCheck" style="margin:0; font-size:13px; color:#5c4535; cursor:pointer;">按换行自动拆分多个任务</label>
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+                            <input type="checkbox" id="ocrSplitCheck" checked style="width:20px; height:20px; margin:0; accent-color:var(--lilac);" />
+                            <label for="ocrSplitCheck" style="margin:0; font-size:14px; color:var(--ink); cursor:pointer; font-weight:800;">按换行拆分多个任务</label>
                         </div>
 
-                        <div style="background:#fdfbf7; padding:12px; border-radius:16px; border:1px solid #f0e6d6;">
-                            <div style="font-size:12px; font-weight:800; color:#a68f7b; margin-bottom:8px;">统一设置（应用于上述拆分的所有任务）</div>
-                            <label>分类</label>
+                        <div style="background:var(--icy-blue); padding:16px; border-radius:20px;">
+                            <div style="font-size:13px; font-weight:900; color:var(--ink); margin-bottom:12px;">统一设置（应用给上述任务）</div>
+                            <label style="color:var(--ink);">分类</label>
                             <select id="ocrCategory" onchange="updateOcrSubjectOptions()">
                                 <option value="校内任务">校内任务</option>
                                 <option value="校外任务">校外任务</option>
                             </select>
-                            <label>学科</label>
+                            <label style="color:var(--ink);">学科</label>
                             <div id="ocrSubjectContainer">
                                 <select id="ocrSubjectSelect">
                                     <option value="语文">语文</option>
@@ -1812,22 +1845,22 @@
                                     <option value="其它">其它</option>
                                 </select>
                             </div>
-                            <div style="display:flex; gap:8px; margin-bottom:12px;">
+                            <div style="display:flex; gap:12px; margin-bottom:16px;">
                                 <div style="flex:1;">
-                                    <label>开始时间</label>
-                                    <input id="ocrStartDate" type="date" value="${today}" style="margin-bottom:0;" />
+                                    <label style="color:var(--ink);">开始时间</label>
+                                    <input id="ocrStartDate" type="date" value="${today}" style="margin-bottom:0; background:white;" />
                                 </div>
                                 <div style="flex:1;">
-                                    <label>结束时间(留空即当日)</label>
-                                    <div style="display:flex; gap:4px;">
-                                        <input id="ocrEndDate" type="date" value="" style="margin-bottom:0;" />
-                                        <button type="button" class="btn-outline btn-sm" onclick="document.getElementById('ocrEndDate').value=''" style="padding:0 10px; font-size:12px; border-radius:12px;">清空</button>
+                                    <label style="color:var(--ink);">结束时间(留空即当日)</label>
+                                    <div style="display:flex; gap:6px;">
+                                        <input id="ocrEndDate" type="date" value="" style="margin-bottom:0; background:white;" />
+                                        <button type="button" class="btn-outline" onclick="document.getElementById('ocrEndDate').value=''" style="padding:0 10px; font-size:12px;">清空</button>
                                     </div>
                                 </div>
                             </div>
                             
-                            <label>每日重复</label>
-                            <select id="ocrDaily" style="margin-bottom:0;">
+                            <label style="color:var(--ink);">每日重复</label>
+                            <select id="ocrDaily" style="margin-bottom:0; background:white;">
                                 <option value="false" selected>否</option>
                                 <option value="true">是</option>
                             </select>
@@ -1888,7 +1921,7 @@
                     const container = document.getElementById('ocrSubjectContainer');
                     if (cat === '校内任务') {
                         container.innerHTML = `
-                            <select id="ocrSubjectSelect">
+                            <select id="ocrSubjectSelect" style="background:white;">
                                 <option value="语文">语文</option>
                                 <option value="数学">数学</option>
                                 <option value="英语">英语</option>
@@ -1896,7 +1929,7 @@
                             </select>
                         `;
                     } else {
-                        container.innerHTML = `<input id="ocrSubjectInput" type="text" placeholder="自定义学科" />`;
+                        container.innerHTML = `<input id="ocrSubjectInput" type="text" placeholder="自定义学科" style="background:white;" />`;
                     }
                 };
 
@@ -1963,7 +1996,7 @@
                     if (isAdminAuthenticated && currentRole === 'admin') return;
                     showModal({
                         title: '管理员验证',
-                        contentHTML: `<input id="pwdInput" type="password" placeholder="请输入密码" autofocus />`,
+                        contentHTML: `<input id="pwdInput" type="password" placeholder="请输入密码" autofocus style="text-align:center; letter-spacing:5px;" />`,
                         confirmText: '进入',
                         onConfirm: () => {
                             const pwd = document.getElementById('pwdInput').value;
@@ -1971,7 +2004,7 @@
                                 currentRole = 'admin';
                                 isAdminAuthenticated = true;
                                 renderAll();
-                                showToast('欢迎，管理员');
+                                showToast('欢迎回来，管理员');
                                 return true;
                             } else {
                                 alert('密码错误');
@@ -1981,7 +2014,6 @@
                     });
                 });
 
-                // 展开/收起功能
                 document.body.addEventListener('click', (e) => {
                     if (e.target.matches('.collapse-btn')) {
                         const targetId = e.target.dataset.target;
@@ -2142,17 +2174,17 @@
                     
                     let html = `
                         <div style="padding: 10px;">
-                            <div style="font-size:18px; font-weight:800; color:#4a3b32; margin-bottom:12px; display:flex; justify-content:space-between;">
-                                <span>今日获得：</span>
-                                <span style="color:#d48a3d;">${calcTodayStars()} 🌟</span>
+                            <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; background:var(--aqua); color:white; padding:16px 24px; border-radius:20px;">
+                                <span>今日获得</span>
+                                <span>${calcTodayStars()} 🌟</span>
                             </div>
-                            <div style="font-size:18px; font-weight:800; color:#4a3b32; margin-bottom:12px; display:flex; justify-content:space-between;">
-                                <span>本月累计：</span>
-                                <span style="color:#d48a3d;">${monthData.total} 🌟</span>
+                            <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; background:var(--lilac); color:white; padding:16px 24px; border-radius:20px;">
+                                <span>本月累计</span>
+                                <span>${monthData.total} 🌟</span>
                             </div>
-                            <div style="font-size:18px; font-weight:800; color:#4a3b32; margin-bottom:12px; display:flex; justify-content:space-between;">
-                                <span>本月奖励：</span>
-                                <span style="color:#2e8b57;">${monthData.total} 元</span>
+                            <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; background:var(--white); border: 2px solid var(--icy-blue); padding:16px 24px; border-radius:20px;">
+                                <span>本月奖励</span>
+                                <span style="color:var(--lilac);">${monthData.total} 元</span>
                             </div>
                         </div>
                     `;
