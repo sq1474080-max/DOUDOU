@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- PWA 核心配置 -->
+    <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="豆豆打卡">
-    <title>豆豆任务</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="星值打卡">
+    <link rel="apple-touch-icon" href="https://api.iconify.design/twemoji:star.svg">
+    
+    <title>星值任务打卡</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <style>
@@ -32,6 +37,8 @@
             display: flex;
             flex-direction: column;
             color: #4a3b32;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         /* 顶部导航 */
@@ -582,61 +589,15 @@
 
         /* --- 大屏 / iPad 横屏适配 --- */
         @media (min-width: 900px) {
-            body {
-                padding: 24px 24px 90px;
-            }
-            .app-header {
-                max-width: 1200px;
-                width: 100%;
-                margin: 0 auto 20px auto;
-            }
-            .layout-container {
-                flex-direction: row;
-                align-items: flex-start;
-                max-width: 1200px;
-                width: 100%;
-                margin: 0 auto;
-            }
-            .left-panel {
-                flex: 0 0 320px;
-                position: sticky;
-                top: 24px;
-            }
-            .right-panel {
-                flex: 1;
-                min-width: 0;
-            }
-            /* 右侧任务列表变为两列网格 */
-            #inSchoolGroups, #outSchoolGroups {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-            }
-            /* 为了大屏内部分组标题正常跨越两列 */
-            .sub-title {
-                grid-column: span 2;
-                font-size: 15px;
-                border-bottom: 2px solid #f0e6d6;
-                padding-bottom: 6px;
-                margin-top: 16px;
-            }
-            #overdueTaskList {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-            }
-            #extraTaskList {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-            }
-            .bottom-bar {
-                max-width: 800px;
-                margin: 0 auto;
-                border-radius: 40px 40px 0 0;
-                border: 2px solid #f4ead9;
-                border-bottom: none;
-            }
+            body { padding: 24px 24px 90px; }
+            .app-header { max-width: 1200px; width: 100%; margin: 0 auto 20px auto; }
+            .layout-container { flex-direction: row; align-items: flex-start; max-width: 1200px; width: 100%; margin: 0 auto; }
+            .left-panel { flex: 0 0 320px; position: sticky; top: 24px; }
+            .right-panel { flex: 1; min-width: 0; }
+            #inSchoolGroups, #outSchoolGroups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+            .sub-title { grid-column: span 2; font-size: 15px; border-bottom: 2px solid #f0e6d6; padding-bottom: 6px; margin-top: 16px; }
+            #overdueTaskList, #extraTaskList { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+            .bottom-bar { max-width: 800px; margin: 0 auto; border-radius: 40px 40px 0 0; border: 2px solid #f4ead9; border-bottom: none; }
         }
     </style>
 </head>
@@ -648,9 +609,7 @@
     </div>
 
     <div class="layout-container">
-        <!-- 左侧面板：资料、日历、额外任务 -->
         <div class="left-panel">
-            <!-- 第一栏：头像+名字 | 星值统计 -->
             <div class="profile-stats-bar">
                 <div class="profile-card">
                     <div class="avatar-container">
@@ -673,7 +632,6 @@
                 </div>
             </div>
 
-            <!-- 第二栏：月历 -->
             <div class="calendar-card">
                 <div class="calendar-header">
                     <button class="calendar-nav-btn" id="prevMonth">‹</button>
@@ -686,7 +644,6 @@
                 <div class="calendar-grid" id="calendarGrid"></div>
             </div>
 
-            <!-- 额外任务 (放左侧以平衡高度) -->
             <div class="section-title" style="margin-top:0;">
                 <div class="title-left"><span>🎁 额外任务</span></div>
                 <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增额外</button>
@@ -694,9 +651,7 @@
             <div id="extraTaskList" class="task-list"></div>
         </div>
 
-        <!-- 右侧面板：核心任务列表 -->
         <div class="right-panel">
-            <!-- 校内任务 -->
             <div class="section-title" style="margin-top:0;">
                 <div class="title-left">
                     <span>🏫 校内任务</span>
@@ -706,7 +661,6 @@
             </div>
             <div id="inSchoolGroups"></div>
 
-            <!-- 校外任务 -->
             <div class="section-title" style="margin-top:24px;">
                 <div class="title-left">
                     <span>🏫 校外任务</span>
@@ -716,21 +670,18 @@
             </div>
             <div id="outSchoolGroups"></div>
 
-            <!-- 考试任务 -->
             <div class="section-title" style="margin-top:24px;">
                 <div class="title-left"><span>📝 考试任务</span></div>
                 <button class="btn-outline btn-sm" id="addExamBtn">+ 新增考试</button>
             </div>
             <div id="examTaskList"></div>
 
-            <!-- 未完成任务 -->
             <div class="section-title" style="margin-top:24px;">
                 <div class="title-left" style="font-size:16px;"><span>⏳ 未完成任务</span></div>
                 <span id="overdueCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
             </div>
             <div id="overdueTaskList" class="task-list"></div>
 
-            <!-- 任务库管理（仅管理员） -->
             <div id="adminTaskLibrarySection" class="hidden">
                 <div class="section-title" style="margin-top:24px;">
                     <span>📚 任务库管理</span>
@@ -745,7 +696,6 @@
         </div>
     </div>
 
-    <!-- 底部导航 -->
     <div class="bottom-bar">
         <button class="bottom-btn active" id="bottomHome"><span>🏠</span>今日</button>
         <button class="bottom-btn" id="bottomStats"><span>📊</span>统计</button>
@@ -755,17 +705,25 @@
     <div id="modalRoot"></div>
 
     <script>
-        // ==========================================
-        // Supabase 配置
+        // --- 注册 PWA Service Worker ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('PWA ServiceWorker registered:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('PWA ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+
         const SUPABASE_URL = 'https://skgxcnnagfgwfrccwwrx.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_t96OWboqHhMc4CSJLEuQXQ_TE_xIMdw';
-        // ==========================================
 
         let supabaseClient = null;
         if (SUPABASE_URL && SUPABASE_URL !== '替换为您的_SUPABASE_URL') {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } else {
-            console.warn('尚未配置 Supabase，当前将使用本地存储模式。');
         }
 
         (function() {
@@ -785,9 +743,7 @@
             const defaultTasks = [
                 { id: 't1', name: '习题册', reward: 0, daily: true, note: '', category: '校内任务', subject: '语文', startDate: '2026-11-01', endDate: '' },
                 { id: 't2', name: '口算', reward: 0, daily: true, note: '', category: '校内任务', subject: '数学', startDate: '2026-11-01', endDate: '' },
-                { id: 't3', name: '英语阅读', reward: 0, daily: true, note: '', category: '校内任务', subject: '英语', startDate: '2026-11-01', endDate: '' },
-                { id: 't4', name: '口语练习', reward: 0, daily: true, note: '', category: '校外任务', subject: '口语', startDate: '2026-11-01', endDate: '' },
-                { id: 't5', name: '新东方数学', reward: 0, daily: false, note: '', category: '校外任务', subject: '新东方', startDate: '2026-11-01', endDate: '2026-12-31' }
+                { id: 't3', name: '英语阅读', reward: 0, daily: true, note: '', category: '校内任务', subject: '英语', startDate: '2026-11-01', endDate: '' }
             ];
 
             const defaultState = {
@@ -834,19 +790,13 @@
 
             function saveState() {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-
                 if (supabaseClient && !isSyncingFromCloud) {
                     if (saveTimeout) clearTimeout(saveTimeout);
                     saveTimeout = setTimeout(async () => {
                         try {
                             const payload = JSON.parse(JSON.stringify(state));
-                            await supabaseClient
-                                .from('app_state')
-                                .upsert({ id: 1, state_data: payload, updated_at: new Date().toISOString() });
-                            console.log('☁️ 云端数据同步成功');
-                        } catch (error) {
-                            console.error('☁️ 云端同步失败:', error);
-                        }
+                            await supabaseClient.from('app_state').upsert({ id: 1, state_data: payload, updated_at: new Date().toISOString() });
+                        } catch (error) {}
                     }, 800);
                 }
             }
@@ -854,18 +804,11 @@
             async function fetchCloudState() {
                 if (!supabaseClient) return;
                 try {
-                    const { data, error } = await supabaseClient
-                        .from('app_state')
-                        .select('state_data')
-                        .eq('id', 1)
-                        .single();
-                    
+                    const { data, error } = await supabaseClient.from('app_state').select('state_data').eq('id', 1).single();
                     if (error) throw error;
-                    
                     if (data && data.state_data && Object.keys(data.state_data).length > 0) {
                         isSyncingFromCloud = true;
                         state = data.state_data;
-                        
                         state.tasks = (state.tasks || []).map(t => {
                             let cat = t.category;
                             if (cat === '校内作业') cat = '校内任务';
@@ -874,41 +817,33 @@
                             if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
                             return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
                         });
-                        
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                         renderAll();
                         isSyncingFromCloud = false;
                     }
-                } catch (error) {
-                    console.error('☁️ 获取云端数据失败:', error);
-                }
+                } catch (error) {}
             }
 
             function setupRealtime() {
                 if (!supabaseClient) return;
-                supabaseClient
-                    .channel('app_state_changes')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'app_state' }, payload => {
-                        const newState = payload.new.state_data;
-                        if (newState && Object.keys(newState).length > 0) {
-                            isSyncingFromCloud = true;
-                            state = newState;
-                            state.tasks = (state.tasks || []).map(t => {
-                                let cat = t.category;
-                                if (cat === '校内作业') cat = '校内任务';
-                                if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
-                                let sub = t.subject || '其它';
-                                if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
-                                return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
-                            });
-                            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                            renderAll();
-                            setTimeout(() => { isSyncingFromCloud = false; }, 100);
-                        }
-                    })
-                    .subscribe((status) => {
-                        console.log('☁️ Realtime 状态:', status);
-                    });
+                supabaseClient.channel('app_state_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'app_state' }, payload => {
+                    const newState = payload.new.state_data;
+                    if (newState && Object.keys(newState).length > 0) {
+                        isSyncingFromCloud = true;
+                        state = newState;
+                        state.tasks = (state.tasks || []).map(t => {
+                            let cat = t.category;
+                            if (cat === '校内作业') cat = '校内任务';
+                            if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
+                            let sub = t.subject || '其它';
+                            if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
+                            return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
+                        });
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                        renderAll();
+                        setTimeout(() => { isSyncingFromCloud = false; }, 100);
+                    }
+                }).subscribe();
             }
 
             function escapeHtml(text) {
@@ -984,35 +919,26 @@
                 return state.checkins.some(c => c.date === today && c.taskId === taskId && !c.isExtra);
             }
 
-            // 判断任务今天是否应当展示在列表中，或者已经过期掉入未完成
             function canTaskCheck(task) {
                 const today = getBeijingDateStr();
                 const now = getBeijingNow();
 
                 if (task.endDate) {
-                    // 有结束时间：只要今天还没过结束日，就能打卡
                     const parts = task.endDate.split('-');
                     const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
                     deadline.setHours(23, 59, 59, 999);
                     return now.getTime() <= deadline.getTime();
                 } else {
-                    // 无结束时间（当日任务/每日重复任务）：当天或次日06:00前可打卡
                     if (task.startDate === today) return true;
-                    
-                    // 如果任务有 daily 属性但没结束时间，意味着它是每日重复任务，今天永远有效
                     if (task.daily) return true;
-                    
-                    // 非每日重复且无结束时间，判断是否在次日 06:00 前
                     const parts = task.startDate.split('-');
                     const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
                     deadline.setDate(deadline.getDate() + 1);
-                    deadline.setHours(6, 0, 0, 0);
-                    
+                    deadline.setHours(6, 0, 0, 0); 
                     return now.getTime() < deadline.getTime();
                 }
             }
 
-            // --- 渲染相关 ---
             function renderProfile() {
                 const name = state.profile.name || 'HEIDI';
                 const avatar = state.profile.avatar || '';
@@ -1274,7 +1200,6 @@
                 const today = getBeijingDateStr();
                 const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
 
-                // 过滤：未到开始时间跳过；已打卡跳过；未过期跳过
                 const overdueTasks = state.tasks.filter(task => {
                     if (todayCheckTaskIds.has(task.id)) return false;
                     if (task.startDate > today) return false;
@@ -1485,10 +1410,7 @@
                 const modal = document.createElement('div');
                 modal.className = 'modal-content';
                 
-                const cancelBtnHtml = cancelText 
-                    ? `<button class="btn-cancel" id="modalCancel">${cancelText}</button>` 
-                    : '';
-                
+                const cancelBtnHtml = cancelText ? `<button class="btn-cancel" id="modalCancel">${cancelText}</button>` : '';
                 const actionStyle = cancelText ? '' : 'width: 100%;';
 
                 modal.innerHTML = `
@@ -1581,7 +1503,6 @@
             window.updateSubjectOptions = function() {
                 const cat = document.getElementById('modalTaskCategory').value;
                 const subContainer = document.getElementById('subjectContainer');
-                const subSelect = document.getElementById('modalTaskSubjectSelect');
                 
                 if (cat === '校内任务') {
                     subContainer.innerHTML = `
@@ -1763,24 +1684,110 @@
                             <div id="ocrStatus" style="margin-top:10px; font-size:13px; color:#a68f7b; font-weight:700;"></div>
                         </div>
                         <div id="ocrPreviewContainer" style="display:none; margin-bottom:16px; text-align:center;">
-                            <img id="ocrPreviewImg" style="max-width:100%; max-height:150px; border-radius:12px; border:2px solid #f0e6d6;">
+                            <img id="ocrPreviewImg" style="max-width:100%; max-height:120px; border-radius:12px; border:2px solid #f0e6d6;">
                         </div>
-                        <label>识别文字（可修改）</label>
-                        <textarea id="ocrResult" rows="4" placeholder="识别结果会显示在这里..."></textarea>
+                        
+                        <label>识别文字（可在此处编辑，按行拆分任务）</label>
+                        <textarea id="ocrResult" rows="6" placeholder="识别结果会显示在这里..."></textarea>
+                        
+                        <div style="display:flex; align-items:center; gap:6px; margin-bottom:12px;">
+                            <input type="checkbox" id="ocrSplitCheck" checked style="width:auto; margin:0;" />
+                            <label for="ocrSplitCheck" style="margin:0; font-size:13px; color:#5c4535; cursor:pointer;">按换行自动拆分多个任务</label>
+                        </div>
+
+                        <div style="background:#fdfbf7; padding:12px; border-radius:16px; border:1px solid #f0e6d6;">
+                            <div style="font-size:12px; font-weight:800; color:#a68f7b; margin-bottom:8px;">统一设置（应用于上述拆分的所有任务）</div>
+                            <label>分类</label>
+                            <select id="ocrCategory" onchange="updateOcrSubjectOptions()">
+                                <option value="校内任务">校内任务</option>
+                                <option value="校外任务">校外任务</option>
+                            </select>
+                            <label>学科</label>
+                            <div id="ocrSubjectContainer">
+                                <select id="ocrSubjectSelect">
+                                    <option value="语文">语文</option>
+                                    <option value="数学">数学</option>
+                                    <option value="英语" selected>英语</option>
+                                    <option value="其它">其它</option>
+                                </select>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <div style="flex:1;">
+                                    <label>开始时间</label>
+                                    <input id="ocrStartDate" type="date" value="${today}" />
+                                </div>
+                                <div style="flex:1;">
+                                    <label>结束时间(留空即当日)</label>
+                                    <input id="ocrEndDate" type="date" value="" />
+                                </div>
+                            </div>
+                        </div>
                     `,
-                    confirmText: '生成任务',
+                    confirmText: '批量生成',
                     onConfirm: () => {
-                        const text = document.getElementById('ocrResult').value.trim();
-                        if (!text) { showToast('请先识别或输入文字', false); return false; }
-                        state.tasks.push({
-                            id: 'task_ocr_' + Date.now(),
-                            name: text, daily: true, note: 'OCR生成', category: '校内任务', subject: '其它', startDate: today, endDate: ''
+                        const rawText = document.getElementById('ocrResult').value.trim();
+                        if (!rawText) { showToast('请先识别或输入文字', false); return false; }
+                        
+                        const isSplit = document.getElementById('ocrSplitCheck').checked;
+                        const category = document.getElementById('ocrCategory').value;
+                        let subject = '';
+                        if (category === '校内任务') {
+                            subject = document.getElementById('ocrSubjectSelect').value;
+                        } else {
+                            subject = document.getElementById('ocrSubjectInput').value.trim() || '其它';
+                        }
+                        const startDate = document.getElementById('ocrStartDate').value || today;
+                        const endDate = document.getElementById('ocrEndDate').value;
+
+                        let taskNames = [];
+                        if (isSplit) {
+                            taskNames = rawText.split('\n')
+                                .map(line => line.replace(/^\d+[\.\、\s]+/, '').trim()) 
+                                .filter(name => name.length > 0);
+                        } else {
+                            taskNames = [rawText.replace(/\n/g, ' ')];
+                        }
+
+                        if (taskNames.length === 0) {
+                            showToast('没有提取到有效任务名', false);
+                            return false;
+                        }
+
+                        taskNames.forEach(name => {
+                            state.tasks.push({
+                                id: 'task_ocr_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
+                                name: name, 
+                                daily: !endDate, 
+                                note: 'OCR导入', 
+                                category: category, 
+                                subject: subject, 
+                                startDate: startDate, 
+                                endDate: endDate
+                            });
                         });
+                        
                         saveState();
                         renderAll();
-                        showToast('已根据识别结果生成任务');
+                        showToast(`成功生成 ${taskNames.length} 个任务`);
                     }
                 });
+
+                window.updateOcrSubjectOptions = function() {
+                    const cat = document.getElementById('ocrCategory').value;
+                    const container = document.getElementById('ocrSubjectContainer');
+                    if (cat === '校内任务') {
+                        container.innerHTML = `
+                            <select id="ocrSubjectSelect">
+                                <option value="语文">语文</option>
+                                <option value="数学">数学</option>
+                                <option value="英语">英语</option>
+                                <option value="其它">其它</option>
+                            </select>
+                        `;
+                    } else {
+                        container.innerHTML = `<input id="ocrSubjectInput" type="text" placeholder="自定义学科" />`;
+                    }
+                };
 
                 setTimeout(() => {
                     const fileInput = document.getElementById('ocrFileInput');
@@ -1802,7 +1809,7 @@
                         };
                         reader.readAsDataURL(file);
 
-                        statusEl.innerHTML = '⏳ 正在识别中，请稍候...（首次加载语言包可能需要几秒）';
+                        statusEl.innerHTML = '⏳ 正在识别中，请稍候...';
                         resultEl.value = '';
                         
                         try {
@@ -1815,11 +1822,16 @@
                                     }
                                 }}
                             );
-                            const cleanText = text.trim().replace(/\s+/g, ' ');
+                            
+                            let cleanText = text.split('\n')
+                                .map(l => l.trim())
+                                .filter(l => l.length > 0)
+                                .join('\n');
+                                
                             resultEl.value = cleanText;
-                            statusEl.innerHTML = '✅ 识别完成，请核对文字';
+                            statusEl.innerHTML = '✅ 识别完成，请在文本框内修改';
                             if (!cleanText) {
-                                statusEl.innerHTML = '⚠️ 未能识别出文字，请重试或手动输入';
+                                statusEl.innerHTML = '⚠️ 未能识别出文字，请重试';
                             }
                         } catch (error) {
                             console.error('OCR Error:', error);
