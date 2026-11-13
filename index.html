@@ -8,10 +8,10 @@
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="豆豆任务">
-    <link rel="apple-touch-icon" href="https://api.iconify.design/twemoji:star.svg">
+    <meta name="apple-mobile-web-app-title" content="HEIDI STAR">
+    <link rel="apple-touch-icon" href="icon.png">
     
-    <title>豆豆任务打卡</title>
+    <title>HEIDI星旅</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <style>
@@ -558,6 +558,16 @@
             font-weight: 600;
         }
         .modal-content input:focus, .modal-content select:focus { border-color: #d48a3d; }
+        
+        /* 专门修复日期选择器长度问题 */
+        .modal-content input[type="date"] {
+            min-height: 48px;
+            padding: 10px 12px;
+            -webkit-appearance: none;
+            display: flex;
+            align-items: center;
+        }
+
         .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
         .modal-actions button {
             flex: 1;
@@ -705,16 +715,9 @@
     <div id="modalRoot"></div>
 
     <script>
-        // --- 注册 PWA Service Worker ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => {
-                        console.log('PWA ServiceWorker registered:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('PWA ServiceWorker registration failed:', error);
-                    });
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
             });
         }
 
@@ -1524,7 +1527,8 @@
                 if (editTask && !(currentRole === 'admin' && isAdminAuthenticated)) return;
 
                 const isEdit = !!editTask;
-                const task = editTask || { name: '', daily: true, note: '', category: defaultCategory, subject: defaultCategory === '校内任务' ? '语文' : '', startDate: getBeijingDateStr(), endDate: '' };
+                // 默认 daily 改为 false
+                const task = editTask || { name: '', daily: false, note: '', category: defaultCategory, subject: defaultCategory === '校内任务' ? '语文' : '', startDate: getBeijingDateStr(), endDate: '' };
 
                 let subjectHtml = '';
                 if (task.category === '校内任务') {
@@ -1556,16 +1560,21 @@
                         <div id="subjectContainer">${subjectHtml}</div>
                         <div style="height:16px;"></div>
 
-                        <label>开始时间</label>
-                        <input id="modalTaskStartDate" type="date" value="${task.startDate}" />
-
-                        <label>结束时间（留空则仅为当日任务）</label>
-                        <input id="modalTaskEndDate" type="date" value="${task.endDate}" />
+                        <div style="display:flex; gap:12px; margin-bottom:16px;">
+                            <div style="flex:1;">
+                                <label>开始时间</label>
+                                <input id="modalTaskStartDate" type="date" value="${task.startDate}" style="margin-bottom:0;" />
+                            </div>
+                            <div style="flex:1;">
+                                <label>结束时间(留空即当日)</label>
+                                <input id="modalTaskEndDate" type="date" value="${task.endDate}" style="margin-bottom:0;" />
+                            </div>
+                        </div>
                         
-                        <label>是否每日重复</label>
+                        <label>每日重复</label>
                         <select id="modalTaskDaily">
-                            <option value="true" ${task.daily ? 'selected' : ''}>是</option>
                             <option value="false" ${!task.daily ? 'selected' : ''}>否</option>
+                            <option value="true" ${task.daily ? 'selected' : ''}>是</option>
                         </select>
 
                         <label>备注（可选）</label>
@@ -1711,16 +1720,22 @@
                                     <option value="其它">其它</option>
                                 </select>
                             </div>
-                            <div style="display:flex; gap:8px;">
+                            <div style="display:flex; gap:8px; margin-bottom:12px;">
                                 <div style="flex:1;">
                                     <label>开始时间</label>
-                                    <input id="ocrStartDate" type="date" value="${today}" />
+                                    <input id="ocrStartDate" type="date" value="${today}" style="margin-bottom:0;" />
                                 </div>
                                 <div style="flex:1;">
                                     <label>结束时间(留空即当日)</label>
-                                    <input id="ocrEndDate" type="date" value="" />
+                                    <input id="ocrEndDate" type="date" value="" style="margin-bottom:0;" />
                                 </div>
                             </div>
+                            
+                            <label>每日重复</label>
+                            <select id="ocrDaily" style="margin-bottom:0;">
+                                <option value="false" selected>否</option>
+                                <option value="true">是</option>
+                            </select>
                         </div>
                     `,
                     confirmText: '批量生成',
@@ -1738,6 +1753,7 @@
                         }
                         const startDate = document.getElementById('ocrStartDate').value || today;
                         const endDate = document.getElementById('ocrEndDate').value;
+                        const daily = document.getElementById('ocrDaily').value === 'true';
 
                         let taskNames = [];
                         if (isSplit) {
@@ -1757,7 +1773,7 @@
                             state.tasks.push({
                                 id: 'task_ocr_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
                                 name: name, 
-                                daily: !endDate, 
+                                daily: daily, 
                                 note: 'OCR导入', 
                                 category: category, 
                                 subject: subject, 
