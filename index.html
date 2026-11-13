@@ -82,6 +82,7 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            width: 100%;
         }
 
         /* 第一栏：头像+名字 | 星值 */
@@ -202,6 +203,7 @@
             border: 2px solid #f4ead9;
             position: relative;
             overflow: hidden;
+            width: 100%;
         }
         
         .calendar-card::before {
@@ -298,11 +300,29 @@
             font-weight: 800;
             color: #5c4535;
             font-size: 18px;
+            width: 100%;
         }
         .section-title .title-left {
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+        .section-title .title-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .collapse-btn {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            color: #a68f7b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
         }
 
         .sub-title {
@@ -317,6 +337,7 @@
             flex-direction: column;
             gap: 12px;
             margin-bottom: 10px;
+            width: 100%;
         }
 
         .task-item {
@@ -329,6 +350,7 @@
             box-shadow: 0 2px 8px rgba(180, 160, 140, 0.08);
             transition: 0.2s;
             border: 1px solid transparent;
+            width: 100%;
         }
 
         .task-item.completed {
@@ -462,6 +484,7 @@
             flex-direction: column;
             gap: 10px;
             box-shadow: 0 2px 8px rgba(180, 160, 140, 0.08);
+            width: 100%;
         }
         .exam-score-input {
             width: 90px;
@@ -602,7 +625,7 @@
             body { padding: 24px 24px 90px; }
             .app-header { max-width: 1200px; width: 100%; margin: 0 auto 20px auto; }
             .layout-container { flex-direction: row; align-items: flex-start; max-width: 1200px; width: 100%; margin: 0 auto; }
-            .left-panel { flex: 0 0 320px; position: sticky; top: 24px; }
+            .left-panel { flex: 0 0 340px; position: sticky; top: 24px; display: flex; flex-direction: column; gap: 16px;}
             .right-panel { flex: 1; min-width: 0; }
             #inSchoolGroups, #outSchoolGroups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
             .sub-title { grid-column: span 2; font-size: 15px; border-bottom: 2px solid #f0e6d6; padding-bottom: 6px; margin-top: 16px; }
@@ -619,6 +642,7 @@
     </div>
 
     <div class="layout-container">
+        <!-- 左侧面板 -->
         <div class="left-panel">
             <div class="profile-stats-bar">
                 <div class="profile-card">
@@ -656,18 +680,25 @@
 
             <div class="section-title" style="margin-top:0;">
                 <div class="title-left"><span>🎁 额外任务</span></div>
-                <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增额外</button>
+                <div class="title-right">
+                    <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增额外</button>
+                    <button class="collapse-btn hidden" data-target="extraTaskList">⬇️</button>
+                </div>
             </div>
             <div id="extraTaskList" class="task-list"></div>
         </div>
 
+        <!-- 右侧面板 -->
         <div class="right-panel">
             <div class="section-title" style="margin-top:0;">
                 <div class="title-left">
                     <span>🏫 校内任务</span>
                     <span id="inSchoolCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
                 </div>
-                <button class="btn-outline btn-sm" id="addInSchoolBtn">+ 新增</button>
+                <div class="title-right">
+                    <button class="btn-outline btn-sm" id="addInSchoolBtn">+ 新增</button>
+                    <button class="collapse-btn hidden" data-target="inSchoolGroups">⬇️</button>
+                </div>
             </div>
             <div id="inSchoolGroups"></div>
 
@@ -676,19 +707,28 @@
                     <span>🏫 校外任务</span>
                     <span id="outSchoolCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
                 </div>
-                <button class="btn-outline btn-sm" id="addOutSchoolBtn">+ 新增</button>
+                <div class="title-right">
+                    <button class="btn-outline btn-sm" id="addOutSchoolBtn">+ 新增</button>
+                    <button class="collapse-btn hidden" data-target="outSchoolGroups">⬇️</button>
+                </div>
             </div>
             <div id="outSchoolGroups"></div>
 
             <div class="section-title" style="margin-top:24px;">
                 <div class="title-left"><span>📝 考试任务</span></div>
-                <button class="btn-outline btn-sm" id="addExamBtn">+ 新增考试</button>
+                <div class="title-right">
+                    <button class="btn-outline btn-sm" id="addExamBtn">+ 新增考试</button>
+                    <button class="collapse-btn hidden" data-target="examTaskList">⬇️</button>
+                </div>
             </div>
             <div id="examTaskList"></div>
 
             <div class="section-title" style="margin-top:24px;">
                 <div class="title-left" style="font-size:16px;"><span>⏳ 未完成任务</span></div>
-                <span id="overdueCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+                <div class="title-right">
+                    <span id="overdueCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+                    <button class="collapse-btn hidden" data-target="overdueTaskList">⬇️</button>
+                </div>
             </div>
             <div id="overdueTaskList" class="task-list"></div>
 
@@ -1123,8 +1163,13 @@
                 if (!container) return;
                 
                 const today = getBeijingDateStr();
-                const todayExtras = state.extraTasks.filter(t => t.createdDate === today);
+                let todayExtras = state.extraTasks.filter(t => t.createdDate === today);
                 
+                // 儿童模式只显示最近3个
+                if (currentRole !== 'admin') {
+                    todayExtras = todayExtras.slice(-3);
+                }
+
                 if (todayExtras.length === 0) {
                     container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">暂无额外任务</div>`;
                     return;
@@ -1144,6 +1189,7 @@
                             </div>
                             ${currentRole === 'admin' && isAdminAuthenticated ? `
                             <div class="task-actions">
+                                <button class="icon-btn" data-action="edit-extra" data-extra-id="${task.id}">📝</button>
                                 <button class="icon-btn" data-action="delete-extra" data-extra-id="${task.id}" style="color:#cd5c5c;">🗑️</button>
                             </div>` : ''}
                             <div class="task-check" data-action="toggle-extra" data-extra-id="${task.id}">${completed ? '✓' : ''}</div>
@@ -1188,7 +1234,10 @@
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
                                 <div>${scoreHtml}</div>
                                 ${currentRole === 'admin' && isAdminAuthenticated ? `
-                                <button class="icon-btn" data-action="delete-exam" data-exam-id="${exam.id}" style="color:#cd5c5c; width:32px; height:32px; font-size:14px;">删除</button>
+                                <div class="task-actions">
+                                    <button class="icon-btn" data-action="edit-exam" data-exam-id="${exam.id}">📝</button>
+                                    <button class="icon-btn" data-action="delete-exam" data-exam-id="${exam.id}" style="color:#cd5c5c; width:32px; height:32px; font-size:14px;">🗑️</button>
+                                </div>
                                 ` : ''}
                             </div>
                         </div>
@@ -1289,17 +1338,25 @@
                 const btnChild = document.getElementById('btnChildMode');
                 const adminSection = document.getElementById('adminTaskLibrarySection');
                 const addExtraBtn = document.getElementById('addExtraBtn');
+                const collapseBtns = document.querySelectorAll('.collapse-btn');
 
                 if (currentRole === 'admin' && isAdminAuthenticated) {
                     btnAdmin.classList.add('active');
                     btnChild.classList.remove('active');
                     adminSection.classList.remove('hidden');
                     addExtraBtn.classList.remove('hidden');
+                    collapseBtns.forEach(btn => btn.classList.remove('hidden'));
                 } else {
                     btnAdmin.classList.remove('active');
                     btnChild.classList.add('active');
                     adminSection.classList.add('hidden');
                     addExtraBtn.classList.add('hidden');
+                    collapseBtns.forEach(btn => btn.classList.add('hidden'));
+                    // 如果是儿童模式，强制展开所有列表防止误触
+                    document.querySelectorAll('.task-list, #inSchoolGroups, #outSchoolGroups, #examTaskList').forEach(el => {
+                        el.style.display = '';
+                    });
+                    collapseBtns.forEach(btn => btn.textContent = '⬇️');
                 }
             }
 
@@ -1359,6 +1416,16 @@
 
                 const existingIndex = state.checkins.findIndex(c => c.date === today && c.taskId === extraId && c.isExtra);
                 if (existingIndex !== -1) {
+                    // 儿童模式次日12点后无法取消的逻辑（防止前端时间被篡改）
+                    if (currentRole !== 'admin') {
+                        const checkinTime = state.checkins[existingIndex].timestamp;
+                        const now = Date.now();
+                        // 如果打卡时间不是今天（跨日了），则不允许取消
+                        if (new Date(checkinTime).toDateString() !== new Date().toDateString()) {
+                            showToast('过期的打卡不可取消', false);
+                            return;
+                        }
+                    }
                     state.checkins.splice(existingIndex, 1);
                     showToast(`取消额外任务`);
                 } else {
@@ -1527,7 +1594,6 @@
                 if (editTask && !(currentRole === 'admin' && isAdminAuthenticated)) return;
 
                 const isEdit = !!editTask;
-                // 默认 daily 改为 false
                 const task = editTask || { name: '', daily: false, note: '', category: defaultCategory, subject: defaultCategory === '校内任务' ? '语文' : '', startDate: getBeijingDateStr(), endDate: '' };
 
                 let subjectHtml = '';
@@ -1567,7 +1633,10 @@
                             </div>
                             <div style="flex:1;">
                                 <label>结束时间(留空即当日)</label>
-                                <input id="modalTaskEndDate" type="date" value="${task.endDate}" style="margin-bottom:0;" />
+                                <div style="display:flex; gap:4px;">
+                                    <input id="modalTaskEndDate" type="date" value="${task.endDate}" style="margin-bottom:0;" />
+                                    <button type="button" class="btn-outline btn-sm" onclick="document.getElementById('modalTaskEndDate').value=''" style="padding:0 10px; font-size:12px; border-radius:12px;">清空</button>
+                                </div>
                             </div>
                         </div>
                         
@@ -1615,64 +1684,87 @@
                 });
             }
 
-            function openExtraModal() {
+            function openExtraModal(editExtra = null) {
                 if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const isEdit = !!editExtra;
                 const today = getBeijingDateStr();
+                const task = editExtra || { name: '', reward: 10, createdDate: today };
+
                 showModal({
-                    title: '新增额外任务',
+                    title: isEdit ? '编辑额外任务' : '新增额外任务',
                     contentHTML: `
                         <label>任务名称</label>
-                        <input id="extraNameInput" type="text" placeholder="如：拼图奖励" />
+                        <input id="extraNameInput" type="text" value="${escapeHtml(task.name)}" placeholder="如：拼图奖励" />
                         <label>星值 (0-50)</label>
-                        <input id="extraRewardInput" type="number" min="0" max="50" value="10" />
+                        <input id="extraRewardInput" type="number" min="0" max="50" value="${task.reward}" />
                     `,
-                    confirmText: '添加',
+                    confirmText: '保存',
                     onConfirm: () => {
                         const name = document.getElementById('extraNameInput').value.trim();
                         const reward = parseInt(document.getElementById('extraRewardInput').value, 10);
                         if (!name) { alert('请输入名称'); return false; }
                         if (isNaN(reward) || reward < 0 || reward > 50) { alert('星值必须在0-50之间'); return false; }
                         
-                        state.extraTasks.push({
-                            id: 'extra_' + Date.now(),
-                            name: name,
-                            reward: reward,
-                            createdDate: today
-                        });
+                        if (isEdit) {
+                            const idx = state.extraTasks.findIndex(t => t.id === task.id);
+                            if (idx !== -1) {
+                                state.extraTasks[idx].name = name;
+                                state.extraTasks[idx].reward = reward;
+                            }
+                        } else {
+                            state.extraTasks.push({
+                                id: 'extra_' + Date.now(),
+                                name: name,
+                                reward: reward,
+                                createdDate: today
+                            });
+                        }
                         saveState();
                         renderAll();
-                        showToast('已添加额外任务');
+                        showToast(isEdit ? '修改成功' : '已添加额外任务');
                         return true;
                     }
                 });
             }
 
-            function openExamModal() {
+            function openExamModal(editExam = null) {
+                if (editExam && !(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const isEdit = !!editExam;
                 const today = getBeijingDateStr();
+                const exam = editExam || { name: '', date: today, score: null };
+
                 showModal({
-                    title: '新增考试任务',
+                    title: isEdit ? '编辑考试任务' : '新增考试任务',
                     contentHTML: `
                         <label>考试名称</label>
-                        <input id="examNameInput" type="text" placeholder="如：期中考试-数学" />
+                        <input id="examNameInput" type="text" value="${escapeHtml(exam.name)}" placeholder="如：期中考试-数学" />
                         <label>考试日期</label>
-                        <input id="examDateInput" type="date" value="${today}" />
+                        <input id="examDateInput" type="date" value="${exam.date}" />
                     `,
-                    confirmText: '创建',
+                    confirmText: '保存',
                     onConfirm: () => {
                         const name = document.getElementById('examNameInput').value.trim();
                         const date = document.getElementById('examDateInput').value;
                         if (!name) { alert('请输入考试名称'); return false; }
                         if (!date) { alert('请选择日期'); return false; }
                         
-                        state.exams.push({
-                            id: 'exam_' + Date.now(),
-                            name: name,
-                            date: date,
-                            score: null
-                        });
+                        if (isEdit) {
+                            const idx = state.exams.findIndex(t => t.id === exam.id);
+                            if (idx !== -1) {
+                                state.exams[idx].name = name;
+                                state.exams[idx].date = date;
+                            }
+                        } else {
+                            state.exams.push({
+                                id: 'exam_' + Date.now(),
+                                name: name,
+                                date: date,
+                                score: null
+                            });
+                        }
                         saveState();
                         renderAll();
-                        showToast('已添加，请录入分数');
+                        showToast(isEdit ? '修改成功' : '已添加考试任务');
                         return true;
                     }
                 });
@@ -1727,7 +1819,10 @@
                                 </div>
                                 <div style="flex:1;">
                                     <label>结束时间(留空即当日)</label>
-                                    <input id="ocrEndDate" type="date" value="" style="margin-bottom:0;" />
+                                    <div style="display:flex; gap:4px;">
+                                        <input id="ocrEndDate" type="date" value="" style="margin-bottom:0;" />
+                                        <button type="button" class="btn-outline btn-sm" onclick="document.getElementById('ocrEndDate').value=''" style="padding:0 10px; font-size:12px; border-radius:12px;">清空</button>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -1886,6 +1981,23 @@
                     });
                 });
 
+                // 展开/收起功能
+                document.body.addEventListener('click', (e) => {
+                    if (e.target.matches('.collapse-btn')) {
+                        const targetId = e.target.dataset.target;
+                        const targetEl = document.getElementById(targetId);
+                        if (targetEl) {
+                            if (targetEl.style.display === 'none') {
+                                targetEl.style.display = '';
+                                e.target.textContent = '⬇️';
+                            } else {
+                                targetEl.style.display = 'none';
+                                e.target.textContent = '➡️';
+                            }
+                        }
+                    }
+                });
+
                 document.body.addEventListener('change', (e) => {
                     if (e.target.matches('.exam-score-input')) {
                         const examId = e.target.dataset.examId;
@@ -1915,12 +2027,12 @@
                     }
                 });
 
-                document.getElementById('addExamBtn').addEventListener('click', openExamModal);
+                document.getElementById('addExamBtn').addEventListener('click', () => openExamModal(null));
                 document.getElementById('addInSchoolBtn').addEventListener('click', () => openTaskModal(null, '校内任务'));
                 document.getElementById('addOutSchoolBtn').addEventListener('click', () => openTaskModal(null, '校外任务'));
                 document.getElementById('openCreateTaskBtn').addEventListener('click', () => openTaskModal(null, '校内任务'));
 
-                document.getElementById('addExtraBtn').addEventListener('click', openExtraModal);
+                document.getElementById('addExtraBtn').addEventListener('click', () => openExtraModal(null));
                 document.getElementById('editProfileBtn').addEventListener('click', openProfileModal);
                 document.getElementById('ocrBtn').addEventListener('click', openOcrModal);
                 document.getElementById('resetStarsBtn').addEventListener('click', resetStarsConfirm);
@@ -1941,6 +2053,11 @@
                         }
                     } else if (action === 'delete-task') {
                         if (currentRole === 'admin' && isAdminAuthenticated) deleteTaskConfirm(target.dataset.taskId);
+                    } else if (action === 'edit-extra') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const extra = state.extraTasks.find(t => t.id === target.dataset.extraId);
+                            if (extra) openExtraModal(extra);
+                        }
                     } else if (action === 'delete-extra') {
                         if (currentRole === 'admin' && isAdminAuthenticated) {
                             const extraId = target.dataset.extraId;
@@ -1957,6 +2074,11 @@
                                     showToast('已删除');
                                 }
                             });
+                        }
+                    } else if (action === 'edit-exam') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const exam = state.exams.find(x => x.id === target.dataset.examId);
+                            if (exam) openExamModal(exam);
                         }
                     } else if (action === 'delete-exam') {
                         if (currentRole === 'admin' && isAdminAuthenticated) {
