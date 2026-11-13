@@ -1,0 +1,16 @@
+{
+  "name": "豆豆任务",
+  "short_name": "任务",
+  "start_url": "/DOUDOU/",
+  "display": "standalone",
+  "background_color": "#f7f1e5",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    {
+      "src": "https://api.iconify.design/twemoji:star.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
