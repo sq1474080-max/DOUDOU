@@ -7,9 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="星值打卡">
     <title>星值任务打卡</title>
-    <!-- 引入 Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- 引入 Tesseract.js 用于前端 OCR 识别 -->
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
@@ -47,6 +45,7 @@
             padding: 8px;
             box-shadow: 0 4px 12px rgba(180, 160, 140, 0.15);
             border: 1px solid #f0e6d6;
+            flex-shrink: 0;
         }
 
         .header-btn {
@@ -66,11 +65,22 @@
         .header-btn:active { background: #f0e6d6; }
         .header-btn.active { color: #d48a3d; }
         
+        /* 布局容器 */
+        .layout-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
         /* 第一栏：头像+名字 | 星值 */
         .profile-stats-bar {
             display: flex;
             gap: 12px;
-            margin-bottom: 16px;
             align-items: stretch;
         }
 
@@ -181,7 +191,6 @@
             background: #fdfbf7;
             border-radius: 24px;
             padding: 12px;
-            margin-bottom: 16px;
             box-shadow: 0 4px 12px rgba(180, 160, 140, 0.15);
             border: 2px solid #f4ead9;
             position: relative;
@@ -570,6 +579,65 @@
             backdrop-filter: blur(4px);
         }
         @keyframes dropDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- 大屏 / iPad 横屏适配 --- */
+        @media (min-width: 900px) {
+            body {
+                padding: 24px 24px 90px;
+            }
+            .app-header {
+                max-width: 1200px;
+                width: 100%;
+                margin: 0 auto 20px auto;
+            }
+            .layout-container {
+                flex-direction: row;
+                align-items: flex-start;
+                max-width: 1200px;
+                width: 100%;
+                margin: 0 auto;
+            }
+            .left-panel {
+                flex: 0 0 320px;
+                position: sticky;
+                top: 24px;
+            }
+            .right-panel {
+                flex: 1;
+                min-width: 0;
+            }
+            /* 右侧任务列表变为两列网格 */
+            #inSchoolGroups, #outSchoolGroups {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            /* 为了大屏内部分组标题正常跨越两列 */
+            .sub-title {
+                grid-column: span 2;
+                font-size: 15px;
+                border-bottom: 2px solid #f0e6d6;
+                padding-bottom: 6px;
+                margin-top: 16px;
+            }
+            #overdueTaskList {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            #extraTaskList {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .bottom-bar {
+                max-width: 800px;
+                margin: 0 auto;
+                border-radius: 40px 40px 0 0;
+                border: 2px solid #f4ead9;
+                border-bottom: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -579,94 +647,102 @@
         <button class="header-btn" id="exportCsvBtn">☁️ 导出CSV</button>
     </div>
 
-    <!-- 第一栏：头像+名字 | 星值统计 -->
-    <div class="profile-stats-bar">
-        <div class="profile-card">
-            <div class="avatar-container">
-                <div class="avatar" id="avatarDisplay">小</div>
-            </div>
-            <div class="profile-name" id="profileName">小朋友</div>
-            <button class="edit-profile-btn hidden" id="editProfileBtn">编辑资料</button>
-        </div>
-        <div class="stats-group">
-            <div class="stats-card">
-                <span class="stats-label">今日获得</span>
-                <span class="stats-number" id="todayStars">0<span>🌟</span></span>
-            </div>
-            <div>
-                <div class="stats-card" style="background: linear-gradient(90deg, #e2f0f9, #d1e5f7);">
-                    <span class="stats-label">本月获得</span>
-                    <span class="stats-number" id="monthStars">0<span>🌟</span></span>
+    <div class="layout-container">
+        <!-- 左侧面板：资料、日历、额外任务 -->
+        <div class="left-panel">
+            <!-- 第一栏：头像+名字 | 星值统计 -->
+            <div class="profile-stats-bar">
+                <div class="profile-card">
+                    <div class="avatar-container">
+                        <div class="avatar" id="avatarDisplay">小</div>
+                    </div>
+                    <div class="profile-name" id="profileName">小朋友</div>
+                    <button class="edit-profile-btn hidden" id="editProfileBtn">编辑资料</button>
+                </div>
+                <div class="stats-group">
+                    <div class="stats-card">
+                        <span class="stats-label">今日获得</span>
+                        <span class="stats-number" id="todayStars">0<span>🌟</span></span>
+                    </div>
+                    <div>
+                        <div class="stats-card" style="background: linear-gradient(90deg, #e2f0f9, #d1e5f7);">
+                            <span class="stats-label">本月获得</span>
+                            <span class="stats-number" id="monthStars">0<span>🌟</span></span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- 第二栏：月历 -->
-    <div class="calendar-card">
-        <div class="calendar-header">
-            <button class="calendar-nav-btn" id="prevMonth">‹</button>
-            <span class="month-label" id="calendarMonth">2026年11月</span>
-            <button class="calendar-nav-btn" id="nextMonth">›</button>
-        </div>
-        <div class="calendar-weekdays">
-            <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
-        </div>
-        <div class="calendar-grid" id="calendarGrid"></div>
-    </div>
+            <!-- 第二栏：月历 -->
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <button class="calendar-nav-btn" id="prevMonth">‹</button>
+                    <span class="month-label" id="calendarMonth">2026年11月</span>
+                    <button class="calendar-nav-btn" id="nextMonth">›</button>
+                </div>
+                <div class="calendar-weekdays">
+                    <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
 
-    <!-- 第三栏：校内任务 -->
-    <div class="section-title">
-        <div class="title-left">
-            <span>🏫 校内任务</span>
-            <span id="inSchoolCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+            <!-- 额外任务 (放左侧以平衡高度) -->
+            <div class="section-title" style="margin-top:0;">
+                <div class="title-left"><span>🎁 额外任务</span></div>
+                <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增额外</button>
+            </div>
+            <div id="extraTaskList" class="task-list"></div>
         </div>
-        <button class="btn-outline btn-sm" id="addInSchoolBtn">+ 新增</button>
-    </div>
-    <div id="inSchoolGroups"></div>
 
-    <!-- 第四栏：校外任务 -->
-    <div class="section-title" style="margin-top:24px;">
-        <div class="title-left">
-            <span>🏫 校外任务</span>
-            <span id="outSchoolCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+        <!-- 右侧面板：核心任务列表 -->
+        <div class="right-panel">
+            <!-- 校内任务 -->
+            <div class="section-title" style="margin-top:0;">
+                <div class="title-left">
+                    <span>🏫 校内任务</span>
+                    <span id="inSchoolCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+                </div>
+                <button class="btn-outline btn-sm" id="addInSchoolBtn">+ 新增</button>
+            </div>
+            <div id="inSchoolGroups"></div>
+
+            <!-- 校外任务 -->
+            <div class="section-title" style="margin-top:24px;">
+                <div class="title-left">
+                    <span>🏫 校外任务</span>
+                    <span id="outSchoolCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+                </div>
+                <button class="btn-outline btn-sm" id="addOutSchoolBtn">+ 新增</button>
+            </div>
+            <div id="outSchoolGroups"></div>
+
+            <!-- 考试任务 -->
+            <div class="section-title" style="margin-top:24px;">
+                <div class="title-left"><span>📝 考试任务</span></div>
+                <button class="btn-outline btn-sm" id="addExamBtn">+ 新增考试</button>
+            </div>
+            <div id="examTaskList"></div>
+
+            <!-- 未完成任务 -->
+            <div class="section-title" style="margin-top:24px;">
+                <div class="title-left" style="font-size:16px;"><span>⏳ 未完成任务</span></div>
+                <span id="overdueCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+            </div>
+            <div id="overdueTaskList" class="task-list"></div>
+
+            <!-- 任务库管理（仅管理员） -->
+            <div id="adminTaskLibrarySection" class="hidden">
+                <div class="section-title" style="margin-top:24px;">
+                    <span>📚 任务库管理</span>
+                    <button class="btn-outline btn-sm" id="openCreateTaskBtn">+ 新增任务</button>
+                </div>
+                <div class="flex-row" style="display:flex; gap:8px; margin-bottom:12px;">
+                    <button class="btn-outline btn-sm" id="ocrBtn">📷 拍照 OCR</button>
+                    <button class="btn-outline btn-sm" id="resetStarsBtn" style="color:#cd5c5c; border-color:#f5c6cb;">🔄 重置星值</button>
+                </div>
+                <div id="taskLibraryList" class="task-list"></div>
+            </div>
         </div>
-        <button class="btn-outline btn-sm" id="addOutSchoolBtn">+ 新增</button>
-    </div>
-    <div id="outSchoolGroups"></div>
-
-    <!-- 第五栏：额外任务 -->
-    <div class="section-title" style="margin-top:24px;">
-        <div class="title-left"><span>🎁 额外任务</span></div>
-        <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增额外</button>
-    </div>
-    <div id="extraTaskList" class="task-list"></div>
-
-    <!-- 第六栏：考试任务 -->
-    <div class="section-title" style="margin-top:24px;">
-        <div class="title-left"><span>📝 考试任务</span></div>
-        <button class="btn-outline btn-sm" id="addExamBtn">+ 新增考试</button>
-    </div>
-    <div id="examTaskList"></div>
-
-    <!-- 第七栏：未完成任务 -->
-    <div class="section-title" style="margin-top:24px;">
-        <div class="title-left" style="font-size:16px;"><span>⏳ 未完成任务</span></div>
-        <span id="overdueCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
-    </div>
-    <div id="overdueTaskList" class="task-list"></div>
-
-    <!-- 第八栏：任务库管理（仅管理员） -->
-    <div id="adminTaskLibrarySection" class="hidden">
-        <div class="section-title" style="margin-top:24px;">
-            <span>📚 任务库管理</span>
-            <button class="btn-outline btn-sm" id="openCreateTaskBtn">+ 新增任务</button>
-        </div>
-        <div class="flex-row" style="display:flex; gap:8px; margin-bottom:12px;">
-            <button class="btn-outline btn-sm" id="ocrBtn">📷 拍照 OCR</button>
-            <button class="btn-outline btn-sm" id="resetStarsBtn" style="color:#cd5c5c; border-color:#f5c6cb;">🔄 重置星值</button>
-        </div>
-        <div id="taskLibraryList" class="task-list"></div>
     </div>
 
     <!-- 底部导航 -->
@@ -685,7 +761,6 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_t96OWboqHhMc4CSJLEuQXQ_TE_xIMdw';
         // ==========================================
 
-        // 初始化 Supabase
         let supabaseClient = null;
         if (SUPABASE_URL && SUPABASE_URL !== '替换为您的_SUPABASE_URL') {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -697,7 +772,6 @@
             const STORAGE_KEY = 'star_task_app_v1';
             const ADMIN_PASSWORD = '111';
 
-            // 北京时间
             function getBeijingNow() {
                 const now = new Date();
                 const utc = now.getTime() + now.getTimezoneOffset() * 60000;
@@ -729,12 +803,10 @@
                 if (stored) {
                     try { 
                         const parsed = JSON.parse(stored);
-                        // 兼容旧版分类转换
                         parsed.tasks = (parsed.tasks || []).map(t => {
                             let cat = t.category;
                             if (cat === '校内作业') cat = '校内任务';
                             if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
-                            
                             let sub = t.subject || '其它';
                             if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
                             return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
@@ -757,7 +829,6 @@
             let calendarYear = bjInit.getFullYear();
             let calendarMonth = bjInit.getMonth();
 
-            // --- 核心：云端同步逻辑 ---
             let saveTimeout = null;
             let isSyncingFromCloud = false;
 
@@ -799,7 +870,6 @@
                             let cat = t.category;
                             if (cat === '校内作业') cat = '校内任务';
                             if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
-                            
                             let sub = t.subject || '其它';
                             if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
                             return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
@@ -807,7 +877,6 @@
                         
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                         renderAll();
-                        console.log('☁️ 已拉取云端数据并更新界面');
                         isSyncingFromCloud = false;
                     }
                 } catch (error) {
@@ -820,22 +889,18 @@
                 supabaseClient
                     .channel('app_state_changes')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'app_state' }, payload => {
-                        console.log('☁️ 收到 Realtime 更新:', payload);
                         const newState = payload.new.state_data;
                         if (newState && Object.keys(newState).length > 0) {
                             isSyncingFromCloud = true;
                             state = newState;
-                            
                             state.tasks = (state.tasks || []).map(t => {
                                 let cat = t.category;
                                 if (cat === '校内作业') cat = '校内任务';
                                 if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
-                                
                                 let sub = t.subject || '其它';
                                 if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
                                 return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
                             });
-                            
                             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                             renderAll();
                             setTimeout(() => { isSyncingFromCloud = false; }, 100);
@@ -846,7 +911,6 @@
                     });
             }
 
-            // --- 业务逻辑 ---
             function escapeHtml(text) {
                 if (!text) return '';
                 const div = document.createElement('div');
@@ -890,7 +954,6 @@
                     if (e.date.startsWith(prefix)) examSum += getExamStars(e.score);
                 });
                 
-                // 核心修改：只有完成校内任务（category === '校内任务'）才享有全月满勤奖励
                 const homeworkDates = new Set();
                 state.checkins.forEach(c => {
                     if (!c.date.startsWith(prefix) || c.isExtra) return;
@@ -921,25 +984,29 @@
                 return state.checkins.some(c => c.date === today && c.taskId === taskId && !c.isExtra);
             }
 
-            // 修改：无结束时间(即当日任务)，次日 06:00 后过期不可打卡
+            // 判断任务今天是否应当展示在列表中，或者已经过期掉入未完成
             function canTaskCheck(task) {
                 const today = getBeijingDateStr();
                 const now = getBeijingNow();
 
                 if (task.endDate) {
-                    // 有结束时间，结束日当天 23:59:59 前可打卡
+                    // 有结束时间：只要今天还没过结束日，就能打卡
                     const parts = task.endDate.split('-');
                     const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
                     deadline.setHours(23, 59, 59, 999);
                     return now.getTime() <= deadline.getTime();
                 } else {
-                    // 无结束时间（仅开始时间），次日 06:00 前可打卡
+                    // 无结束时间（当日任务/每日重复任务）：当天或次日06:00前可打卡
                     if (task.startDate === today) return true;
                     
+                    // 如果任务有 daily 属性但没结束时间，意味着它是每日重复任务，今天永远有效
+                    if (task.daily) return true;
+                    
+                    // 非每日重复且无结束时间，判断是否在次日 06:00 前
                     const parts = task.startDate.split('-');
                     const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
                     deadline.setDate(deadline.getDate() + 1);
-                    deadline.setHours(6, 0, 0, 0); // 调整为次日 06:00
+                    deadline.setHours(6, 0, 0, 0);
                     
                     return now.getTime() < deadline.getTime();
                 }
@@ -1010,26 +1077,18 @@
                 return 'tag-green';
             }
 
-            // 渲染任务通用逻辑
             function renderTaskGroup(containerId, category, countBadgeId) {
                 const container = document.getElementById(containerId);
                 if (!container) return;
 
                 const today = getBeijingDateStr();
-                // 获取当前分类下所有“需要展示”的任务（可能包含过期但今天已打卡的，或者正在生效的）
                 const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
                 
                 const tasks = state.tasks.filter(task => {
                     if (task.category !== category) return false;
-                    // 如果是今天已打卡的，展示
                     if (todayCheckTaskIds.has(task.id)) return true;
-                    
-                    // 如果尚未到开始时间，不展示
                     if (task.startDate > today) return false;
-                    
-                    // 检查是否已经彻底过期且未打卡 -> 移到"未完成任务"
                     if (!canTaskCheck(task)) return false;
-
                     return true;
                 });
 
@@ -1039,11 +1098,10 @@
                 }
 
                 if (tasks.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">暂无${category}</div>`;
+                    container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">暂无${category}</div>`;
                     return;
                 }
 
-                // 按学科分组
                 const groups = {};
                 tasks.forEach(t => {
                     const sub = t.subject || '其它';
@@ -1052,7 +1110,6 @@
                 });
 
                 let html = '';
-                // 对学科排序，校内固定顺序，校外按字母/拼音
                 let sortedSubjects = Object.keys(groups);
                 if (category === '校内任务') {
                     const order = { '语文': 1, '数学': 2, '英语': 3, '其它': 4 };
@@ -1063,7 +1120,7 @@
 
                 sortedSubjects.forEach(sub => {
                     html += `<div class="sub-title">📖 ${sub}</div>`;
-                    html += `<div class="task-list">`;
+                    html += `<div class="task-list" style="display:grid; grid-template-columns:1fr; gap:12px;">`;
                     groups[sub].forEach(task => {
                         html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
                     });
@@ -1086,22 +1143,23 @@
                 const today = getBeijingDateStr();
                 
                 let tagsHtml = '';
-                // 学科标签
                 if (task.subject) {
                     tagsHtml += `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>`;
                 }
                 if (task.note) {
                     tagsHtml += `<span class="tag tag-orange">📝 ${escapeHtml(task.note)}</span>`;
                 }
+                if (task.daily) {
+                    tagsHtml += `<span class="tag tag-orange" style="background:#fce4ec; color:#c2185b;">🔁 每日</span>`;
+                }
                 
-                // 日期标签逻辑
                 if (overdue) {
                     tagsHtml += `<span class="tag tag-date" style="background:#ffebee; color:#c62828;">📅 原定：${task.startDate}${task.endDate ? ' 至 ' + task.endDate : ''}</span>`;
                 } else {
                     if (task.endDate) {
                         tagsHtml += `<span class="tag tag-deadline">📅 截止：${task.endDate}</span>`;
                     } else {
-                        if (task.startDate === today) {
+                        if (task.startDate === today || task.daily) {
                             tagsHtml += `<span class="tag tag-today">📅 今日任务</span>`;
                         } else {
                             tagsHtml += `<span class="tag tag-date">📅 ${task.startDate}</span>`;
@@ -1139,7 +1197,7 @@
                 const todayExtras = state.extraTasks.filter(t => t.createdDate === today);
                 
                 if (todayExtras.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">暂无额外任务</div>`;
+                    container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">暂无额外任务</div>`;
                     return;
                 }
                 
@@ -1209,7 +1267,6 @@
                 }).join('');
             }
 
-            // 未完成任务渲染（应用新的过期判定）
             function renderOverdueTasks() {
                 const container = document.getElementById('overdueTaskList');
                 if (!container) return;
@@ -1217,23 +1274,20 @@
                 const today = getBeijingDateStr();
                 const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
 
-                // 过滤条件：属于校内或校外、未打卡、且已过打卡时间
+                // 过滤：未到开始时间跳过；已打卡跳过；未过期跳过
                 const overdueTasks = state.tasks.filter(task => {
                     if (todayCheckTaskIds.has(task.id)) return false;
-                    // 未到开始时间，不属于过期
                     if (task.startDate > today) return false;
-                    // 已过打卡允许时间（次日6点或截止日）
                     return !canTaskCheck(task);
                 });
 
                 document.getElementById('overdueCountBadge').textContent = `${overdueTasks.length}项`;
 
                 if (overdueTasks.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">🎉 全部完成啦！</div>`;
+                    container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">🎉 全部完成啦！</div>`;
                     return;
                 }
 
-                // 按开始时间倒序排
                 overdueTasks.sort((a,b) => b.startDate.localeCompare(a.startDate));
 
                 container.innerHTML = overdueTasks.map(task => {
@@ -1242,6 +1296,10 @@
                         ${task.subject ? `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>` : ''}
                     `;
                     
+                    if (task.daily) {
+                        tagsHtml += `<span class="tag tag-orange" style="background:#fce4ec; color:#c2185b;">🔁 每日</span>`;
+                    }
+
                     let dateLabel = '';
                     if (task.endDate) {
                         dateLabel = `📅 ${task.startDate} 至 ${task.endDate}`;
@@ -1330,7 +1388,6 @@
                 updateRoleUI();
             }
 
-            // --- Toast ---
             function showToast(message, isSuccess = true) {
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
@@ -1345,7 +1402,6 @@
                 }, 2000);
             }
 
-            // --- 打卡业务 ---
             function toggleTaskCheck(taskId) {
                 const today = getBeijingDateStr();
                 const task = state.tasks.find(t => t.id === taskId);
@@ -1422,7 +1478,6 @@
                 });
             }
 
-            // --- 模态框通用 ---
             function showModal({ title, content, contentHTML, confirmText = '确认', cancelText = '取消', danger = false, onConfirm, onCancel }) {
                 const modalRoot = document.getElementById('modalRoot');
                 const overlay = document.createElement('div');
@@ -1464,7 +1519,6 @@
                 overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
             }
 
-            // --- 编辑资料 ---
             function openProfileModal() {
                 if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
                 const currentName = state.profile.name || 'HEIDI';
@@ -1524,12 +1578,10 @@
                 }, 0);
             }
 
-            // --- 新增/编辑任务 ---
             window.updateSubjectOptions = function() {
                 const cat = document.getElementById('modalTaskCategory').value;
                 const subContainer = document.getElementById('subjectContainer');
                 const subSelect = document.getElementById('modalTaskSubjectSelect');
-                const subInput = document.getElementById('modalTaskSubjectInput');
                 
                 if (cat === '校内任务') {
                     subContainer.innerHTML = `
@@ -1548,7 +1600,6 @@
             };
 
             function openTaskModal(editTask = null, defaultCategory = '校内任务') {
-                // 管理员可编辑，儿童仅可新增
                 if (editTask && !(currentRole === 'admin' && isAdminAuthenticated)) return;
 
                 const isEdit = !!editTask;
@@ -1589,6 +1640,12 @@
 
                         <label>结束时间（留空则仅为当日任务）</label>
                         <input id="modalTaskEndDate" type="date" value="${task.endDate}" />
+                        
+                        <label>是否每日重复</label>
+                        <select id="modalTaskDaily">
+                            <option value="true" ${task.daily ? 'selected' : ''}>是</option>
+                            <option value="false" ${!task.daily ? 'selected' : ''}>否</option>
+                        </select>
 
                         <label>备注（可选）</label>
                         <input id="modalTaskNote" type="text" value="${escapeHtml(task.note || '')}" />
@@ -1607,17 +1664,18 @@
 
                         const startDate = document.getElementById('modalTaskStartDate').value || getBeijingDateStr();
                         const endDate = document.getElementById('modalTaskEndDate').value;
+                        const daily = document.getElementById('modalTaskDaily').value === 'true';
                         const note = document.getElementById('modalTaskNote').value.trim();
 
                         if (!name) { alert('请输入名称'); return false; }
 
                         if (isEdit) {
                             const idx = state.tasks.findIndex(t => t.id === task.id);
-                            if (idx !== -1) state.tasks[idx] = { ...state.tasks[idx], name, note, subject, startDate, endDate };
+                            if (idx !== -1) state.tasks[idx] = { ...state.tasks[idx], name, note, subject, startDate, endDate, daily };
                         } else {
                             state.tasks.push({
                                 id: 'task_' + Date.now(),
-                                name, daily: !endDate, note, category, subject, startDate, endDate
+                                name, daily, note, category, subject, startDate, endDate
                             });
                         }
                         saveState();
@@ -1627,7 +1685,6 @@
                 });
             }
 
-            // --- 新增额外任务 (仅管理员) ---
             function openExtraModal() {
                 if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
                 const today = getBeijingDateStr();
@@ -1660,7 +1717,6 @@
                 });
             }
 
-            // --- 新增考试任务 ---
             function openExamModal() {
                 const today = getBeijingDateStr();
                 showModal({
@@ -1692,7 +1748,6 @@
                 });
             }
 
-            // --- OCR (仅管理员) ---
             function openOcrModal() {
                 if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
                 const today = getBeijingDateStr();
@@ -1774,7 +1829,6 @@
                 }, 100);
             }
 
-            // --- 事件绑定 ---
             function bindEvents() {
                 document.getElementById('btnChildMode').addEventListener('click', () => {
                     currentRole = 'child';
