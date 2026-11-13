@@ -366,6 +366,8 @@
         .tag-blue { background: #cce5ff; color: #2b4e7a; } 
         .tag-orange { background: #ffe5b4; color: #8a632b; } 
         .tag-date { background: #e0e0e0; color: #666; }
+        .tag-today { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .tag-deadline { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
 
         .task-check {
             width: 32px;
@@ -613,38 +615,48 @@
         <div class="calendar-grid" id="calendarGrid"></div>
     </div>
 
-    <!-- 第三栏：今日任务 -->
+    <!-- 第三栏：校内任务 -->
     <div class="section-title">
         <div class="title-left">
-            <span>📋 今日任务</span>
-            <span id="taskCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+            <span>🏫 校内任务</span>
+            <span id="inSchoolCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
         </div>
-        <button class="btn-outline btn-sm" id="todayAddTaskBtn">+ 新增</button>
+        <button class="btn-outline btn-sm" id="addInSchoolBtn">+ 新增</button>
     </div>
-    <div id="todayTaskGroups"></div>
+    <div id="inSchoolGroups"></div>
 
-    <!-- 第四栏：额外任务 -->
+    <!-- 第四栏：校外任务 -->
+    <div class="section-title" style="margin-top:24px;">
+        <div class="title-left">
+            <span>🏫 校外任务</span>
+            <span id="outSchoolCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
+        </div>
+        <button class="btn-outline btn-sm" id="addOutSchoolBtn">+ 新增</button>
+    </div>
+    <div id="outSchoolGroups"></div>
+
+    <!-- 第五栏：额外任务 -->
     <div class="section-title" style="margin-top:24px;">
         <div class="title-left"><span>🎁 额外任务</span></div>
         <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增额外</button>
     </div>
     <div id="extraTaskList" class="task-list"></div>
 
-    <!-- 第五栏：考试任务 -->
+    <!-- 第六栏：考试任务 -->
     <div class="section-title" style="margin-top:24px;">
         <div class="title-left"><span>📝 考试任务</span></div>
         <button class="btn-outline btn-sm" id="addExamBtn">+ 新增考试</button>
     </div>
     <div id="examTaskList"></div>
 
-    <!-- 第六栏：未完成任务 -->
+    <!-- 第七栏：未完成任务 -->
     <div class="section-title" style="margin-top:24px;">
         <div class="title-left" style="font-size:16px;"><span>⏳ 未完成任务</span></div>
         <span id="overdueCountBadge" style="font-size:13px; background:#f0e6d6; color:#8c7661; padding:2px 8px; border-radius:10px;">0项</span>
     </div>
     <div id="overdueTaskList" class="task-list"></div>
 
-    <!-- 第七栏：任务库管理（仅管理员） -->
+    <!-- 第八栏：任务库管理（仅管理员） -->
     <div id="adminTaskLibrarySection" class="hidden">
         <div class="section-title" style="margin-top:24px;">
             <span>📚 任务库管理</span>
@@ -683,7 +695,7 @@
 
         (function() {
             const STORAGE_KEY = 'star_task_app_v1';
-            const ADMIN_PASSWORD = '111'; // 修改为 111
+            const ADMIN_PASSWORD = '111';
 
             // 北京时间
             function getBeijingNow() {
@@ -697,11 +709,11 @@
             }
 
             const defaultTasks = [
-                { id: 't1', name: '习题册', reward: 0, daily: true, note: '', category: '校内作业', subject: '语文', createdDate: '2026-11-01' },
-                { id: 't2', name: '口算', reward: 0, daily: true, note: '', category: '校内作业', subject: '数学', createdDate: '2026-11-01' },
-                { id: 't3', name: '英语阅读', reward: 0, daily: true, note: '', category: '校内作业', subject: '英语', createdDate: '2026-11-01' },
-                { id: 't4', name: '口语练习', reward: 0, daily: true, note: '', category: '校外作业', subject: '口语', createdDate: '2026-11-01' },
-                { id: 't5', name: '新东方数学', reward: 0, daily: false, note: '', category: '校外作业', subject: '新东方', createdDate: '2026-11-01' }
+                { id: 't1', name: '习题册', reward: 0, daily: true, note: '', category: '校内任务', subject: '语文', startDate: '2026-11-01', endDate: '' },
+                { id: 't2', name: '口算', reward: 0, daily: true, note: '', category: '校内任务', subject: '数学', startDate: '2026-11-01', endDate: '' },
+                { id: 't3', name: '英语阅读', reward: 0, daily: true, note: '', category: '校内任务', subject: '英语', startDate: '2026-11-01', endDate: '' },
+                { id: 't4', name: '口语练习', reward: 0, daily: true, note: '', category: '校外任务', subject: '口语', startDate: '2026-11-01', endDate: '' },
+                { id: 't5', name: '新东方数学', reward: 0, daily: false, note: '', category: '校外任务', subject: '新东方', startDate: '2026-11-01', endDate: '2026-12-31' }
             ];
 
             const defaultState = {
@@ -717,10 +729,15 @@
                 if (stored) {
                     try { 
                         const parsed = JSON.parse(stored);
+                        // 兼容旧版分类转换
                         parsed.tasks = (parsed.tasks || []).map(t => {
-                            if (t.category === '课外辅导') t.category = '校外作业';
-                            if (!t.subject) t.subject = t.category === '校内作业' ? '其它' : (t.category === '校外作业' ? '口语' : '');
-                            return { ...t, createdDate: t.createdDate || '2026-11-01' };
+                            let cat = t.category;
+                            if (cat === '校内作业') cat = '校内任务';
+                            if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
+                            
+                            let sub = t.subject || '其它';
+                            if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
+                            return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
                         });
                         if (!parsed.profile) parsed.profile = { name: 'HEIDI', avatar: '' };
                         if (!parsed.exams) parsed.exams = [];
@@ -779,9 +796,13 @@
                         state = data.state_data;
                         
                         state.tasks = (state.tasks || []).map(t => {
-                            if (t.category === '课外辅导') t.category = '校外作业';
-                            if (!t.subject) t.subject = t.category === '校内作业' ? '其它' : (t.category === '校外作业' ? '口语' : '');
-                            return { ...t, createdDate: t.createdDate || '2026-11-01' };
+                            let cat = t.category;
+                            if (cat === '校内作业') cat = '校内任务';
+                            if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
+                            
+                            let sub = t.subject || '其它';
+                            if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
+                            return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
                         });
                         
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -806,9 +827,13 @@
                             state = newState;
                             
                             state.tasks = (state.tasks || []).map(t => {
-                                if (t.category === '课外辅导') t.category = '校外作业';
-                                if (!t.subject) t.subject = t.category === '校内作业' ? '其它' : (t.category === '校外作业' ? '口语' : '');
-                                return { ...t, createdDate: t.createdDate || '2026-11-01' };
+                                let cat = t.category;
+                                if (cat === '校内作业') cat = '校内任务';
+                                if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
+                                
+                                let sub = t.subject || '其它';
+                                if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
+                                return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
                             });
                             
                             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -865,11 +890,12 @@
                     if (e.date.startsWith(prefix)) examSum += getExamStars(e.score);
                 });
                 
+                // 核心修改：只有完成校内任务（category === '校内任务'）才享有全月满勤奖励
                 const homeworkDates = new Set();
                 state.checkins.forEach(c => {
                     if (!c.date.startsWith(prefix) || c.isExtra) return;
                     const task = state.tasks.find(t => t.id === c.taskId);
-                    if (task && task.category === '校内作业') {
+                    if (task && task.category === '校内任务') {
                         homeworkDates.add(c.date);
                     }
                 });
@@ -895,17 +921,28 @@
                 return state.checkins.some(c => c.date === today && c.taskId === taskId && !c.isExtra);
             }
 
+            // 修改：无结束时间(即当日任务)，次日 06:00 后过期不可打卡
             function canTaskCheck(task) {
-                if (task.daily) return true;
                 const today = getBeijingDateStr();
-                if (task.createdDate === today) return true;
-                
                 const now = getBeijingNow();
-                const parts = task.createdDate.split('-');
-                const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
-                deadline.setDate(deadline.getDate() + 1);
-                deadline.setHours(12, 0, 0, 0);
-                return now.getTime() < deadline.getTime();
+
+                if (task.endDate) {
+                    // 有结束时间，结束日当天 23:59:59 前可打卡
+                    const parts = task.endDate.split('-');
+                    const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
+                    deadline.setHours(23, 59, 59, 999);
+                    return now.getTime() <= deadline.getTime();
+                } else {
+                    // 无结束时间（仅开始时间），次日 06:00 前可打卡
+                    if (task.startDate === today) return true;
+                    
+                    const parts = task.startDate.split('-');
+                    const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
+                    deadline.setDate(deadline.getDate() + 1);
+                    deadline.setHours(6, 0, 0, 0); // 调整为次日 06:00
+                    
+                    return now.getTime() < deadline.getTime();
+                }
             }
 
             // --- 渲染相关 ---
@@ -963,8 +1000,8 @@
             }
 
             function getTagClass(text) {
-                if (text === '校内作业') return 'tag-green';
-                if (text === '校外作业') return 'tag-orange';
+                if (text === '校内任务') return 'tag-green';
+                if (text === '校外任务') return 'tag-orange';
                 if (text === '语文') return 'tag-purple';
                 if (text === '数学') return 'tag-pink';
                 if (text === '英语') return 'tag-blue';
@@ -973,87 +1010,103 @@
                 return 'tag-green';
             }
 
-            function renderTodayTasks() {
-                const container = document.getElementById('todayTaskGroups');
-                const today = getBeijingDateStr();
-                const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
+            // 渲染任务通用逻辑
+            function renderTaskGroup(containerId, category, countBadgeId) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
 
-                const todayTasks = state.tasks.filter(task => {
+                const today = getBeijingDateStr();
+                // 获取当前分类下所有“需要展示”的任务（可能包含过期但今天已打卡的，或者正在生效的）
+                const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
+                
+                const tasks = state.tasks.filter(task => {
+                    if (task.category !== category) return false;
+                    // 如果是今天已打卡的，展示
                     if (todayCheckTaskIds.has(task.id)) return true;
-                    return canTaskCheck(task);
+                    
+                    // 如果尚未到开始时间，不展示
+                    if (task.startDate > today) return false;
+                    
+                    // 检查是否已经彻底过期且未打卡 -> 移到"未完成任务"
+                    if (!canTaskCheck(task)) return false;
+
+                    return true;
                 });
 
-                document.getElementById('taskCountBadge').textContent = `${todayTasks.length}项`;
+                if (countBadgeId) {
+                    const badge = document.getElementById(countBadgeId);
+                    if (badge) badge.textContent = `${tasks.length}项`;
+                }
 
-                const inSchoolTasks = todayTasks.filter(t => t.category === '校内作业');
-                const outSchoolTasks = todayTasks.filter(t => t.category === '校外作业');
-                const otherTasks = todayTasks.filter(t => t.category !== '校内作业' && t.category !== '校外作业');
+                if (tasks.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;padding:20px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">暂无${category}</div>`;
+                    return;
+                }
+
+                // 按学科分组
+                const groups = {};
+                tasks.forEach(t => {
+                    const sub = t.subject || '其它';
+                    if (!groups[sub]) groups[sub] = [];
+                    groups[sub].push(t);
+                });
 
                 let html = '';
-
-                if (inSchoolTasks.length > 0) {
-                    html += `<div class="group-title" style="font-size:16px; color:#5c4535; font-weight:800; margin:10px 0 8px 4px;">🏫 校内作业</div>`;
-                    const inGroups = ['语文', '数学', '英语', '其它'];
-                    inGroups.forEach(sub => {
-                        const groupTasks = inSchoolTasks.filter(t => t.subject === sub || (!t.subject && sub === '其它'));
-                        if (groupTasks.length > 0) {
-                            html += `<div class="sub-title">📖 ${sub}</div>`;
-                            html += `<div class="task-list">`;
-                            groupTasks.forEach(task => {
-                                html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
-                            });
-                            html += `</div>`;
-                        }
-                    });
+                // 对学科排序，校内固定顺序，校外按字母/拼音
+                let sortedSubjects = Object.keys(groups);
+                if (category === '校内任务') {
+                    const order = { '语文': 1, '数学': 2, '英语': 3, '其它': 4 };
+                    sortedSubjects.sort((a,b) => (order[a]||99) - (order[b]||99));
+                } else {
+                    sortedSubjects.sort();
                 }
 
-                if (outSchoolTasks.length > 0) {
-                    html += `<div class="group-title" style="font-size:16px; color:#5c4535; font-weight:800; margin:16px 0 8px 4px;">🏫 校外作业</div>`;
-                    const outGroups = ['口语', '新东方'];
-                    outGroups.forEach(sub => {
-                        const groupTasks = outSchoolTasks.filter(t => t.subject === sub);
-                        if (groupTasks.length > 0) {
-                            html += `<div class="sub-title">🗣️ ${sub}</div>`;
-                            html += `<div class="task-list">`;
-                            groupTasks.forEach(task => {
-                                html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
-                            });
-                            html += `</div>`;
-                        }
-                    });
-                }
-                
-                if (otherTasks.length > 0) {
-                    html += `<div class="group-title" style="font-size:16px; color:#5c4535; font-weight:800; margin:16px 0 8px 4px;">📌 其它</div>`;
+                sortedSubjects.forEach(sub => {
+                    html += `<div class="sub-title">📖 ${sub}</div>`;
                     html += `<div class="task-list">`;
-                    otherTasks.forEach(task => {
+                    groups[sub].forEach(task => {
                         html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
                     });
                     html += `</div>`;
-                }
-
-                if (html === '') {
-                    html = `<div style="text-align:center;padding:32px;color:#a68f7b;background:#fdfbf7;border-radius:20px;font-weight:700;">✨ 今天没有任务哦</div>`;
-                }
+                });
 
                 container.innerHTML = html;
             }
 
+            function renderInSchoolTasks() {
+                renderTaskGroup('inSchoolGroups', '校内任务', 'inSchoolCountBadge');
+            }
+
+            function renderOutSchoolTasks() {
+                renderTaskGroup('outSchoolGroups', '校外任务', 'outSchoolCountBadge');
+            }
+
             function renderTaskItem(task, completed, overdue) {
                 const showAdminActions = (currentRole === 'admin' && isAdminAuthenticated);
+                const today = getBeijingDateStr();
                 
                 let tagsHtml = '';
-                if (task.category) {
-                    tagsHtml += `<span class="tag ${getTagClass(task.category)}">${task.category}</span>`;
-                }
-                if (task.subject && task.subject !== task.category) {
+                // 学科标签
+                if (task.subject) {
                     tagsHtml += `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>`;
                 }
                 if (task.note) {
                     tagsHtml += `<span class="tag tag-orange">📝 ${escapeHtml(task.note)}</span>`;
                 }
-                if (!task.daily && task.createdDate !== getBeijingDateStr()) {
-                    tagsHtml += `<span class="tag tag-date">📅 ${task.createdDate}</span>`;
+                
+                // 日期标签逻辑
+                if (overdue) {
+                    tagsHtml += `<span class="tag tag-date" style="background:#ffebee; color:#c62828;">📅 原定：${task.startDate}${task.endDate ? ' 至 ' + task.endDate : ''}</span>`;
+                } else {
+                    if (task.endDate) {
+                        tagsHtml += `<span class="tag tag-deadline">📅 截止：${task.endDate}</span>`;
+                    } else {
+                        if (task.startDate === today) {
+                            tagsHtml += `<span class="tag tag-today">📅 今日任务</span>`;
+                        } else {
+                            tagsHtml += `<span class="tag tag-date">📅 ${task.startDate}</span>`;
+                        }
+                    }
                 }
 
                 const checkHtml = overdue 
@@ -1062,7 +1115,7 @@
 
                 return `
                     <div class="task-item ${completed ? 'completed' : ''} ${overdue ? 'overdue' : ''}" data-task-id="${task.id}">
-                        <div class="task-icon">📄</div>
+                        <div class="task-icon">${task.category === '校内任务' ? '📚' : '🏫'}</div>
                         <div class="task-info">
                             <div class="task-name">${escapeHtml(task.name)}</div>
                             <div class="task-meta">
@@ -1156,6 +1209,7 @@
                 }).join('');
             }
 
+            // 未完成任务渲染（应用新的过期判定）
             function renderOverdueTasks() {
                 const container = document.getElementById('overdueTaskList');
                 if (!container) return;
@@ -1163,10 +1217,12 @@
                 const today = getBeijingDateStr();
                 const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
 
+                // 过滤条件：属于校内或校外、未打卡、且已过打卡时间
                 const overdueTasks = state.tasks.filter(task => {
-                    if (task.daily) return false;
-                    if (task.category !== '校内作业') return false;
                     if (todayCheckTaskIds.has(task.id)) return false;
+                    // 未到开始时间，不属于过期
+                    if (task.startDate > today) return false;
+                    // 已过打卡允许时间（次日6点或截止日）
                     return !canTaskCheck(task);
                 });
 
@@ -1177,20 +1233,36 @@
                     return;
                 }
 
-                container.innerHTML = overdueTasks.map(task => `
-                    <div class="task-item overdue">
-                        <div class="task-icon">📄</div>
-                        <div class="task-info">
-                            <div class="task-name">${escapeHtml(task.name)}</div>
-                            <div class="task-meta">
-                                <span class="tag tag-green">校内作业</span>
-                                ${task.subject ? `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>` : ''}
-                                <span class="tag tag-date">📅 ${task.createdDate}</span>
+                // 按开始时间倒序排
+                overdueTasks.sort((a,b) => b.startDate.localeCompare(a.startDate));
+
+                container.innerHTML = overdueTasks.map(task => {
+                    let tagsHtml = `
+                        <span class="tag ${getTagClass(task.category)}">${task.category}</span>
+                        ${task.subject ? `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>` : ''}
+                    `;
+                    
+                    let dateLabel = '';
+                    if (task.endDate) {
+                        dateLabel = `📅 ${task.startDate} 至 ${task.endDate}`;
+                    } else {
+                        dateLabel = `📅 任务日：${task.startDate}`;
+                    }
+                    tagsHtml += `<span class="tag tag-date" style="background:#ffebee; color:#c62828;">${dateLabel}</span>`;
+
+                    return `
+                        <div class="task-item overdue">
+                            <div class="task-icon">${task.category === '校内任务' ? '📚' : '🏫'}</div>
+                            <div class="task-info">
+                                <div class="task-name">${escapeHtml(task.name)}</div>
+                                <div class="task-meta">
+                                    ${tagsHtml}
+                                </div>
                             </div>
+                            <span class="overdue-badge">未完成</span>
                         </div>
-                        <span class="overdue-badge">未完成</span>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             function renderTaskLibrary() {
@@ -1207,6 +1279,7 @@
                             <div class="task-meta">
                                 <span class="tag ${getTagClass(task.category)}">${task.category}</span>
                                 ${task.subject ? `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>` : ''}
+                                ${task.endDate ? `<span class="tag tag-deadline">至 ${task.endDate}</span>` : ''}
                             </div>
                         </div>
                         <div class="task-actions">
@@ -1248,7 +1321,8 @@
                 renderProfile();
                 renderStats();
                 renderCalendar();
-                renderTodayTasks();
+                renderInSchoolTasks();
+                renderOutSchoolTasks();
                 renderExtraTasks();
                 renderExams();
                 renderOverdueTasks();
@@ -1277,7 +1351,7 @@
                 const task = state.tasks.find(t => t.id === taskId);
                 if (!task) return;
                 
-                if (!task.daily && !canTaskCheck(task) && !isTaskCheckedToday(taskId)) {
+                if (!canTaskCheck(task) && !isTaskCheckedToday(taskId)) {
                     showToast('该任务已过期无法打卡', false);
                     return;
                 }
@@ -1356,12 +1430,10 @@
                 const modal = document.createElement('div');
                 modal.className = 'modal-content';
                 
-                // 如果 cancelText 为空字符串，则不显示取消按钮
                 const cancelBtnHtml = cancelText 
                     ? `<button class="btn-cancel" id="modalCancel">${cancelText}</button>` 
                     : '';
                 
-                // 如果只有确认按钮，让确认按钮占满
                 const actionStyle = cancelText ? '' : 'width: 100%;';
 
                 modal.innerHTML = `
@@ -1452,70 +1524,100 @@
                 }, 0);
             }
 
-            // --- 新增/编辑日常任务 ---
+            // --- 新增/编辑任务 ---
             window.updateSubjectOptions = function() {
                 const cat = document.getElementById('modalTaskCategory').value;
-                const subSelect = document.getElementById('modalTaskSubject');
-                const currentSub = subSelect.value;
+                const subContainer = document.getElementById('subjectContainer');
+                const subSelect = document.getElementById('modalTaskSubjectSelect');
+                const subInput = document.getElementById('modalTaskSubjectInput');
                 
-                let options = [];
-                if (cat === '校内作业') {
-                    options = ['语文', '数学', '英语', '其它'];
-                } else if (cat === '校外作业') {
-                    options = ['口语', '新东方'];
+                if (cat === '校内任务') {
+                    subContainer.innerHTML = `
+                        <select id="modalTaskSubjectSelect">
+                            <option value="语文">语文</option>
+                            <option value="数学">数学</option>
+                            <option value="英语">英语</option>
+                            <option value="其它">其它</option>
+                        </select>
+                    `;
+                } else {
+                    subContainer.innerHTML = `
+                        <input id="modalTaskSubjectInput" type="text" placeholder="自定义学科（如：美术）" />
+                    `;
                 }
-                
-                subSelect.innerHTML = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
-                if (options.includes(currentSub)) subSelect.value = currentSub;
             };
 
-            function openTaskModal(editTask = null) {
+            function openTaskModal(editTask = null, defaultCategory = '校内任务') {
+                // 管理员可编辑，儿童仅可新增
                 if (editTask && !(currentRole === 'admin' && isAdminAuthenticated)) return;
 
                 const isEdit = !!editTask;
-                const task = editTask || { name: '', daily: true, note: '', category: '校内作业', subject: '语文' };
-                const today = getBeijingDateStr();
+                const task = editTask || { name: '', daily: true, note: '', category: defaultCategory, subject: defaultCategory === '校内任务' ? '语文' : '', startDate: getBeijingDateStr(), endDate: '' };
+
+                let subjectHtml = '';
+                if (task.category === '校内任务') {
+                    subjectHtml = `
+                        <select id="modalTaskSubjectSelect">
+                            <option value="语文" ${task.subject === '语文' ? 'selected' : ''}>语文</option>
+                            <option value="数学" ${task.subject === '数学' ? 'selected' : ''}>数学</option>
+                            <option value="英语" ${task.subject === '英语' ? 'selected' : ''}>英语</option>
+                            <option value="其它" ${task.subject === '其它' ? 'selected' : ''}>其它</option>
+                        </select>
+                    `;
+                } else {
+                    subjectHtml = `<input id="modalTaskSubjectInput" type="text" value="${escapeHtml(task.subject)}" placeholder="自定义学科" />`;
+                }
 
                 showModal({
                     title: isEdit ? '编辑任务' : '新增任务',
                     contentHTML: `
                         <label>任务名称</label>
                         <input id="modalTaskName" type="text" value="${escapeHtml(task.name)}" placeholder="输入任务名称" />
+                        
                         <label>分类</label>
-                        <select id="modalTaskCategory" onchange="updateSubjectOptions()">
-                            <option value="校内作业" ${task.category === '校内作业' ? 'selected' : ''}>校内作业</option>
-                            <option value="校外作业" ${task.category === '校外作业' ? 'selected' : ''}>校外作业</option>
+                        <select id="modalTaskCategory" onchange="updateSubjectOptions()" ${isEdit ? 'disabled' : ''}>
+                            <option value="校内任务" ${task.category === '校内任务' ? 'selected' : ''}>校内任务</option>
+                            <option value="校外任务" ${task.category === '校外任务' ? 'selected' : ''}>校外任务</option>
                         </select>
+
                         <label>学科</label>
-                        <select id="modalTaskSubject">
-                            <!-- 由JS联动渲染 -->
-                        </select>
-                        <label>是否每日重复</label>
-                        <select id="modalTaskDaily">
-                            <option value="true" ${task.daily ? 'selected' : ''}>是</option>
-                            <option value="false" ${!task.daily ? 'selected' : ''}>否</option>
-                        </select>
+                        <div id="subjectContainer">${subjectHtml}</div>
+                        <div style="height:16px;"></div>
+
+                        <label>开始时间</label>
+                        <input id="modalTaskStartDate" type="date" value="${task.startDate}" />
+
+                        <label>结束时间（留空则仅为当日任务）</label>
+                        <input id="modalTaskEndDate" type="date" value="${task.endDate}" />
+
                         <label>备注（可选）</label>
                         <input id="modalTaskNote" type="text" value="${escapeHtml(task.note || '')}" />
-                        <label style="color:#a68f7b; font-size:12px;">记录日期：${isEdit ? task.createdDate : today}</label>
                     `,
                     confirmText: '保存',
                     onConfirm: () => {
                         const name = document.getElementById('modalTaskName').value.trim();
                         const category = document.getElementById('modalTaskCategory').value;
-                        const subject = document.getElementById('modalTaskSubject').value;
-                        const daily = document.getElementById('modalTaskDaily').value === 'true';
+                        
+                        let subject = '';
+                        if (category === '校内任务') {
+                            subject = document.getElementById('modalTaskSubjectSelect').value;
+                        } else {
+                            subject = document.getElementById('modalTaskSubjectInput').value.trim() || '其它';
+                        }
+
+                        const startDate = document.getElementById('modalTaskStartDate').value || getBeijingDateStr();
+                        const endDate = document.getElementById('modalTaskEndDate').value;
                         const note = document.getElementById('modalTaskNote').value.trim();
 
                         if (!name) { alert('请输入名称'); return false; }
 
                         if (isEdit) {
                             const idx = state.tasks.findIndex(t => t.id === task.id);
-                            if (idx !== -1) state.tasks[idx] = { ...state.tasks[idx], name, daily, note, category, subject };
+                            if (idx !== -1) state.tasks[idx] = { ...state.tasks[idx], name, note, subject, startDate, endDate };
                         } else {
                             state.tasks.push({
                                 id: 'task_' + Date.now(),
-                                name, daily, note, category, subject, createdDate: today
+                                name, daily: !endDate, note, category, subject, startDate, endDate
                             });
                         }
                         saveState();
@@ -1523,12 +1625,6 @@
                         showToast('保存成功');
                     }
                 });
-
-                setTimeout(() => {
-                    document.getElementById('modalTaskSubject').value = task.subject;
-                    updateSubjectOptions();
-                    document.getElementById('modalTaskSubject').value = task.subject;
-                }, 0);
             }
 
             // --- 新增额外任务 (仅管理员) ---
@@ -1564,7 +1660,7 @@
                 });
             }
 
-            // --- 新增考试任务 (儿童、管理员均可) ---
+            // --- 新增考试任务 ---
             function openExamModal() {
                 const today = getBeijingDateStr();
                 showModal({
@@ -1596,7 +1692,7 @@
                 });
             }
 
-            // --- OCR (仅管理员) 及 真实 OCR 识别 ---
+            // --- OCR (仅管理员) ---
             function openOcrModal() {
                 if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
                 const today = getBeijingDateStr();
@@ -1623,7 +1719,7 @@
                         if (!text) { showToast('请先识别或输入文字', false); return false; }
                         state.tasks.push({
                             id: 'task_ocr_' + Date.now(),
-                            name: text, daily: false, note: 'OCR生成', category: '校内作业', subject: '其它', createdDate: today
+                            name: text, daily: true, note: 'OCR生成', category: '校内任务', subject: '其它', startDate: today, endDate: ''
                         });
                         saveState();
                         renderAll();
@@ -1644,7 +1740,6 @@
                         const file = e.target.files[0];
                         if (!file) return;
 
-                        // 预览图片
                         const reader = new FileReader();
                         reader.onload = (ev) => {
                             previewContainer.style.display = 'block';
@@ -1652,14 +1747,13 @@
                         };
                         reader.readAsDataURL(file);
 
-                        // 开始真实 OCR 识别
                         statusEl.innerHTML = '⏳ 正在识别中，请稍候...（首次加载语言包可能需要几秒）';
                         resultEl.value = '';
                         
                         try {
                             const { data: { text } } = await Tesseract.recognize(
                                 file,
-                                'chi_sim+eng', // 简体中文+英文
+                                'chi_sim+eng', 
                                 { logger: m => {
                                     if (m.status === 'recognizing text') {
                                         statusEl.innerHTML = `⏳ 识别进度：${Math.round(m.progress * 100)}%`;
@@ -1739,12 +1833,11 @@
                     }
                 });
 
-                // 这些按钮对儿童模式开放
                 document.getElementById('addExamBtn').addEventListener('click', openExamModal);
-                document.getElementById('todayAddTaskBtn').addEventListener('click', () => openTaskModal(null));
-                document.getElementById('openCreateTaskBtn').addEventListener('click', () => openTaskModal(null));
+                document.getElementById('addInSchoolBtn').addEventListener('click', () => openTaskModal(null, '校内任务'));
+                document.getElementById('addOutSchoolBtn').addEventListener('click', () => openTaskModal(null, '校外任务'));
+                document.getElementById('openCreateTaskBtn').addEventListener('click', () => openTaskModal(null, '校内任务'));
 
-                // 以下仅限管理员
                 document.getElementById('addExtraBtn').addEventListener('click', openExtraModal);
                 document.getElementById('editProfileBtn').addEventListener('click', openProfileModal);
                 document.getElementById('ocrBtn').addEventListener('click', openOcrModal);
@@ -1839,7 +1932,6 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
                 
-                // 统计弹窗逻辑（判断是否显示清零）
                 document.getElementById('bottomStats').addEventListener('click', () => {
                     const monthData = calcMonthStars();
                     const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
@@ -1889,12 +1981,11 @@
                             }
                         });
                     } else {
-                        // 儿童模式：隐藏清零按钮
                         showModal({
                             title: '📊 星值统计',
                             contentHTML: html,
                             confirmText: '知道了',
-                            cancelText: '' // 传入空字符串隐藏
+                            cancelText: '' 
                         });
                     }
                 });
@@ -1905,11 +1996,6 @@
                 if (!state.exams) state.exams = [];
                 if (!state.extraTasks) state.extraTasks = [];
                 if (!state.profile) state.profile = { name: 'HEIDI', avatar: '' };
-                
-                state.tasks = state.tasks.map(t => {
-                    if (!t.subject) t.subject = t.category === '校内作业' ? '其它' : (t.category === '校外作业' ? '口语' : '');
-                    return { ...t, createdDate: t.createdDate || '2026-11-01' };
-                });
                 
                 bindEvents();
                 renderAll();
