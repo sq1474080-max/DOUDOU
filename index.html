@@ -243,7 +243,7 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 12px; /* 加大数字和星星之间的间距 */
+            gap: 12px;
         }
 
         /* 第二栏：日历 */
@@ -322,7 +322,7 @@
             font-weight: 900;
         }
 
-        /* 通用标题：紧凑间距 */
+        /* 通用标题 */
         .section-title {
             display: flex;
             justify-content: space-between;
@@ -395,7 +395,7 @@
             background: #FFF0F0;
         }
 
-        /* 任务图标容器：完全透明，无背景 */
+        /* 任务图标容器 */
         .task-icon {
             display: flex;
             align-items: center;
@@ -559,7 +559,7 @@
             font-size: 15px;
             color: var(--ink);
             outline: none;
-            background: var(--icy-blue);
+            background: var(--white);
         }
         .exam-score-input:focus { border-color: var(--lilac); background: var(--white); }
         .exam-stars {
@@ -628,8 +628,23 @@
             max-height: 90vh;
             overflow-y: auto;
         }
-        .modal-content h3 { font-size: 22px; margin-bottom: 24px; color: var(--ink); text-align: center; font-weight: 800;}
+        
+        /* 修复弹窗标题：使用 flex 居中，让图标和文字完美对齐 */
+        .modal-content h3 {
+            font-size: 22px;
+            margin-bottom: 24px;
+            color: var(--ink);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+        }
+
         .modal-content label { font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 8px; display: block; }
+        
+        /* 修复弹窗内输入框：背景改为白色，与底色区分 */
         .modal-content input, .modal-content textarea, .modal-content select {
             width: 100%;
             padding: 14px 18px;
@@ -637,30 +652,38 @@
             border-radius: 16px;
             font-size: 15px;
             margin-bottom: 20px;
-            background: var(--icy-blue);
+            background: var(--white);
             outline: none;
             color: var(--ink);
             font-weight: 600;
             transition: 0.2s;
+            box-sizing: border-box;
         }
-        .modal-content input:focus, .modal-content select:focus { border-color: var(--lilac); background: var(--white); }
+        .modal-content input:focus, .modal-content select:focus { border-color: var(--lilac); }
+        
+        /* 统一日期框的高度和内边距 */
         .modal-content input[type="date"] {
-            min-height: 52px;
+            height: 50px;
+            min-height: 50px;
             -webkit-appearance: none;
             display: flex;
             align-items: center;
+            padding: 0 14px;
         }
 
         .modal-actions { display: flex; gap: 12px; margin-top: 12px; }
         .modal-actions button {
             flex: 1;
-            padding: 16px;
+            height: 52px;
             border-radius: var(--radius-btn);
             border: none;
             font-weight: 800;
             font-size: 16px;
             cursor: pointer;
             transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-cancel { background: #F4F5F8; color: var(--ink); }
         .btn-confirm { background: var(--lilac); color: var(--white); box-shadow: 0 4px 12px rgba(152, 131, 244, 0.3); }
@@ -1284,7 +1307,6 @@
                 container.innerHTML = sortedExams.map(exam => {
                     const stars = exam.score !== null ? getExamStars(exam.score) : 0;
                     const isZero = stars === 0;
-                    // 星值文字和图标之间的间距
                     const starText = exam.score !== null 
                         ? `<span style="display:flex; align-items:center; gap:6px;">获得 ${stars} <img src="icon_star.svg" class="zoom-icon" style="width:16px; height:16px; object-fit:contain;"></span>` 
                         : '未录入';
@@ -1299,7 +1321,6 @@
                         <div class="exam-item">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div style="font-weight:800; font-size:16px; color:var(--ink); display:flex; align-items:center; gap:8px;">
-                                    <!-- 图标与文字垂直对齐 -->
                                     <img src="icon_exam_card.svg" class="zoom-icon" style="width: 20px; height: 20px; vertical-align: middle;"> 
                                     <span style="line-height: 1.2;">${escapeHtml(exam.name)}</span>
                                 </div>
@@ -1338,8 +1359,8 @@
                 document.getElementById('overdueCountBadge').textContent = `${overdueTasks.length}项`;
 
                 if (overdueTasks.length === 0) {
-                    // 替换完成图标
-                    container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:24px;color:var(--ink);background:var(--white);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);"><img src="icon_done.svg" class="zoom-icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 6px;"> 全部完成啦！</div>`;
+                    // 修复：使用 Flex 布局让图标和文字完美居中对齐
+                    container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 8px; padding:24px;color:var(--ink);background:var(--white);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);"><img src="icon_done.svg" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;"> 全部完成啦！</div>`;
                     return;
                 }
 
@@ -1412,7 +1433,6 @@
                 const todaySum = calcTodayStars();
                 const monthData = calcMonthStars();
                 
-                // 调整图标间隙，数字与星值之间的 margin-left 改为 12px
                 document.getElementById('todayStars').innerHTML = `${todaySum} <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px; margin-left: 12px;">`;
                 document.getElementById('monthStars').innerHTML = `${monthData.total} <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px; margin-left: 12px;">`;
             }
@@ -1565,8 +1585,10 @@
                 const cancelBtnHtml = cancelText ? `<button class="btn-cancel" id="modalCancel">${cancelText}</button>` : '';
                 const actionStyle = cancelText ? '' : 'width: 100%;';
 
+                let titleHtml = title.includes('<img') ? `<div style="display:flex; justify-content:center; align-items:center; gap:8px;">${title}</div>` : escapeHtml(title);
+
                 modal.innerHTML = `
-                    <h3>${escapeHtml(title)}</h3>
+                    <h3>${titleHtml}</h3>
                     <div id="modalBody">${contentHTML || `<p style="margin-bottom:24px; color:var(--ink); font-weight:600; text-align:center;">${escapeHtml(content || '')}</p>`}</div>
                     <div class="modal-actions">
                         ${cancelBtnHtml}
@@ -1716,7 +1738,7 @@
                                 <label>结束时间(留空即当日)</label>
                                 <div style="display:flex; gap:6px;">
                                     <input id="modalTaskEndDate" type="date" value="${task.endDate}" style="margin-bottom:0;" />
-                                    <button type="button" class="btn-outline" onclick="document.getElementById('modalTaskEndDate').value=''" style="padding:0 12px; font-size:13px;">清空</button>
+                                    <button type="button" class="btn-outline" onclick="document.getElementById('modalTaskEndDate').value=''" style="padding:0 12px; font-size:13px; height: 50px;">清空</button>
                                 </div>
                             </div>
                         </div>
@@ -1896,19 +1918,19 @@
                             <div style="display:flex; gap:12px; margin-bottom:16px;">
                                 <div style="flex:1;">
                                     <label style="color:var(--ink);">开始时间</label>
-                                    <input id="ocrStartDate" type="date" value="${today}" style="margin-bottom:0; background:white;" />
+                                    <input id="ocrStartDate" type="date" value="${today}" style="margin-bottom:0;" />
                                 </div>
                                 <div style="flex:1;">
                                     <label style="color:var(--ink);">结束时间(留空即当日)</label>
                                     <div style="display:flex; gap:6px;">
-                                        <input id="ocrEndDate" type="date" value="" style="margin-bottom:0; background:white;" />
-                                        <button type="button" class="btn-outline" onclick="document.getElementById('ocrEndDate').value=''" style="padding:0 10px; font-size:12px;">清空</button>
+                                        <input id="ocrEndDate" type="date" value="" style="margin-bottom:0;" />
+                                        <button type="button" class="btn-outline" onclick="document.getElementById('ocrEndDate').value=''" style="padding:0 10px; font-size:12px; height: 50px;">清空</button>
                                     </div>
                                 </div>
                             </div>
                             
                             <label style="color:var(--ink);">每日重复</label>
-                            <select id="ocrDaily" style="margin-bottom:0; background:white;">
+                            <select id="ocrDaily" style="margin-bottom:0;">
                                 <option value="false" selected>否</option>
                                 <option value="true">是</option>
                             </select>
@@ -1969,7 +1991,7 @@
                     const container = document.getElementById('ocrSubjectContainer');
                     if (cat === '校内任务') {
                         container.innerHTML = `
-                            <select id="ocrSubjectSelect" style="background:white;">
+                            <select id="ocrSubjectSelect">
                                 <option value="语文">语文</option>
                                 <option value="数学">数学</option>
                                 <option value="英语">英语</option>
@@ -1977,7 +1999,7 @@
                             </select>
                         `;
                     } else {
-                        container.innerHTML = `<input id="ocrSubjectInput" type="text" placeholder="自定义学科" style="background:white;" />`;
+                        container.innerHTML = `<input id="ocrSubjectInput" type="text" placeholder="自定义学科" />`;
                     }
                 };
 
@@ -2221,7 +2243,6 @@
                     const monthData = calcMonthStars();
                     const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
                     
-                    // 调整统计卡片弹窗的垂直居中，并替换图标
                     let html = `
                         <div style="padding: 10px;">
                             <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--aqua); color:white; padding:16px 24px; border-radius:20px;">
@@ -2250,7 +2271,7 @@
 
                     if (isAdmin) {
                         showModal({
-                            title: '<img src="icon_nav_stats.svg" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;"> 星值统计',
+                            title: '<img src="icon_stats_title.svg" style="width: 24px; height: 24px; vertical-align: middle;"> 星值统计',
                             contentHTML: html,
                             confirmText: '知道了',
                             cancelText: '清零',
@@ -2277,7 +2298,7 @@
                         });
                     } else {
                         showModal({
-                            title: '<img src="icon_nav_stats.svg" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;"> 星值统计',
+                            title: '<img src="icon_stats_title.svg" style="width: 24px; height: 24px; vertical-align: middle;"> 星值统计',
                             contentHTML: html,
                             confirmText: '知道了',
                             cancelText: '' 
