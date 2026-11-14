@@ -712,7 +712,6 @@
             body { padding: 24px 40px 100px; }
             .app-header { max-width: 1200px; width: 100%; margin: 0 auto 24px auto; }
             
-            /* 核心优化：使用 Grid 均分左右两栏的高度和排列，左侧稍微加宽至 380px */
             .layout-container { 
                 display: grid;
                 grid-template-columns: 380px 1fr;
@@ -728,21 +727,19 @@
                 top: 24px; 
                 display: flex; 
                 flex-direction: column; 
-                gap: 20px; /* 统一左右间距 */
+                gap: 20px;
             }
             .right-panel { 
                 display: flex; 
                 flex-direction: column; 
-                gap: 20px; /* 统一左右间距 */
+                gap: 20px;
                 min-width: 0; 
             }
             
-            /* 右侧的任务列表可以分成两列 */
             #inSchoolGroups, #outSchoolGroups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
             .sub-title { grid-column: span 2; font-size: 15px; margin-top: 16px; }
             #overdueTaskList { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
             
-            /* 重点修复：左侧额外任务在横屏时不分成两列，保持单列，避免卡片被挤压变形 */
             #extraTaskList { display: flex; flex-direction: column; gap: 16px; }
         }
     </style>
@@ -851,15 +848,20 @@
             <div id="overdueTaskList" class="task-list"></div>
 
             <div id="adminTaskLibrarySection" class="hidden">
-                <div class="section-title" style="margin-top:12px;">
-                    <span><img src="icon_book_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 任务库管理</span>
-                    <button class="btn-primary btn-sm" id="openCreateTaskBtn">+ 新增任务</button>
+                <div class="section-title" style="margin-top:12px; margin-bottom: 12px;">
+                    <div class="title-left" style="display:flex; align-items:center; gap:8px;">
+                        <img src="icon_book_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 
+                        <span>任务库管理</span>
+                    </div>
+                    <div class="title-right" style="display:flex; align-items:center; gap:8px;">
+                        <button class="btn-primary btn-sm" id="openCreateTaskBtn" style="height: 36px;">+ 新增任务</button>
+                        <button class="btn-outline btn-sm" id="ocrBtn" style="height: 36px; padding: 0 12px;">
+                            <img src="icon_camera.svg" class="zoom-icon" style="width: 18px; height: 18px;">
+                        </button>
+                        <button class="btn-outline btn-sm" id="resetStarsBtn" style="display:none;"></button>
+                    </div>
                 </div>
-                <div class="flex-row" style="display:flex; gap:8px; margin-bottom:12px;">
-                    <button class="btn-outline btn-sm" id="ocrBtn"><img src="icon_camera.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 拍照 OCR</button>
-                    <button class="btn-outline btn-sm" id="resetStarsBtn" style="color:var(--coral); border-color:var(--coral);"><img src="icon_reset.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 重置星值</button>
-                </div>
-                <div id="taskLibraryList" class="task-list"></div>
+                <div id="taskLibraryList" class="task-list" style="margin-top:0;"></div>
             </div>
         </div>
     </div>
@@ -2150,6 +2152,7 @@
                 document.getElementById('addExtraBtn').addEventListener('click', () => openExtraModal(null));
                 document.getElementById('editProfileBtn').addEventListener('click', openProfileModal);
                 document.getElementById('ocrBtn').addEventListener('click', openOcrModal);
+                // 隐藏了重置星值，但保留事件以防报错
                 document.getElementById('resetStarsBtn').addEventListener('click', resetStarsConfirm);
 
                 document.body.addEventListener('click', (e) => {
@@ -2282,7 +2285,6 @@
                     `;
 
                     if (isAdmin) {
-                        // 稍微放大图标尺寸 (32px)
                         showModal({
                             title: '<img src="icon_stats_title.svg" style="width: 32px; height: 32px; vertical-align: middle;"> 星值统计',
                             contentHTML: html,
