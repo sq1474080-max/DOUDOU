@@ -711,12 +711,39 @@
         @media (min-width: 900px) {
             body { padding: 24px 40px 100px; }
             .app-header { max-width: 1200px; width: 100%; margin: 0 auto 24px auto; }
-            .layout-container { flex-direction: row; align-items: flex-start; max-width: 1200px; width: 100%; margin: 0 auto; }
-            .left-panel { flex: 0 0 340px; position: sticky; top: 24px; display: flex; flex-direction: column; gap: 24px;}
-            .right-panel { flex: 1; min-width: 0; }
+            
+            /* 核心优化：使用 Grid 均分左右两栏的高度和排列，左侧稍微加宽至 380px */
+            .layout-container { 
+                display: grid;
+                grid-template-columns: 380px 1fr;
+                align-items: start;
+                max-width: 1200px; 
+                width: 100%; 
+                margin: 0 auto;
+                gap: 20px;
+            }
+            
+            .left-panel { 
+                position: sticky; 
+                top: 24px; 
+                display: flex; 
+                flex-direction: column; 
+                gap: 20px; /* 统一左右间距 */
+            }
+            .right-panel { 
+                display: flex; 
+                flex-direction: column; 
+                gap: 20px; /* 统一左右间距 */
+                min-width: 0; 
+            }
+            
+            /* 右侧的任务列表可以分成两列 */
             #inSchoolGroups, #outSchoolGroups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
             .sub-title { grid-column: span 2; font-size: 15px; margin-top: 16px; }
-            #overdueTaskList, #extraTaskList { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+            #overdueTaskList { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+            
+            /* 重点修复：左侧额外任务在横屏时不分成两列，保持单列，避免卡片被挤压变形 */
+            #extraTaskList { display: flex; flex-direction: column; gap: 16px; }
         }
     </style>
 </head>
@@ -999,6 +1026,7 @@
                 return 0;
             }
 
+            // 1. 今日星值计算（包含负数）
             function calcTodayStars() {
                 const today = getBeijingDateStr();
                 let sum = 0;
@@ -1011,10 +1039,12 @@
                 return sum;
             }
 
+            // 2. 本月星值计算（修改：最后一天默认发放20星，取消满勤要求）
             function calcMonthStars() {
                 const bj = getBeijingNow();
                 const prefix = `${bj.getFullYear()}-${String(bj.getMonth()+1).padStart(2,'0')}`;
                 const todayDate = bj.getDate();
+                const lastDay = new Date(bj.getFullYear(), bj.getMonth() + 1, 0).getDate();
                 
                 let extraSum = 0;
                 let examSum = 0;
@@ -1027,29 +1057,10 @@
                     if (e.date.startsWith(prefix)) examSum += getExamStars(e.score);
                 });
                 
-                const homeworkDates = new Set();
-                state.checkins.forEach(c => {
-                    if (!c.date.startsWith(prefix) || c.isExtra) return;
-                    const task = state.tasks.find(t => t.id === c.taskId);
-                    if (task && task.category === '校内任务') {
-                        homeworkDates.add(c.date);
-                    }
-                });
+                // 只有在当月最后一天（自然月结束）默认加20星
+                const monthlyBonus = (todayDate === lastDay) ? 20 : 0;
                 
-                let isFullMonth = false;
-                if (homeworkDates.size > 0) {
-                    isFullMonth = true;
-                    for (let i = 1; i <= todayDate; i++) {
-                        const dStr = `${prefix}-${String(i).padStart(2,'0')}`;
-                        if (!homeworkDates.has(dStr)) {
-                            isFullMonth = false;
-                            break;
-                        }
-                    }
-                }
-                
-                const bonus = isFullMonth ? 20 : 0;
-                return { total: extraSum + examSum + bonus, hasHomework: isFullMonth, extraSum, examSum, bonus };
+                return { total: extraSum + examSum + monthlyBonus, extraSum, examSum, monthlyBonus };
             }
 
             function isTaskCheckedToday(taskId) {
@@ -1359,7 +1370,6 @@
                 document.getElementById('overdueCountBadge').textContent = `${overdueTasks.length}项`;
 
                 if (overdueTasks.length === 0) {
-                    // 修复：使用 Flex 布局让图标和文字完美居中对齐
                     container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 8px; padding:24px;color:var(--ink);background:var(--white);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);"><img src="icon_done.svg" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;"> 全部完成啦！</div>`;
                     return;
                 }
@@ -1532,7 +1542,8 @@
                     showToast(`取消额外任务`);
                 } else {
                     state.checkins.push({ date: today, taskId: extraId, reward: extraTask.reward, timestamp: Date.now(), isExtra: true });
-                    showToast(`完成额外任务 +${extraTask.reward}星`);
+                    const rewardStr = extraTask.reward >= 0 ? '+' + extraTask.reward : extraTask.reward;
+                    showToast(`完成额外任务 ${rewardStr}星`);
                 }
                 saveState();
                 renderAll();
@@ -1798,15 +1809,16 @@
                     contentHTML: `
                         <label>任务名称</label>
                         <input id="extraNameInput" type="text" value="${escapeHtml(task.name)}" placeholder="如：拼图奖励" />
-                        <label>星值 (0-50)</label>
-                        <input id="extraRewardInput" type="number" min="0" max="50" value="${task.reward}" />
+                        <label>星值 (-50 到 50)</label>
+                        <input id="extraRewardInput" type="number" min="-50" max="50" value="${task.reward}" />
                     `,
                     confirmText: '保存',
                     onConfirm: () => {
                         const name = document.getElementById('extraNameInput').value.trim();
                         const reward = parseInt(document.getElementById('extraRewardInput').value, 10);
                         if (!name) { alert('请输入名称'); return false; }
-                        if (isNaN(reward) || reward < 0 || reward > 50) { alert('星值必须在0-50之间'); return false; }
+                        // 允许负数
+                        if (isNaN(reward) || reward < -50 || reward > 50) { alert('星值必须在-50到50之间'); return false; }
                         
                         if (isEdit) {
                             const idx = state.extraTasks.findIndex(t => t.id === task.id);
@@ -2270,8 +2282,9 @@
                     `;
 
                     if (isAdmin) {
+                        // 稍微放大图标尺寸 (32px)
                         showModal({
-                            title: '<img src="icon_stats_title.svg" style="width: 24px; height: 24px; vertical-align: middle;"> 星值统计',
+                            title: '<img src="icon_stats_title.svg" style="width: 32px; height: 32px; vertical-align: middle;"> 星值统计',
                             contentHTML: html,
                             confirmText: '知道了',
                             cancelText: '清零',
@@ -2298,7 +2311,7 @@
                         });
                     } else {
                         showModal({
-                            title: '<img src="icon_stats_title.svg" style="width: 24px; height: 24px; vertical-align: middle;"> 星值统计',
+                            title: '<img src="icon_stats_title.svg" style="width: 32px; height: 32px; vertical-align: middle;"> 星值统计',
                             contentHTML: html,
                             confirmText: '知道了',
                             cancelText: '' 
