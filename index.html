@@ -46,9 +46,9 @@
             background: linear-gradient(135deg, #E5F3FF 0%, #FFE2F4 100%);
             background-attachment: fixed;
             min-height: 100vh;
-            padding: 12px 20px 100px; /* 安全边距20 */
+            padding: 12px 20px 120px; /* 底部留白加大，因图标变大导致底部导航变高 */
             padding-top: max(20px, env(safe-area-inset-top));
-            padding-bottom: calc(100px + env(safe-area-inset-bottom));
+            padding-bottom: calc(120px + env(safe-area-inset-bottom));
             display: flex;
             flex-direction: column;
             color: var(--ink);
@@ -61,10 +61,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             background: var(--ink);
             border-radius: var(--radius-btn);
-            padding: 6px 12px;
+            padding: 8px 16px; /* 增大 padding 适应大图标 */
             box-shadow: 0 10px 30px rgba(32, 37, 54, 0.1);
             flex-shrink: 0;
         }
@@ -75,10 +75,10 @@
             gap: 6px;
             background: transparent;
             border: none;
-            font-size: 13px;
-            font-weight: 700;
+            font-size: 14px;
+            font-weight: 800;
             color: rgba(255, 255, 255, 0.5);
-            padding: 8px 14px;
+            padding: 6px 12px;
             border-radius: var(--radius-btn);
             cursor: pointer;
             transition: 0.3s;
@@ -97,7 +97,7 @@
         .left-panel, .right-panel {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 20px;
             width: 100%;
         }
 
@@ -225,7 +225,7 @@
 
         .stats-label {
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: 0.5px;
         }
 
@@ -313,16 +313,17 @@
             font-weight: 900;
         }
 
-        /* 通用标题 */
+        /* 通用标题（调整了段前段后间距，紧凑处理） */
         .section-title {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 24px 0 12px;
+            margin: 16px 0 8px;
             font-weight: 800;
             color: var(--ink);
             font-size: 21px;
             width: 100%;
+            line-height: 1.2; /* 避免大图标撑得太高 */
         }
         .section-title .title-left {
             display: flex;
@@ -346,10 +347,10 @@
         }
 
         .sub-title {
-            font-size: 14px; 
+            font-size: 15px; 
             color: var(--ink); 
             font-weight: 800; 
-            margin: 16px 0 8px 4px;
+            margin: 12px 0 8px 4px;
             display: flex;
             align-items: center;
         }
@@ -358,7 +359,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             width: 100%;
         }
 
@@ -385,14 +386,15 @@
             background: #FFF0F0;
         }
 
+        /* 任务图标容器放大 */
         .task-icon {
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 44px;
-            height: 44px;
+            min-width: 76px;
+            height: 76px;
             background: var(--icy-blue);
-            border-radius: 16px;
+            border-radius: 20px;
         }
         .task-item.completed .task-icon { background: transparent; }
         .task-item.overdue .task-icon { background: #FFD1D1; }
@@ -406,7 +408,7 @@
 
         .task-name {
             font-weight: 800;
-            font-size: 16px;
+            font-size: 17px;
             color: var(--ink);
             word-break: break-word;
         }
@@ -417,15 +419,16 @@
             flex-wrap: wrap;
         }
 
-        /* 标签胶囊 */
+        /* 标签胶囊（适配大号图标） */
         .tag {
-            padding: 4px 10px;
+            padding: 6px 12px;
             border-radius: 999px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 800;
             display: flex;
             align-items: center;
             gap: 4px;
+            line-height: 1;
         }
         .tag-green { background: var(--lime); color: var(--ink); } 
         .tag-purple { background: #EDE8FF; color: var(--lilac); } 
@@ -438,14 +441,14 @@
 
         /* 打卡圆形选择点（保留✓不替换） */
         .task-check {
-            width: 36px;
-            height: 36px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             border: 3px solid var(--icy-blue);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 22px;
             color: transparent;
             cursor: pointer;
             flex-shrink: 0;
@@ -458,31 +461,32 @@
             color: var(--white);
         }
 
+        /* 操作按钮放大 */
         .task-actions {
             display: flex;
-            gap: 4px;
+            gap: 8px;
+            margin-left: 8px;
         }
         .icon-btn {
             background: var(--white);
             border: none;
-            width: 36px;
-            height: 36px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             color: var(--ink);
-            font-size: 16px;
-            box-shadow: 0 2px 8px rgba(32, 37, 54, 0.05);
+            box-shadow: 0 4px 12px rgba(32, 37, 54, 0.06);
         }
 
         .overdue-badge {
             background: #FFE5E5;
             color: var(--coral);
-            padding: 6px 14px;
+            padding: 8px 16px;
             border-radius: 999px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 800;
         }
 
@@ -515,7 +519,7 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             transition: 0.2s;
         }
         .btn-outline:active { background: #EDE8FF; }
@@ -555,7 +559,7 @@
         }
         .exam-stars.zero { color: #8892A6; }
 
-        /* 底部导航（深色胶囊） */
+        /* 底部导航（图标放大，导航栏变高） */
         .bottom-bar {
             position: fixed;
             bottom: 20px;
@@ -575,12 +579,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 13px;
+            font-weight: 800;
             color: rgba(255, 255, 255, 0.5);
             background: transparent;
             border: none;
-            gap: 4px;
+            gap: 6px;
             cursor: pointer;
             transition: 0.2s;
             padding: 4px 20px;
@@ -666,22 +670,22 @@
 
         /* --- 大屏 / iPad 横屏适配 --- */
         @media (min-width: 900px) {
-            body { padding: 24px 40px 100px; }
+            body { padding: 24px 40px 120px; }
             .app-header { max-width: 1200px; width: 100%; margin: 0 auto 24px auto; }
             .layout-container { flex-direction: row; align-items: flex-start; max-width: 1200px; width: 100%; margin: 0 auto; }
-            .left-panel { flex: 0 0 340px; position: sticky; top: 24px; display: flex; flex-direction: column; gap: 24px;}
+            .left-panel { flex: 0 0 340px; position: sticky; top: 24px; display: flex; flex-direction: column; gap: 20px;}
             .right-panel { flex: 1; min-width: 0; }
             #inSchoolGroups, #outSchoolGroups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-            .sub-title { grid-column: span 2; font-size: 15px; margin-top: 16px; }
+            .sub-title { grid-column: span 2; font-size: 16px; margin-top: 16px; }
             #overdueTaskList, #extraTaskList { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         }
     </style>
 </head>
 <body>
     <div class="app-header">
-        <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" style="width: 18px; height: 18px; margin-right: 4px; vertical-align: middle;"> 儿童模式</button>
-        <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" style="width: 18px; height: 18px; margin-right: 4px; vertical-align: middle;"> 管理员</button>
-        <button class="header-btn" id="exportCsvBtn"><img src="icon_export.svg" style="width: 18px; height: 18px; margin-right: 4px; vertical-align: middle;"> 导出CSV</button>
+        <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" style="width: 45px; height: 45px; margin-right: 4px; vertical-align: middle;"> 儿童模式</button>
+        <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" style="width: 45px; height: 45px; margin-right: 4px; vertical-align: middle;"> 管理员</button>
+        <button class="header-btn" id="exportCsvBtn"><img src="icon_export.svg" style="width: 45px; height: 45px; margin-right: 4px; vertical-align: middle;"> 导出CSV</button>
     </div>
 
     <div class="layout-container">
@@ -700,11 +704,11 @@
                 <div class="stats-group">
                     <div class="stats-card today">
                         <span class="stats-label">今日获得</span>
-                        <span class="stats-number" id="todayStars">0 <img src="icon_star.svg" style="width: 22px; height: 22px; vertical-align: middle; margin-left: 2px;"></span>
+                        <span class="stats-number" id="todayStars">0 <img src="icon_star.svg" style="width: 55px; height: 55px; vertical-align: middle; margin-left: 2px;"></span>
                     </div>
                     <div class="stats-card month">
                         <span class="stats-label">本月获得</span>
-                        <span class="stats-number" id="monthStars">0 <img src="icon_star.svg" style="width: 22px; height: 22px; vertical-align: middle; margin-left: 2px;"></span>
+                        <span class="stats-number" id="monthStars">0 <img src="icon_star.svg" style="width: 55px; height: 55px; vertical-align: middle; margin-left: 2px;"></span>
                     </div>
                 </div>
             </div>
@@ -723,11 +727,11 @@
 
             <div class="section-title" style="margin-top:0;">
                 <div class="title-left">
-                    <img src="icon_gift_title.svg" style="width: 22px; height: 22px; vertical-align: middle; margin-right: 4px;"> 额外任务
+                    <img src="icon_gift_title.svg" style="width: 55px; height: 55px; vertical-align: middle; margin-right: 4px;"> 额外任务
                 </div>
                 <div class="title-right">
                     <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增</button>
-                    <button class="collapse-btn hidden" data-target="extraTaskList"><img src="icon_expand.svg" style="width: 18px; height: 18px; vertical-align: middle;"></button>
+                    <button class="collapse-btn hidden" data-target="extraTaskList"><img src="icon_expand.svg" style="width: 45px; height: 45px; vertical-align: middle;"></button>
                 </div>
             </div>
             <div id="extraTaskList" class="task-list"></div>
@@ -736,58 +740,58 @@
         <div class="right-panel">
             <div class="section-title" style="margin-top:0;">
                 <div class="title-left">
-                    <img src="icon_school_title.svg" style="width: 22px; height: 22px; vertical-align: middle; margin-right: 4px;"> 校内任务
-                    <span id="inSchoolCountBadge" style="font-size:13px; background:var(--white); color:var(--ink); padding:4px 12px; border-radius:999px; font-weight:900; box-shadow: var(--shadow-soft);">0项</span>
+                    <img src="icon_school_title.svg" style="width: 55px; height: 55px; vertical-align: middle; margin-right: 4px;"> 校内任务
+                    <span id="inSchoolCountBadge" style="font-size:15px; background:var(--white); color:var(--ink); padding:6px 14px; border-radius:999px; font-weight:900; box-shadow: var(--shadow-soft);">0项</span>
                 </div>
                 <div class="title-right">
                     <button class="btn-outline btn-sm" id="addInSchoolBtn">+ 新增</button>
-                    <button class="collapse-btn hidden" data-target="inSchoolGroups"><img src="icon_expand.svg" style="width: 18px; height: 18px; vertical-align: middle;"></button>
+                    <button class="collapse-btn hidden" data-target="inSchoolGroups"><img src="icon_expand.svg" style="width: 45px; height: 45px; vertical-align: middle;"></button>
                 </div>
             </div>
             <div id="inSchoolGroups"></div>
 
-            <div class="section-title" style="margin-top:24px;">
+            <div class="section-title" style="margin-top:16px;">
                 <div class="title-left">
-                    <img src="icon_out_title.svg" style="width: 22px; height: 22px; vertical-align: middle; margin-right: 4px;"> 校外任务
-                    <span id="outSchoolCountBadge" style="font-size:13px; background:var(--white); color:var(--ink); padding:4px 12px; border-radius:999px; font-weight:900; box-shadow: var(--shadow-soft);">0项</span>
+                    <img src="icon_out_title.svg" style="width: 55px; height: 55px; vertical-align: middle; margin-right: 4px;"> 校外任务
+                    <span id="outSchoolCountBadge" style="font-size:15px; background:var(--white); color:var(--ink); padding:6px 14px; border-radius:999px; font-weight:900; box-shadow: var(--shadow-soft);">0项</span>
                 </div>
                 <div class="title-right">
                     <button class="btn-outline btn-sm" id="addOutSchoolBtn">+ 新增</button>
-                    <button class="collapse-btn hidden" data-target="outSchoolGroups"><img src="icon_expand.svg" style="width: 18px; height: 18px; vertical-align: middle;"></button>
+                    <button class="collapse-btn hidden" data-target="outSchoolGroups"><img src="icon_expand.svg" style="width: 45px; height: 45px; vertical-align: middle;"></button>
                 </div>
             </div>
             <div id="outSchoolGroups"></div>
 
-            <div class="section-title" style="margin-top:24px;">
+            <div class="section-title" style="margin-top:16px;">
                 <div class="title-left">
-                    <img src="icon_exam_title.svg" style="width: 22px; height: 22px; vertical-align: middle; margin-right: 4px;"> 考试任务
+                    <img src="icon_exam_title.svg" style="width: 55px; height: 55px; vertical-align: middle; margin-right: 4px;"> 考试任务
                 </div>
                 <div class="title-right">
                     <button class="btn-outline btn-sm" id="addExamBtn">+ 新增考试</button>
-                    <button class="collapse-btn hidden" data-target="examTaskList"><img src="icon_expand.svg" style="width: 18px; height: 18px; vertical-align: middle;"></button>
+                    <button class="collapse-btn hidden" data-target="examTaskList"><img src="icon_expand.svg" style="width: 45px; height: 45px; vertical-align: middle;"></button>
                 </div>
             </div>
             <div id="examTaskList"></div>
 
-            <div class="section-title" style="margin-top:24px;">
+            <div class="section-title" style="margin-top:16px;">
                 <div class="title-left" style="font-size:18px;">
-                    <img src="icon_overdue_title.svg" style="width: 22px; height: 22px; vertical-align: middle; margin-right: 4px;"> 未完成任务
+                    <img src="icon_overdue_title.svg" style="width: 55px; height: 55px; vertical-align: middle; margin-right: 4px;"> 未完成任务
                 </div>
                 <div class="title-right">
-                    <span id="overdueCountBadge" style="font-size:13px; background:var(--white); color:var(--ink); padding:4px 12px; border-radius:999px; font-weight:900; box-shadow: var(--shadow-soft);">0项</span>
-                    <button class="collapse-btn hidden" data-target="overdueTaskList"><img src="icon_expand.svg" style="width: 18px; height: 18px; vertical-align: middle;"></button>
+                    <span id="overdueCountBadge" style="font-size:15px; background:var(--white); color:var(--ink); padding:6px 14px; border-radius:999px; font-weight:900; box-shadow: var(--shadow-soft);">0项</span>
+                    <button class="collapse-btn hidden" data-target="overdueTaskList"><img src="icon_expand.svg" style="width: 45px; height: 45px; vertical-align: middle;"></button>
                 </div>
             </div>
             <div id="overdueTaskList" class="task-list"></div>
 
             <div id="adminTaskLibrarySection" class="hidden">
-                <div class="section-title" style="margin-top:24px;">
-                    <span><img src="icon_book_title.svg" style="width: 22px; height: 22px; vertical-align: middle; margin-right: 4px;"> 任务库管理</span>
+                <div class="section-title" style="margin-top:16px;">
+                    <span><img src="icon_book_title.svg" style="width: 55px; height: 55px; vertical-align: middle; margin-right: 4px;"> 任务库管理</span>
                     <button class="btn-primary btn-sm" id="openCreateTaskBtn">+ 新增任务</button>
                 </div>
                 <div class="flex-row" style="display:flex; gap:8px; margin-bottom:16px;">
-                    <button class="btn-outline btn-sm" id="ocrBtn"><img src="icon_camera.svg" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 4px;"> 拍照 OCR</button>
-                    <button class="btn-outline btn-sm" id="resetStarsBtn" style="color:var(--coral); border-color:var(--coral);"><img src="icon_reset.svg" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 4px;"> 重置星值</button>
+                    <button class="btn-outline btn-sm" id="ocrBtn"><img src="icon_camera.svg" style="width: 45px; height: 45px; vertical-align: middle; margin-right: 4px;"> 拍照 OCR</button>
+                    <button class="btn-outline btn-sm" id="resetStarsBtn" style="color:var(--coral); border-color:var(--coral);"><img src="icon_reset.svg" style="width: 45px; height: 45px; vertical-align: middle; margin-right: 4px;"> 重置星值</button>
                 </div>
                 <div id="taskLibraryList" class="task-list"></div>
             </div>
@@ -796,10 +800,10 @@
 
     <div class="bottom-bar">
         <button class="bottom-btn active" id="bottomHome">
-            <img src="icon_nav_home.svg" style="width: 24px; height: 24px; margin-bottom: 4px;"> 今日
+            <img src="icon_nav_home.svg" style="width: 60px; height: 60px; margin-bottom: 4px;"> 今日
         </button>
         <button class="bottom-btn" id="bottomStats">
-            <img src="icon_nav_stats.svg" style="width: 24px; height: 24px; margin-bottom: 4px;"> 统计
+            <img src="icon_nav_stats.svg" style="width: 60px; height: 60px; margin-bottom: 4px;"> 统计
         </button>
     </div>
 
@@ -1139,7 +1143,7 @@
                 }
 
                 sortedSubjects.forEach(sub => {
-                    html += `<div class="sub-title"><img src="icon_subject.svg" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;"> ${sub}</div>`;
+                    html += `<div class="sub-title"><img src="icon_subject.svg" style="width: 40px; height: 40px; vertical-align: middle; margin-right: 4px;"> ${sub}</div>`;
                     html += `<div class="task-list" style="display:grid; grid-template-columns:1fr; gap:12px;">`;
                     groups[sub].forEach(task => {
                         html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
@@ -1170,7 +1174,7 @@
                     tagsHtml += `<span class="tag tag-orange">${escapeHtml(task.note)}</span>`;
                 }
                 if (task.daily) {
-                    tagsHtml += `<span class="tag tag-green"><img src="icon_repeat.svg" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 2px;"> 每日</span>`;
+                    tagsHtml += `<span class="tag tag-green"><img src="icon_repeat.svg" style="width: 35px; height: 35px; vertical-align: middle; margin-right: 4px;"> 每日</span>`;
                 }
                 
                 if (overdue) {
@@ -1194,7 +1198,7 @@
                 return `
                     <div class="task-item ${completed ? 'completed' : ''} ${overdue ? 'overdue' : ''}" data-task-id="${task.id}">
                         <div class="task-icon">
-                            <img src="${task.category === '校内任务' ? 'icon_in_card.svg' : 'icon_out_card.svg'}" style="width: 28px; height: 28px; object-fit: contain;">
+                            <img src="${task.category === '校内任务' ? 'icon_in_card.svg' : 'icon_out_card.svg'}" style="width: 70px; height: 70px; object-fit: contain;">
                         </div>
                         <div class="task-info">
                             <div class="task-name">${escapeHtml(task.name)}</div>
@@ -1204,7 +1208,7 @@
                         </div>
                         ${showAdminActions ? `
                         <div class="task-actions">
-                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" style="width: 16px; height: 16px;"></button>
+                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" style="width: 40px; height: 40px;"></button>
                         </div>` : ''}
                         ${checkHtml}
                     </div>
@@ -1231,7 +1235,7 @@
                     const completed = state.checkins.some(c => c.date === today && c.taskId === task.id && c.isExtra);
                     return `
                         <div class="task-item ${completed ? 'completed' : ''}">
-                            <div class="task-icon"><img src="icon_gift_card.svg" style="width: 28px; height: 28px; object-fit: contain;"></div>
+                            <div class="task-icon"><img src="icon_gift_card.svg" style="width: 70px; height: 70px; object-fit: contain;"></div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(task.name)}</div>
                                 <div class="task-meta">
@@ -1241,8 +1245,8 @@
                             </div>
                             ${currentRole === 'admin' && isAdminAuthenticated ? `
                             <div class="task-actions">
-                                <button class="icon-btn" data-action="edit-extra" data-extra-id="${task.id}"><img src="icon_edit.svg" style="width: 16px; height: 16px;"></button>
-                                <button class="icon-btn" data-action="delete-extra" data-extra-id="${task.id}"><img src="icon_delete.svg" style="width: 16px; height: 16px;"></button>
+                                <button class="icon-btn" data-action="edit-extra" data-extra-id="${task.id}"><img src="icon_edit.svg" style="width: 40px; height: 40px;"></button>
+                                <button class="icon-btn" data-action="delete-extra" data-extra-id="${task.id}"><img src="icon_delete.svg" style="width: 40px; height: 40px;"></button>
                             </div>` : ''}
                             <div class="task-check" data-action="toggle-extra" data-extra-id="${task.id}">${completed ? '✓' : ''}</div>
                         </div>
@@ -1276,7 +1280,7 @@
                         <div class="exam-item">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div style="font-weight:800; font-size:16px; color:var(--ink); display:flex; align-items:center; gap:8px;">
-                                    <span><img src="icon_exam_card.svg" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 4px;"> ${escapeHtml(exam.name)}</span>
+                                    <span><img src="icon_exam_card.svg" style="width: 45px; height: 45px; vertical-align: middle; margin-right: 4px;"> ${escapeHtml(exam.name)}</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <span class="exam-stars ${isZero ? 'zero' : ''}">${starText}</span>
@@ -1287,8 +1291,8 @@
                                 <div>${scoreHtml}</div>
                                 ${currentRole === 'admin' && isAdminAuthenticated ? `
                                 <div class="task-actions">
-                                    <button class="icon-btn" data-action="edit-exam" data-exam-id="${exam.id}"><img src="icon_edit.svg" style="width: 16px; height: 16px;"></button>
-                                    <button class="icon-btn" data-action="delete-exam" data-exam-id="${exam.id}"><img src="icon_delete.svg" style="width: 16px; height: 16px;"></button>
+                                    <button class="icon-btn" data-action="edit-exam" data-exam-id="${exam.id}"><img src="icon_edit.svg" style="width: 40px; height: 40px;"></button>
+                                    <button class="icon-btn" data-action="delete-exam" data-exam-id="${exam.id}"><img src="icon_delete.svg" style="width: 40px; height: 40px;"></button>
                                 </div>
                                 ` : ''}
                             </div>
@@ -1326,7 +1330,7 @@
                     `;
                     
                     if (task.daily) {
-                        tagsHtml += `<span class="tag tag-green"><img src="icon_repeat.svg" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 2px;"> 每日</span>`;
+                        tagsHtml += `<span class="tag tag-green"><img src="icon_repeat.svg" style="width: 35px; height: 35px; vertical-align: middle; margin-right: 4px;"> 每日</span>`;
                     }
 
                     let dateLabel = '';
@@ -1340,7 +1344,7 @@
                     return `
                         <div class="task-item overdue">
                             <div class="task-icon">
-                                <img src="${task.category === '校内任务' ? 'icon_in_card.svg' : 'icon_out_card.svg'}" style="width: 28px; height: 28px; object-fit: contain;">
+                                <img src="${task.category === '校内任务' ? 'icon_in_card.svg' : 'icon_out_card.svg'}" style="width: 70px; height: 70px; object-fit: contain;">
                             </div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(task.name)}</div>
@@ -1366,7 +1370,7 @@
                         <div class="task-info">
                             <div class="task-name">
                                 ${escapeHtml(task.name)} 
-                                ${task.daily ? '<img src="icon_repeat.svg" style="width: 14px; height: 14px; vertical-align: middle;">' : ''}
+                                ${task.daily ? '<img src="icon_repeat.svg" style="width: 35px; height: 35px; vertical-align: middle;">' : ''}
                             </div>
                             <div class="task-meta">
                                 <span class="tag ${getTagClass(task.category)}">${task.category}</span>
@@ -1375,8 +1379,8 @@
                             </div>
                         </div>
                         <div class="task-actions">
-                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" style="width: 16px; height: 16px;"></button>
-                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}"><img src="icon_delete.svg" style="width: 16px; height: 16px;"></button>
+                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" style="width: 40px; height: 40px;"></button>
+                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}"><img src="icon_delete.svg" style="width: 40px; height: 40px;"></button>
                         </div>
                     </div>
                 `).join('');
@@ -1386,8 +1390,8 @@
                 const todaySum = calcTodayStars();
                 const monthData = calcMonthStars();
                 
-                document.getElementById('todayStars').innerHTML = `${todaySum} <img src="icon_star.svg" style="width: 22px; height: 22px; vertical-align: middle; margin-left: 2px;">`;
-                document.getElementById('monthStars').innerHTML = `${monthData.total} <img src="icon_star.svg" style="width: 22px; height: 22px; vertical-align: middle; margin-left: 2px;">`;
+                document.getElementById('todayStars').innerHTML = `${todaySum} <img src="icon_star.svg" style="width: 55px; height: 55px; vertical-align: middle; margin-left: 2px;">`;
+                document.getElementById('monthStars').innerHTML = `${monthData.total} <img src="icon_star.svg" style="width: 55px; height: 55px; vertical-align: middle; margin-left: 2px;">`;
             }
 
             function updateRoleUI() {
@@ -1412,7 +1416,7 @@
                     document.querySelectorAll('.task-list, #inSchoolGroups, #outSchoolGroups, #examTaskList').forEach(el => {
                         el.style.display = '';
                     });
-                    collapseBtns.forEach(btn => btn.innerHTML = '<img src="icon_expand.svg" style="width: 18px; height: 18px; vertical-align: middle;">');
+                    collapseBtns.forEach(btn => btn.innerHTML = '<img src="icon_expand.svg" style="width: 45px; height: 45px; vertical-align: middle;">');
                 }
             }
 
@@ -1434,7 +1438,7 @@
                 const toast = document.createElement('div');
                 toast.className = 'toast';
                 const icon = isSuccess ? 'icon_toast_ok.svg' : 'icon_toast_warn.svg';
-                toast.innerHTML = `<img src="${icon}" style="width: 18px; height: 18px; vertical-align: middle;"> ${escapeHtml(message)}`;
+                toast.innerHTML = `<img src="${icon}" style="width: 45px; height: 45px; vertical-align: middle;"> ${escapeHtml(message)}`;
                 container.appendChild(toast);
                 setTimeout(() => {
                     toast.style.opacity = '0';
@@ -1833,7 +1837,7 @@
                     contentHTML: `
                         <div style="margin-bottom:16px; text-align:center;">
                             <label class="btn-outline" style="display:inline-flex; cursor:pointer; padding:12px 24px; font-size:15px;">
-                                <img src="icon_camera.svg" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;"> 选择图片 / 拍照
+                                <img src="icon_camera.svg" style="width: 45px; height: 45px; vertical-align: middle; margin-right: 6px;"> 选择图片 / 拍照
                                 <input type="file" accept="image/*" id="ocrFileInput" style="display:none;">
                             </label>
                             <div id="ocrStatus" style="margin-top:12px; font-size:13px; color:var(--ink); font-weight:800;"></div>
@@ -2043,10 +2047,10 @@
                         if (targetEl) {
                             if (targetEl.style.display === 'none') {
                                 targetEl.style.display = '';
-                                btn.innerHTML = '<img src="icon_expand.svg" style="width: 18px; height: 18px; vertical-align: middle;">';
+                                btn.innerHTML = '<img src="icon_expand.svg" style="width: 45px; height: 45px; vertical-align: middle;">';
                             } else {
                                 targetEl.style.display = 'none';
-                                btn.innerHTML = '<img src="icon_collapse.svg" style="width: 18px; height: 18px; vertical-align: middle;">';
+                                btn.innerHTML = '<img src="icon_collapse.svg" style="width: 45px; height: 45px; vertical-align: middle;">';
                             }
                         }
                     }
@@ -2198,11 +2202,11 @@
                         <div style="padding: 10px;">
                             <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; background:var(--aqua); color:white; padding:16px 24px; border-radius:20px;">
                                 <span>今日获得</span>
-                                <span>${calcTodayStars()} <img src="icon_star.svg" style="width: 20px; height: 20px; vertical-align: middle;"></span>
+                                <span>${calcTodayStars()} <img src="icon_star.svg" style="width: 45px; height: 45px; vertical-align: middle;"></span>
                             </div>
                             <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; background:var(--lilac); color:white; padding:16px 24px; border-radius:20px;">
                                 <span>本月累计</span>
-                                <span>${monthData.total} <img src="icon_star.svg" style="width: 20px; height: 20px; vertical-align: middle;"></span>
+                                <span>${monthData.total} <img src="icon_star.svg" style="width: 45px; height: 45px; vertical-align: middle;"></span>
                             </div>
                             <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; background:var(--white); border: 2px solid var(--icy-blue); padding:16px 24px; border-radius:20px;">
                                 <span>本月奖励</span>
