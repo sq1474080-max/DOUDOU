@@ -41,7 +41,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* 核心设置：图标放大两倍，但不改变原盒模型大小 */
+        /* 核心设置：图标放大，但不改变原盒模型大小 */
         .zoom-icon {
             transform: scale(2);
             transform-origin: center;
@@ -81,7 +81,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px; /* 放大后略微调整间隙 */
+            gap: 8px;
             background: transparent;
             border: none;
             font-size: 13px;
@@ -243,7 +243,7 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 4px;
+            gap: 12px; /* 加大数字和星星之间的间距 */
         }
 
         /* 第二栏：日历 */
@@ -322,12 +322,12 @@
             font-weight: 900;
         }
 
-        /* 通用标题：压缩段前段后间距 */
+        /* 通用标题：紧凑间距 */
         .section-title {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 12px 0 6px; /* 这里已调整为更紧凑 */
+            margin: 12px 0 6px;
             font-weight: 800;
             color: var(--ink);
             font-size: 21px;
@@ -395,19 +395,15 @@
             background: #FFF0F0;
         }
 
-        /* 任务图标容器：去除背景色，让其彻底透明 */
+        /* 任务图标容器：完全透明，无背景 */
         .task-icon {
             display: flex;
             align-items: center;
             justify-content: center;
             min-width: 44px;
             height: 44px;
-            background: transparent; /* 去掉浅蓝底色 */
-            border-radius: 16px;
+            background: transparent;
         }
-        /* 移除之前对已完成和过期的额外背景覆盖 */
-        .task-item.completed .task-icon { background: transparent; }
-        .task-item.overdue .task-icon { background: transparent; }
 
         .task-info {
             flex: 1;
@@ -570,10 +566,13 @@
             font-weight: 800;
             font-size: 14px;
             color: var(--lilac);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         .exam-stars.zero { color: #8892A6; }
 
-        /* 底部导航（深色胶囊） */
+        /* 底部导航 */
         .bottom-bar {
             position: fixed;
             bottom: 20px;
@@ -721,11 +720,11 @@
                 <div class="stats-group">
                     <div class="stats-card today">
                         <span class="stats-label">今日获得</span>
-                        <span class="stats-number" id="todayStars">0 <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px;"></span>
+                        <span class="stats-number" id="todayStars">0 <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px; margin-left: 12px;"></span>
                     </div>
                     <div class="stats-card month">
                         <span class="stats-label">本月获得</span>
-                        <span class="stats-number" id="monthStars">0 <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px;"></span>
+                        <span class="stats-number" id="monthStars">0 <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px; margin-left: 12px;"></span>
                     </div>
                 </div>
             </div>
@@ -1285,7 +1284,10 @@
                 container.innerHTML = sortedExams.map(exam => {
                     const stars = exam.score !== null ? getExamStars(exam.score) : 0;
                     const isZero = stars === 0;
-                    const starText = exam.score !== null ? `获得 ${stars} 🌟` : '未录入';
+                    // 星值文字和图标之间的间距
+                    const starText = exam.score !== null 
+                        ? `<span style="display:flex; align-items:center; gap:6px;">获得 ${stars} <img src="icon_star.svg" class="zoom-icon" style="width:16px; height:16px; object-fit:contain;"></span>` 
+                        : '未录入';
                     
                     const canEditScore = (currentRole === 'admin' && isAdminAuthenticated) || (exam.score === null);
 
@@ -1297,7 +1299,9 @@
                         <div class="exam-item">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div style="font-weight:800; font-size:16px; color:var(--ink); display:flex; align-items:center; gap:8px;">
-                                    <span><img src="icon_exam_card.svg" class="zoom-icon" style="width: 18px; height: 18px;"> ${escapeHtml(exam.name)}</span>
+                                    <!-- 图标与文字垂直对齐 -->
+                                    <img src="icon_exam_card.svg" class="zoom-icon" style="width: 20px; height: 20px; vertical-align: middle;"> 
+                                    <span style="line-height: 1.2;">${escapeHtml(exam.name)}</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <span class="exam-stars ${isZero ? 'zero' : ''}">${starText}</span>
@@ -1334,7 +1338,8 @@
                 document.getElementById('overdueCountBadge').textContent = `${overdueTasks.length}项`;
 
                 if (overdueTasks.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:24px;color:var(--ink);background:var(--white);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);">🎉 全部完成啦！</div>`;
+                    // 替换完成图标
+                    container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center;padding:24px;color:var(--ink);background:var(--white);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);"><img src="icon_done.svg" class="zoom-icon" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 6px;"> 全部完成啦！</div>`;
                     return;
                 }
 
@@ -1407,8 +1412,9 @@
                 const todaySum = calcTodayStars();
                 const monthData = calcMonthStars();
                 
-                document.getElementById('todayStars').innerHTML = `${todaySum} <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px;">`;
-                document.getElementById('monthStars').innerHTML = `${monthData.total} <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px;">`;
+                // 调整图标间隙，数字与星值之间的 margin-left 改为 12px
+                document.getElementById('todayStars').innerHTML = `${todaySum} <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px; margin-left: 12px;">`;
+                document.getElementById('monthStars').innerHTML = `${monthData.total} <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px; margin-left: 12px;">`;
             }
 
             function updateRoleUI() {
@@ -2215,26 +2221,36 @@
                     const monthData = calcMonthStars();
                     const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
                     
+                    // 调整统计卡片弹窗的垂直居中，并替换图标
                     let html = `
                         <div style="padding: 10px;">
                             <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--aqua); color:white; padding:16px 24px; border-radius:20px;">
                                 <span>今日获得</span>
-                                <span>${calcTodayStars()} <img src="icon_star.svg" class="zoom-icon" style="width: 20px; height: 20px;"></span>
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <span>${calcTodayStars()}</span>
+                                    <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px;">
+                                </div>
                             </div>
                             <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--lilac); color:white; padding:16px 24px; border-radius:20px;">
                                 <span>本月累计</span>
-                                <span>${monthData.total} <img src="icon_star.svg" class="zoom-icon" style="width: 20px; height: 20px;"></span>
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <span>${monthData.total}</span>
+                                    <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px;">
+                                </div>
                             </div>
                             <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--white); border: 2px solid var(--icy-blue); padding:16px 24px; border-radius:20px;">
                                 <span>本月奖励</span>
-                                <span style="color:var(--lilac);">${monthData.total} 元</span>
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--lilac);">
+                                    <span>${monthData.total}</span>
+                                    <img src="icon_currency.svg" class="zoom-icon" style="width: 22px; height: 22px;">
+                                </div>
                             </div>
                         </div>
                     `;
 
                     if (isAdmin) {
                         showModal({
-                            title: '📊 星值统计',
+                            title: '<img src="icon_nav_stats.svg" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;"> 星值统计',
                             contentHTML: html,
                             confirmText: '知道了',
                             cancelText: '清零',
@@ -2261,7 +2277,7 @@
                         });
                     } else {
                         showModal({
-                            title: '📊 星值统计',
+                            title: '<img src="icon_nav_stats.svg" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;"> 星值统计',
                             contentHTML: html,
                             confirmText: '知道了',
                             cancelText: '' 
