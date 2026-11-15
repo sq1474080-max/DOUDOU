@@ -42,16 +42,22 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* 锁定页面背景和禁止橡皮筋露底 */
+        /* 彻底解决背景跟随滑动：使用固定背景层 */
+        .fixed-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #E5F3FF 0%, #FFE2F4 100%);
+            z-index: -10;
+            pointer-events: none;
+        }
+
         html, body {
+            /* 防止 iOS 橡皮筋露底 */
             overscroll-behavior-y: none; 
-            background-color: #E5F3FF;
+            background-color: transparent; 
         }
 
         body {
-            /* 背景固定，不随内容滚动 */
-            background: linear-gradient(135deg, #E5F3FF 0%, #FFE2F4 100%);
-            background-attachment: fixed;
             min-height: 100vh;
             padding: 12px 20px 100px;
             padding-top: max(20px, env(safe-area-inset-top));
@@ -109,7 +115,7 @@
         .layout-container {
             display: flex;
             flex-direction: column;
-            gap: 10px; /* 减小外层间距，让底衬更紧凑 */
+            gap: 10px;
         }
         .left-panel, .right-panel {
             display: flex;
@@ -124,7 +130,6 @@
             padding: 16px;
             margin-bottom: 12px;
             transition: 0.3s;
-            /* 内部微透明背景色 */
         }
 
         /* 第一栏：头像+名字 | 星值 */
@@ -350,7 +355,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 0 0 12px 0; /* 底衬内部，顶部间距设为0 */
+            margin: 0 0 12px 0; 
             font-weight: 800;
             color: var(--ink);
             font-size: 21px;
@@ -454,7 +459,7 @@
             border-radius: 999px;
             font-size: 11px;
             font-weight: 800;
-            display: inline-flex; /* 确保循环图标和文字同在一行 */
+            display: inline-flex; 
             align-items: center;
             justify-content: center;
             gap: 4px;
@@ -661,7 +666,7 @@
             overflow-y: auto;
         }
         
-        /* 修复弹窗标题：使用 flex 居中，让图标和文字完美对齐 */
+        /* 修复弹窗标题 */
         .modal-content h3 {
             font-size: 22px;
             margin-bottom: 24px;
@@ -676,7 +681,7 @@
 
         .modal-content label { font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 8px; display: block; }
         
-        /* 修复弹窗内输入框：背景改为白色，与底色区分 */
+        /* 修复弹窗内输入框 */
         .modal-content input, .modal-content textarea, .modal-content select {
             width: 100%;
             padding: 14px 18px;
@@ -693,7 +698,6 @@
         }
         .modal-content input:focus, .modal-content select:focus { border-color: var(--lilac); }
         
-        /* 统一日期框的高度和内边距 */
         .modal-content input[type="date"] {
             height: 50px;
             min-height: 50px;
@@ -739,19 +743,6 @@
         }
         @keyframes dropDown { from { opacity: 0; transform: translateY(-30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-        /* 下拉刷新提示 */
-        .refresh-indicator {
-            position: absolute;
-            top: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-            color: var(--ink);
-            font-weight: 800;
-            opacity: 0;
-            transition: 0.3s;
-        }
-
         /* --- 大屏 / iPad 横屏适配 --- */
         @media (min-width: 900px) {
             body { padding: 24px 40px 100px; }
@@ -790,6 +781,8 @@
     </style>
 </head>
 <body>
+    <div class="fixed-bg"></div> <!-- 独立背景层 -->
+    
     <div class="app-header">
         <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 儿童模式</button>
         <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 管理员</button>
@@ -833,7 +826,7 @@
                 <div class="calendar-grid" id="calendarGrid"></div>
             </div>
 
-            <!-- 额外任务分组 (紫色底衬) -->
+            <!-- 额外任务分组 -->
             <div class="section-wrapper" style="background-color: rgba(152, 131, 244, 0.15);">
                 <div class="section-title">
                     <div class="title-left">
@@ -849,7 +842,7 @@
         </div>
 
         <div class="right-panel">
-            <!-- 校内任务分组 (绿色底衬) -->
+            <!-- 校内任务分组 -->
             <div class="section-wrapper" style="background-color: rgba(219, 251, 100, 0.25);">
                 <div class="section-title">
                     <div class="title-left">
@@ -864,8 +857,8 @@
                 <div id="inSchoolGroups"></div>
             </div>
 
-            <!-- 校外任务分组 (粉色底衬) -->
-            <div class="section-wrapper" style="background-color: rgba(255, 226, 244, 0.6);">
+            <!-- 校外任务分组 (已修改为 F36C62) -->
+            <div class="section-wrapper" style="background-color: rgba(243, 108, 98, 0.15);">
                 <div class="section-title">
                     <div class="title-left">
                         <img src="icon_out_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 校外任务
@@ -879,7 +872,7 @@
                 <div id="outSchoolGroups"></div>
             </div>
 
-            <!-- 考试任务分组 (青色底衬) -->
+            <!-- 考试任务分组 -->
             <div class="section-wrapper" style="background-color: rgba(106, 213, 232, 0.2);">
                 <div class="section-title">
                     <div class="title-left">
@@ -893,7 +886,7 @@
                 <div id="examTaskList"></div>
             </div>
 
-            <!-- 未完成任务分组 (橙色底衬) -->
+            <!-- 未完成任务分组 -->
             <div class="section-wrapper" style="background-color: rgba(255, 152, 0, 0.15);">
                 <div class="section-title">
                     <div class="title-left" style="font-size:18px;">
@@ -907,7 +900,7 @@
                 <div id="overdueTaskList" class="task-list"></div>
             </div>
 
-            <!-- 任务库管理 (中性底衬) -->
+            <!-- 任务库管理 -->
             <div id="adminTaskLibrarySection" class="hidden section-wrapper" style="background-color: rgba(255, 255, 255, 0.4);">
                 <div class="section-title" style="margin-bottom: 12px;">
                     <div class="title-left" style="display:flex; align-items:center; gap:8px;">
@@ -1284,7 +1277,6 @@
                     tagsHtml += `<span class="tag tag-orange">${escapeHtml(task.note)}</span>`;
                 }
                 if (task.daily) {
-                    // 缩小图标并居中
                     tagsHtml += `<span class="tag tag-green"><img src="icon_repeat.svg" class="icon-repeat-small"> 每日</span>`;
                 }
                 
@@ -2142,7 +2134,6 @@
             let isPulling = false;
 
             document.addEventListener('touchstart', (e) => {
-                // 当页面滚动在最顶部时，记录起始Y坐标
                 if (window.scrollY <= 0) {
                     touchStartY = e.touches[0].clientY;
                     isPulling = true;
@@ -2152,8 +2143,6 @@
             document.addEventListener('touchend', (e) => {
                 if (!isPulling) return;
                 let distance = e.changedTouches[0].clientY - touchStartY;
-                
-                // 如果下拉距离超过 100px，则触发页面刷新
                 if (distance > 100 && window.scrollY <= 0) {
                     window.location.reload();
                 }
