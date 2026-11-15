@@ -2069,6 +2069,15 @@
                 }, 100);
             }
 
+            // 重点修复：增加切回前台自动拉取最新数据的机制
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    if (supabaseClient) {
+                        fetchCloudState();
+                    }
+                }
+            });
+
             function bindEvents() {
                 document.getElementById('btnChildMode').addEventListener('click', () => {
                     currentRole = 'child';
@@ -2152,7 +2161,6 @@
                 document.getElementById('addExtraBtn').addEventListener('click', () => openExtraModal(null));
                 document.getElementById('editProfileBtn').addEventListener('click', openProfileModal);
                 document.getElementById('ocrBtn').addEventListener('click', openOcrModal);
-                // 隐藏了重置星值，但保留事件以防报错
                 document.getElementById('resetStarsBtn').addEventListener('click', resetStarsConfirm);
 
                 document.body.addEventListener('click', (e) => {
