@@ -52,7 +52,6 @@
         }
 
         html, body {
-            /* 防止 iOS 橡皮筋露底 */
             overscroll-behavior-y: none; 
             background-color: transparent; 
         }
@@ -124,7 +123,7 @@
             width: 100%;
         }
 
-        /* 栏目分组底衬 (方案B极浅色) */
+        /* 栏目分组底衬 */
         .section-wrapper {
             border-radius: var(--radius-wrapper);
             padding: 16px;
@@ -140,7 +139,6 @@
             margin-bottom: 20px;
         }
 
-        /* 左侧头像卡片 */
         .profile-card {
             background: var(--white);
             border-radius: var(--radius-card);
@@ -339,7 +337,6 @@
 
         .calendar-day.other-month { color: #D1D5E0; }
         
-        /* 重点修复：锁定正圆 */
         .calendar-day.today {
             background: var(--lilac);
             color: var(--white);
@@ -392,12 +389,20 @@
             gap: 6px;
         }
 
+        /* 任务列表通用外层 */
         .task-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
             margin-bottom: 4px;
             width: 100%;
+        }
+
+        /* 学科内部的任务网格（手机单列，平板双列） */
+        .task-grid-inner {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 12px;
         }
 
         /* 任务卡片 */
@@ -423,7 +428,6 @@
             background: #FFF0F0;
         }
 
-        /* 任务图标容器 */
         .task-icon {
             display: flex;
             align-items: center;
@@ -473,7 +477,7 @@
         .tag-today { background: var(--lilac); color: var(--white); }
         .tag-deadline { background: var(--aqua); color: var(--white); }
 
-        /* 重点修复：循环图标居中缩小 */
+        /* 循环图标居中缩小 */
         .icon-repeat-small {
             width: 12px;
             height: 12px;
@@ -666,7 +670,6 @@
             overflow-y: auto;
         }
         
-        /* 修复弹窗标题 */
         .modal-content h3 {
             font-size: 22px;
             margin-bottom: 24px;
@@ -681,7 +684,6 @@
 
         .modal-content label { font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 8px; display: block; }
         
-        /* 修复弹窗内输入框 */
         .modal-content input, .modal-content textarea, .modal-content select {
             width: 100%;
             padding: 14px 18px;
@@ -772,16 +774,25 @@
                 min-width: 0; 
             }
             
-            #inSchoolGroups, #outSchoolGroups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-            .sub-title { grid-column: span 2; font-size: 15px; margin-top: 16px; }
-            #overdueTaskList { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+            /* 核心修改：学科内部的任务改成双列 */
+            .task-grid-inner {
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* 两列等宽 */
+                gap: 16px;
+            }
             
-            #extraTaskList { display: flex; flex-direction: column; gap: 16px; }
+            /* 未完成任务也直接用双列（因为外层容器是 task-grid-inner） */
+            /* 左侧面板的额外任务保持单列，不应用 task-grid-inner */
+            #extraTaskList {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="fixed-bg"></div> <!-- 独立背景层 -->
+    <div class="fixed-bg"></div>
     
     <div class="app-header">
         <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 儿童模式</button>
@@ -857,7 +868,7 @@
                 <div id="inSchoolGroups"></div>
             </div>
 
-            <!-- 校外任务分组 (已修改为 F36C62) -->
+            <!-- 校外任务分组 -->
             <div class="section-wrapper" style="background-color: rgba(243, 108, 98, 0.15);">
                 <div class="section-title">
                     <div class="title-left">
@@ -897,7 +908,7 @@
                         <button class="collapse-btn hidden" data-target="overdueTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;"></button>
                     </div>
                 </div>
-                <div id="overdueTaskList" class="task-list"></div>
+                <div id="overdueTaskList" class="task-grid-inner" style="margin-bottom:4px;"></div>
             </div>
 
             <!-- 任务库管理 -->
@@ -1246,8 +1257,9 @@
                 }
 
                 sortedSubjects.forEach(sub => {
+                    // 生成 sub-title 和内部双列容器
                     html += `<div class="sub-title"><img src="icon_subject.svg" class="zoom-icon" style="width: 16px; height: 16px;"> ${sub}</div>`;
-                    html += `<div class="task-list" style="display:grid; grid-template-columns:1fr; gap:12px;">`;
+                    html += `<div class="task-grid-inner">`;
                     groups[sub].forEach(task => {
                         html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
                     });
@@ -1423,7 +1435,9 @@
                 document.getElementById('overdueCountBadge').textContent = `${overdueTasks.length}项`;
 
                 if (overdueTasks.length === 0) {
-                    container.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; gap: 8px; padding:16px;color:var(--ink);background:rgba(255,255,255,0.6);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);"><img src="icon_done.svg" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;"> 全部完成啦！</div>`;
+                    // 注意：这里的外层容器是 task-grid-inner，所以内部的 no-data 提示如果不带 grid-column: 1/-1，可能只会占左半边。
+                    // 为了安全，加上 style 占据全宽。
+                    container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 8px; padding:16px;color:var(--ink);background:rgba(255,255,255,0.6);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);"><img src="icon_done.svg" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;"> 全部完成啦！</div>`;
                     return;
                 }
 
