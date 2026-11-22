@@ -19,19 +19,22 @@
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 
         :root {
-            --icy-blue: #E5F3FF;
-            --soft-pink: #FFE2F4;
-            --lilac: #9883F4;
-            --aqua: #6AD5E8;
-            --coral: #F36C62;
-            --lime: #DBFB64;
-            --ink: #202536;
-            --white: #FFFFFF;
+            /* 全局色彩规范 */
+            --bg-page: #f5f5f5;        /* 页面背景 */
+            --bg-card: #f7f7f7;        /* 任务卡片 */
+            --bg-wrapper: #fefefe;     /* 栏目分组底色 */
+            --text-main: #383b42;      /* 主字体 */
+            --text-sub: #b7b7b7;       /* 副字体 */
+            --accent: #4ac310;         /* 提亮/标注 */
+            --accent-light: #e3f5db;   /* 提亮浅底 */
+            --bg-nav: #ffffff;         /* 导航栏/标题栏 */
+            --border-light: #ebebeb;   /* 极浅边框用于区分卡片 */
             
             --radius-card: 22px;
             --radius-wrapper: 32px;
             --radius-btn: 999px;
-            --shadow-soft: 0 8px 24px rgba(32, 37, 54, 0.04);
+            --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.03);
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.02);
         }
 
         * {
@@ -46,7 +49,7 @@
         .fixed-bg {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(135deg, #E5F3FF 0%, #FFE2F4 100%);
+            background: var(--bg-page);
             z-index: -10;
             pointer-events: none;
         }
@@ -63,7 +66,7 @@
             padding-bottom: calc(100px + env(safe-area-inset-bottom));
             display: flex;
             flex-direction: column;
-            color: var(--ink);
+            color: var(--text-main);
             user-select: none;
             -webkit-user-select: none;
         }
@@ -83,11 +86,12 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
-            background: var(--ink);
+            background: var(--bg-nav);
             border-radius: var(--radius-btn);
             padding: 6px 12px;
-            box-shadow: 0 10px 30px rgba(32, 37, 54, 0.1);
+            box-shadow: var(--shadow-soft);
             flex-shrink: 0;
+            border: 1px solid var(--border-light);
         }
 
         .header-btn {
@@ -99,15 +103,15 @@
             border: none;
             font-size: 13px;
             font-weight: 700;
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--text-sub);
             padding: 8px 14px;
             border-radius: var(--radius-btn);
             cursor: pointer;
             transition: 0.3s;
         }
         .header-btn.active { 
-            color: var(--ink); 
-            background: var(--white);
+            color: var(--text-main); 
+            background: var(--bg-card);
         }
         
         /* 布局容器 */
@@ -129,6 +133,9 @@
             padding: 16px;
             margin-bottom: 12px;
             transition: 0.3s;
+            background-color: var(--bg-wrapper) !important; /* 强制统一底色 */
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-light);
         }
 
         /* 第一栏：头像+名字 | 星值 */
@@ -140,7 +147,7 @@
         }
 
         .profile-card {
-            background: var(--white);
+            background: var(--bg-wrapper);
             border-radius: var(--radius-card);
             padding: 16px;
             display: flex;
@@ -151,12 +158,13 @@
             box-shadow: var(--shadow-soft);
             flex: 0 0 auto;
             min-width: 120px;
+            border: 1px solid var(--border-light);
         }
 
         .avatar-container {
             width: 76px;
             height: 76px;
-            background: var(--lilac);
+            background: var(--accent-light);
             border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
             display: flex;
             align-items: center;
@@ -164,7 +172,7 @@
             overflow: hidden;
             position: relative;
             animation: blobFloat 4s ease-in-out infinite alternate;
-            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.1);
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.05);
         }
 
         @keyframes blobFloat {
@@ -176,7 +184,7 @@
             position: absolute;
             width: 8px;
             height: 8px;
-            background: var(--ink);
+            background: var(--text-main);
             border-radius: 50%;
             top: 40%;
         }
@@ -187,7 +195,7 @@
             position: absolute;
             width: 20px;
             height: 10px;
-            border-bottom: 3px solid var(--ink);
+            border-bottom: 3px solid var(--text-main);
             border-radius: 0 0 20px 20px;
             bottom: 25%;
             left: 50%;
@@ -213,7 +221,7 @@
         .profile-name {
             font-weight: 800;
             font-size: 16px;
-            color: var(--ink);
+            color: var(--text-main);
             text-align: center;
             max-width: 100px;
             overflow: hidden;
@@ -222,9 +230,9 @@
         }
 
         .edit-profile-btn {
-            background: var(--icy-blue);
+            background: var(--bg-page);
             border: none;
-            color: var(--ink);
+            color: var(--text-main);
             padding: 6px 14px;
             border-radius: var(--radius-btn);
             font-size: 12px;
@@ -247,10 +255,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: var(--shadow-soft);
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-light);
         }
-        .stats-card.today { background: var(--aqua); color: var(--white); }
-        .stats-card.month { background: var(--white); color: var(--ink); }
+        /* 今日获得用浅绿，本月获得用白 */
+        .stats-card.today { background: var(--accent-light); color: var(--text-main); }
+        .stats-card.month { background: var(--bg-wrapper); color: var(--text-main); }
 
         .stats-label {
             font-size: 14px;
@@ -261,6 +271,7 @@
         .stats-number {
             font-size: 26px;
             font-weight: 900;
+            color: var(--accent);
             display: flex;
             align-items: center;
             justify-content: flex-end;
@@ -269,11 +280,12 @@
 
         /* 第二栏：日历 */
         .calendar-card {
-            background: var(--white);
+            background: var(--bg-wrapper);
             border-radius: var(--radius-card);
             padding: 20px;
             box-shadow: var(--shadow-soft);
             width: 100%;
+            border: 1px solid var(--border-light);
         }
 
         .calendar-header {
@@ -286,20 +298,20 @@
 
         .calendar-header .month-label {
             font-weight: 800;
-            color: var(--ink);
+            color: var(--text-main);
             font-size: 18px;
         }
 
         .calendar-nav-btn {
             position: absolute;
-            background: var(--icy-blue);
+            background: var(--bg-page);
             border: none;
             width: 32px;
             height: 32px;
             border-radius: 50%;
             font-size: 18px;
             cursor: pointer;
-            color: var(--ink);
+            color: var(--text-main);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -313,7 +325,7 @@
             grid-template-columns: repeat(7,1fr);
             text-align: center;
             font-size: 12px;
-            color: #8892A6;
+            color: var(--text-sub);
             margin-bottom: 8px;
             font-weight: 700;
         }
@@ -332,14 +344,14 @@
             font-size: 14px;
             font-weight: 700;
             border-radius: 50%;
-            color: var(--ink);
+            color: var(--text-main);
         }
 
-        .calendar-day.other-month { color: #D1D5E0; }
+        .calendar-day.other-month { color: var(--text-sub); }
         
         .calendar-day.today {
-            background: var(--lilac);
-            color: var(--white);
+            background: var(--accent-light);
+            color: var(--accent);
             font-weight: 900;
             aspect-ratio: 1 / 1;
             width: 100%;
@@ -354,7 +366,7 @@
             align-items: center;
             margin: 0 0 12px 0; 
             font-weight: 800;
-            color: var(--ink);
+            color: var(--text-main);
             font-size: 21px;
             width: 100%;
         }
@@ -381,7 +393,7 @@
 
         .sub-title {
             font-size: 14px; 
-            color: var(--ink); 
+            color: var(--text-main); 
             font-weight: 800; 
             margin: 12px 0 6px 4px;
             display: flex;
@@ -407,25 +419,26 @@
 
         /* 任务卡片 */
         .task-item {
-            background: var(--white);
+            background: var(--bg-card);
             border-radius: var(--radius-card);
             padding: 16px;
             display: flex;
             align-items: center;
             gap: 14px;
-            box-shadow: var(--shadow-soft);
+            box-shadow: var(--shadow-card);
             transition: 0.2s;
             width: 100%;
+            border: 1px solid var(--border-light);
         }
 
         .task-item.completed {
-            background: rgba(255, 255, 255, 0.6);
+            background: var(--bg-card);
             box-shadow: none;
-            opacity: 0.7;
+            opacity: 0.6;
         }
         
         .task-item.overdue {
-            background: #FFF0F0;
+            background: #fff4f4; /* 未完成用极其淡的红色或直接用底色 */
         }
 
         .task-icon {
@@ -447,8 +460,12 @@
         .task-name {
             font-weight: 800;
             font-size: 16px;
-            color: var(--ink);
+            color: var(--text-main);
             word-break: break-word;
+        }
+        .task-item.completed .task-name {
+            color: var(--text-sub);
+            text-decoration: line-through;
         }
 
         .task-meta {
@@ -457,7 +474,7 @@
             flex-wrap: wrap;
         }
 
-        /* 标签胶囊 */
+        /* 标签胶囊全部极简灰/浅绿化 */
         .tag {
             padding: 4px 10px;
             border-radius: 999px;
@@ -467,15 +484,16 @@
             align-items: center;
             justify-content: center;
             gap: 4px;
+            background: var(--border-light);
+            color: var(--text-main);
         }
-        .tag-green { background: var(--lime); color: var(--ink); } 
-        .tag-purple { background: #EDE8FF; color: var(--lilac); } 
-        .tag-pink { background: var(--soft-pink); color: var(--ink); } 
-        .tag-blue { background: var(--icy-blue); color: var(--ink); } 
-        .tag-orange { background: #FFF3D6; color: #D48A3D; } 
-        .tag-date { background: #F4F5F8; color: var(--ink); }
-        .tag-today { background: var(--lilac); color: var(--white); }
-        .tag-deadline { background: var(--aqua); color: var(--white); }
+        /* 用极简灰和浅绿区分标签 */
+        .tag-green { background: var(--accent-light); color: var(--accent); } 
+        .tag-purple, .tag-pink, .tag-blue { background: var(--bg-page); color: var(--text-main); } 
+        .tag-orange { background: var(--border-light); color: var(--text-main); } 
+        .tag-date { background: transparent; color: var(--text-sub); padding-left: 0; }
+        .tag-today { background: var(--accent-light); color: var(--accent); }
+        .tag-deadline { background: var(--border-light); color: var(--text-main); }
 
         /* 循环图标居中缩小 */
         .icon-repeat-small {
@@ -491,7 +509,7 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            border: 3px solid var(--icy-blue);
+            border: 2px solid var(--border-light);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -500,12 +518,12 @@
             cursor: pointer;
             flex-shrink: 0;
             transition: 0.2s;
-            background: var(--white);
+            background: var(--bg-wrapper);
         }
         .task-item.completed .task-check {
-            background: var(--aqua);
-            border-color: var(--aqua);
-            color: var(--white);
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg-nav);
         }
 
         /* 操作按钮 */
@@ -516,8 +534,8 @@
             justify-content: center;
         }
         .icon-btn {
-            background: var(--white);
-            border: none;
+            background: var(--bg-wrapper);
+            border: 1px solid var(--border-light);
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -525,14 +543,13 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            color: var(--ink);
+            color: var(--text-main);
             font-size: 16px;
-            box-shadow: 0 2px 8px rgba(32, 37, 54, 0.05);
         }
 
         .overdue-badge {
-            background: #FFE5E5;
-            color: var(--coral);
+            background: var(--border-light);
+            color: var(--text-main);
             padding: 6px 14px;
             border-radius: 999px;
             font-size: 12px;
@@ -541,9 +558,9 @@
 
         /* 按钮 */
         .btn-primary {
-            background: var(--lilac);
+            background: var(--accent);
             border: none;
-            color: var(--white);
+            color: var(--bg-nav);
             padding: 12px 20px;
             border-radius: var(--radius-btn);
             font-weight: 800;
@@ -553,15 +570,14 @@
             align-items: center;
             justify-content: center;
             gap: 4px;
-            box-shadow: 0 4px 12px rgba(152, 131, 244, 0.3);
             transition: 0.2s;
         }
         .btn-primary:active { transform: scale(0.96); }
         
         .btn-outline {
-            background: var(--white);
-            border: 2px solid var(--lilac);
-            color: var(--lilac);
+            background: var(--bg-nav);
+            border: 1px solid var(--border-light);
+            color: var(--text-main);
             padding: 10px 16px;
             border-radius: var(--radius-btn);
             font-weight: 800;
@@ -573,14 +589,14 @@
             gap: 4px;
             transition: 0.2s;
         }
-        .btn-outline:active { background: #EDE8FF; }
+        .btn-outline:active { background: var(--bg-page); }
         .btn-sm { padding: 8px 14px; font-size: 13px; }
 
         .hidden { display: none !important; }
 
         /* 考试任务 */
         .exam-item {
-            background: var(--white);
+            background: var(--bg-card);
             border-radius: var(--radius-card);
             padding: 16px;
             margin-bottom: 12px;
@@ -588,30 +604,31 @@
             flex-direction: column;
             gap: 12px;
             width: 100%;
-            box-shadow: var(--shadow-soft);
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-light);
         }
         .exam-score-input {
             width: 90px;
             padding: 10px 14px;
             border-radius: var(--radius-btn);
-            border: 2px solid var(--icy-blue);
+            border: 2px solid var(--border-light);
             text-align: center;
             font-weight: 800;
             font-size: 15px;
-            color: var(--ink);
+            color: var(--text-main);
             outline: none;
-            background: var(--white);
+            background: var(--bg-wrapper);
         }
-        .exam-score-input:focus { border-color: var(--lilac); background: var(--white); }
+        .exam-score-input:focus { border-color: var(--accent); background: var(--bg-nav); }
         .exam-stars {
             font-weight: 800;
             font-size: 14px;
-            color: var(--lilac);
+            color: var(--accent);
             display: flex;
             align-items: center;
             gap: 6px;
         }
-        .exam-stars.zero { color: #8892A6; }
+        .exam-stars.zero { color: var(--text-sub); }
 
         /* 底部导航 */
         .bottom-bar {
@@ -621,14 +638,15 @@
             transform: translateX(-50%);
             width: calc(100% - 40px);
             max-width: 400px;
-            background: var(--ink);
+            background: var(--bg-nav);
             padding: 12px 20px;
             display: flex;
             justify-content: space-around;
             align-items: center;
             border-radius: var(--radius-btn);
             z-index: 100;
-            box-shadow: 0 10px 30px rgba(32, 37, 54, 0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-light);
         }
         .bottom-btn {
             display: flex;
@@ -637,7 +655,7 @@
             justify-content: center;
             font-size: 12px;
             font-weight: 700;
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--text-sub);
             background: transparent;
             border: none;
             gap: 4px;
@@ -645,13 +663,13 @@
             transition: 0.2s;
             padding: 4px 20px;
         }
-        .bottom-btn.active { color: var(--white); transform: scale(1.1); }
+        .bottom-btn.active { color: var(--accent); transform: scale(1.1); }
 
         /* 模态框 */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(32, 37, 54, 0.4);
+            background: rgba(0, 0, 0, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -660,7 +678,7 @@
             backdrop-filter: blur(4px);
         }
         .modal-content {
-            background: var(--white);
+            background: var(--bg-nav);
             border-radius: 28px;
             padding: 28px;
             width: 100%;
@@ -673,7 +691,7 @@
         .modal-content h3 {
             font-size: 22px;
             margin-bottom: 24px;
-            color: var(--ink);
+            color: var(--text-main);
             font-weight: 800;
             display: flex;
             align-items: center;
@@ -682,23 +700,23 @@
             text-align: center;
         }
 
-        .modal-content label { font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 8px; display: block; }
+        .modal-content label { font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; display: block; }
         
         .modal-content input, .modal-content textarea, .modal-content select {
             width: 100%;
             padding: 14px 18px;
-            border: 2px solid var(--icy-blue);
+            border: 2px solid var(--border-light);
             border-radius: 16px;
             font-size: 15px;
             margin-bottom: 20px;
-            background: var(--white);
+            background: var(--bg-page);
             outline: none;
-            color: var(--ink);
+            color: var(--text-main);
             font-weight: 600;
             transition: 0.2s;
             box-sizing: border-box;
         }
-        .modal-content input:focus, .modal-content select:focus { border-color: var(--lilac); }
+        .modal-content input:focus, .modal-content select:focus { border-color: var(--accent); background: var(--bg-nav); }
         
         .modal-content input[type="date"] {
             height: 50px;
@@ -723,20 +741,20 @@
             align-items: center;
             justify-content: center;
         }
-        .btn-cancel { background: #F4F5F8; color: var(--ink); }
-        .btn-confirm { background: var(--lilac); color: var(--white); box-shadow: 0 4px 12px rgba(152, 131, 244, 0.3); }
-        .btn-danger { background: var(--coral); color: var(--white); }
+        .btn-cancel { background: var(--bg-page); color: var(--text-main); }
+        .btn-confirm { background: var(--accent); color: var(--bg-nav); }
+        .btn-danger { background: #ff4d4f; color: var(--bg-nav); }
 
         /* Toast */
         .toast-container { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; }
         .toast {
-            background: var(--ink);
-            color: var(--white);
+            background: var(--text-main);
+            color: var(--bg-nav);
             padding: 14px 24px;
             border-radius: var(--radius-btn);
             font-weight: 800;
             font-size: 14px;
-            box-shadow: 0 10px 30px rgba(32, 37, 54, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             animation: dropDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             align-items: center;
@@ -835,13 +853,13 @@
             </div>
 
             <!-- 额外任务分组 -->
-            <div class="section-wrapper" style="background-color: rgba(152, 131, 244, 0.15);">
+            <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left">
                         <img src="icon_gift_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 额外任务
                     </div>
                     <div class="title-right">
-                        <button class="btn-outline btn-sm hidden" id="addExtraBtn" style="border-color: var(--lilac); color: var(--lilac); background: white;">+ 新增</button>
+                        <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增</button>
                         <button class="collapse-btn hidden" data-target="extraTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;"></button>
                     </div>
                 </div>
@@ -851,14 +869,14 @@
 
         <div class="right-panel">
             <!-- 校内任务分组 -->
-            <div class="section-wrapper" style="background-color: rgba(219, 251, 100, 0.25);">
+            <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left">
                         <img src="icon_school_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 校内任务
-                        <span id="inSchoolCountBadge" style="font-size:13px; background:var(--white); color:var(--ink); padding:4px 12px; border-radius:999px; font-weight:900; box-shadow: var(--shadow-soft);">0项</span>
+                        <span id="inSchoolCountBadge" style="font-size:13px; background:var(--bg-page); color:var(--text-main); padding:4px 12px; border-radius:999px; font-weight:900;">0项</span>
                     </div>
                     <div class="title-right">
-                        <button class="btn-outline btn-sm" id="addInSchoolBtn" style="border-color: var(--ink); color: var(--ink); background: white;">+ 新增</button>
+                        <button class="btn-outline btn-sm" id="addInSchoolBtn">+ 新增</button>
                         <button class="collapse-btn hidden" data-target="inSchoolGroups"><img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;"></button>
                     </div>
                 </div>
@@ -866,14 +884,14 @@
             </div>
 
             <!-- 校外任务分组 -->
-            <div class="section-wrapper" style="background-color: rgba(243, 108, 98, 0.15);">
+            <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left">
                         <img src="icon_out_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 校外任务
-                        <span id="outSchoolCountBadge" style="font-size:13px; background:var(--white); color:var(--ink); padding:4px 12px; border-radius:999px; font-weight:900; box-shadow: var(--shadow-soft);">0项</span>
+                        <span id="outSchoolCountBadge" style="font-size:13px; background:var(--bg-page); color:var(--text-main); padding:4px 12px; border-radius:999px; font-weight:900;">0项</span>
                     </div>
                     <div class="title-right">
-                        <button class="btn-outline btn-sm" id="addOutSchoolBtn" style="border-color: var(--ink); color: var(--ink); background: white;">+ 新增</button>
+                        <button class="btn-outline btn-sm" id="addOutSchoolBtn">+ 新增</button>
                         <button class="collapse-btn hidden" data-target="outSchoolGroups"><img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;"></button>
                     </div>
                 </div>
@@ -881,13 +899,13 @@
             </div>
 
             <!-- 考试任务分组 -->
-            <div class="section-wrapper" style="background-color: rgba(106, 213, 232, 0.2);">
+            <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left">
                         <img src="icon_exam_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 考试任务
                     </div>
                     <div class="title-right">
-                        <button class="btn-outline btn-sm" id="addExamBtn" style="border-color: var(--ink); color: var(--ink); background: white;">+ 新增考试</button>
+                        <button class="btn-outline btn-sm" id="addExamBtn">+ 新增考试</button>
                         <button class="collapse-btn hidden" data-target="examTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;"></button>
                     </div>
                 </div>
@@ -895,13 +913,13 @@
             </div>
 
             <!-- 未完成任务分组 -->
-            <div class="section-wrapper" style="background-color: rgba(255, 152, 0, 0.15);">
+            <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left" style="font-size:18px;">
                         <img src="icon_overdue_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 未完成任务
                     </div>
                     <div class="title-right">
-                        <span id="overdueCountBadge" style="font-size:13px; background:var(--white); color:var(--ink); padding:4px 12px; border-radius:999px; font-weight:900; box-shadow: var(--shadow-soft);">0项</span>
+                        <span id="overdueCountBadge" style="font-size:13px; background:var(--bg-page); color:var(--text-main); padding:4px 12px; border-radius:999px; font-weight:900;">0项</span>
                         <button class="collapse-btn hidden" data-target="overdueTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;"></button>
                     </div>
                 </div>
@@ -909,7 +927,7 @@
             </div>
 
             <!-- 任务库管理 -->
-            <div id="adminTaskLibrarySection" class="hidden section-wrapper" style="background-color: rgba(255, 255, 255, 0.4);">
+            <div id="adminTaskLibrarySection" class="hidden section-wrapper">
                 <div class="section-title" style="margin-bottom: 12px;">
                     <div class="title-left" style="display:flex; align-items:center; gap:8px;">
                         <img src="icon_book_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 
@@ -917,7 +935,7 @@
                     </div>
                     <div class="title-right" style="display:flex; align-items:center; gap:8px;">
                         <button class="btn-primary btn-sm" id="openCreateTaskBtn" style="height: 36px;">+ 新增任务</button>
-                        <button class="btn-outline btn-sm" id="ocrBtn" style="height: 36px; padding: 0 12px; border-color: var(--ink); color: var(--ink); background: white;">
+                        <button class="btn-outline btn-sm" id="ocrBtn" style="height: 36px; padding: 0 12px;">
                             <img src="icon_camera.svg" class="zoom-icon" style="width: 18px; height: 18px;">
                         </button>
                         <button class="btn-outline btn-sm" id="resetStarsBtn" style="display:none;"></button>
@@ -1204,12 +1222,9 @@
             }
 
             function getTagClass(text) {
-                if (text === '校内任务') return 'tag-green';
-                if (text === '校外任务') return 'tag-orange';
-                if (text === '语文') return 'tag-purple';
-                if (text === '数学') return 'tag-pink';
-                if (text === '英语') return 'tag-blue';
-                return 'tag-green';
+                if (text === '校内任务' || text === '校外任务') return 'tag-green';
+                if (text === '语文' || text === '数学' || text === '英语') return 'tag-purple';
+                return 'tag-orange';
             }
 
             function renderTaskGroup(containerId, category, countBadgeId) {
@@ -1233,7 +1248,7 @@
                 }
 
                 if (tasks.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--ink);background:rgba(255,255,255,0.6);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);">暂无任务，好好休息~</div>`;
+                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">暂无任务，好好休息~</div>`;
                     return;
                 }
 
@@ -1338,7 +1353,7 @@
                 }
 
                 if (todayExtras.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--ink);background:rgba(255,255,255,0.6);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);">暂无额外任务</div>`;
+                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">暂无额外任务</div>`;
                     return;
                 }
                 
@@ -1370,7 +1385,7 @@
                 if (!container) return;
                 
                 if (state.exams.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--ink);background:rgba(255,255,255,0.6);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);">暂无考试记录</div>`;
+                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">暂无考试记录</div>`;
                     return;
                 }
                 
@@ -1387,18 +1402,18 @@
 
                     const scoreHtml = canEditScore
                         ? `<input type="number" step="0.5" min="0" max="100" class="exam-score-input" data-exam-id="${exam.id}" value="${exam.score !== null ? exam.score : ''}" placeholder="输入分数">`
-                        : `<span style="font-weight:900; color:var(--ink); font-size:16px; margin-left:4px;">${exam.score}分</span>`;
+                        : `<span style="font-weight:900; color:var(--text-main); font-size:16px; margin-left:4px;">${exam.score}分</span>`;
                         
                     return `
                         <div class="exam-item">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div style="font-weight:800; font-size:16px; color:var(--ink); display:flex; align-items:center; gap:8px;">
+                                <div style="font-weight:800; font-size:16px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
                                     <img src="icon_exam_card.svg" class="zoom-icon" style="width: 20px; height: 20px; vertical-align: middle;"> 
                                     <span style="line-height: 1.2;">${escapeHtml(exam.name)}</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <span class="exam-stars ${isZero ? 'zero' : ''}">${starText}</span>
-                                    <span style="font-size:12px; color:#8892A6; font-weight:800;">${exam.date}</span>
+                                    <span style="font-size:12px; color:var(--text-sub); font-weight:800;">${exam.date}</span>
                                 </div>
                             </div>
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
@@ -1431,7 +1446,7 @@
                 document.getElementById('overdueCountBadge').textContent = `${overdueTasks.length}项`;
 
                 if (overdueTasks.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 8px; padding:16px;color:var(--ink);background:rgba(255,255,255,0.6);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);"><img src="icon_done.svg" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;"> 全部完成啦！</div>`;
+                    container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 8px; padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;"><img src="icon_done.svg" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;"> 全部完成啦！</div>`;
                     return;
                 }
 
@@ -1455,12 +1470,11 @@
                     }
                     tagsHtml += `<span class="tag tag-pink">${dateLabel}</span>`;
 
-                    // 修改未完成任务卡片的右侧操作区
                     const showAdminActions = (currentRole === 'admin' && isAdminAuthenticated);
                     const actionHtml = showAdminActions ? `
                         <div class="task-actions">
-                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}" style="color: var(--ink);"><img src="icon_edit.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
-                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}" style="color: var(--coral);"><img src="icon_delete.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
+                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
+                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
                         </div>
                     ` : '';
 
@@ -1485,7 +1499,7 @@
                 const container = document.getElementById('taskLibraryList');
                 if (!container) return;
                 if (state.tasks.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--ink);font-weight:800;">暂无任务</div>`;
+                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);font-weight:800;">暂无任务</div>`;
                     return;
                 }
                 container.innerHTML = state.tasks.map(task => `
@@ -1670,7 +1684,7 @@
 
                 modal.innerHTML = `
                     <h3>${titleHtml}</h3>
-                    <div id="modalBody">${contentHTML || `<p style="margin-bottom:24px; color:var(--ink); font-weight:600; text-align:center;">${escapeHtml(content || '')}</p>`}</div>
+                    <div id="modalBody">${contentHTML || `<p style="margin-bottom:24px; color:var(--text-main); font-weight:600; text-align:center;">${escapeHtml(content || '')}</p>`}</div>
                     <div class="modal-actions">
                         ${cancelBtnHtml}
                         <button class="${danger ? 'btn-danger' : 'btn-confirm'}" id="modalConfirm" style="${actionStyle}">${confirmText}</button>
@@ -1708,7 +1722,7 @@
                         <input id="profileNameInput" type="text" value="${escapeHtml(currentName)}" maxlength="10" />
                         <label>头像</label>
                         <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
-                            <div id="avatarPreview" class="avatar" style="width:72px;height:72px;border-radius:50%;background:var(--lilac);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:transparent;${pendingAvatar ? `background-image:url(${pendingAvatar});background-size:cover;` : ''}"></div>
+                            <div id="avatarPreview" class="avatar" style="width:72px;height:72px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:transparent;${pendingAvatar ? `background-image:url(${pendingAvatar});background-size:cover;` : ''}"></div>
                             <label class="btn-outline" style="cursor:pointer; padding:10px 20px;">
                                 上传图片
                                 <input id="avatarFileInput" type="file" accept="image/*" style="display:none;" />
@@ -1967,28 +1981,28 @@
                                 <img src="icon_camera.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 选择图片 / 拍照
                                 <input type="file" accept="image/*" id="ocrFileInput" style="display:none;">
                             </label>
-                            <div id="ocrStatus" style="margin-top:12px; font-size:13px; color:var(--ink); font-weight:800;"></div>
+                            <div id="ocrStatus" style="margin-top:12px; font-size:13px; color:var(--text-main); font-weight:800;"></div>
                         </div>
                         <div id="ocrPreviewContainer" style="display:none; margin-bottom:16px; text-align:center;">
-                            <img id="ocrPreviewImg" style="max-width:100%; max-height:120px; border-radius:16px; border:2px solid var(--icy-blue);">
+                            <img id="ocrPreviewImg" style="max-width:100%; max-height:120px; border-radius:16px; border:2px solid var(--border-light);">
                         </div>
                         
                         <label>识别文字（可编辑，按行拆分）</label>
                         <textarea id="ocrResult" rows="6" placeholder="识别结果会显示在这里..."></textarea>
                         
                         <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
-                            <input type="checkbox" id="ocrSplitCheck" checked style="width:20px; height:20px; margin:0; accent-color:var(--lilac);" />
-                            <label for="ocrSplitCheck" style="margin:0; font-size:14px; color:var(--ink); cursor:pointer; font-weight:800;">按换行拆分多个任务</label>
+                            <input type="checkbox" id="ocrSplitCheck" checked style="width:20px; height:20px; margin:0; accent-color:var(--accent);" />
+                            <label for="ocrSplitCheck" style="margin:0; font-size:14px; color:var(--text-main); cursor:pointer; font-weight:800;">按换行拆分多个任务</label>
                         </div>
 
-                        <div style="background:var(--icy-blue); padding:16px; border-radius:20px;">
-                            <div style="font-size:13px; font-weight:900; color:var(--ink); margin-bottom:12px;">统一设置（应用给上述任务）</div>
-                            <label style="color:var(--ink);">分类</label>
+                        <div style="background:var(--bg-page); padding:16px; border-radius:20px; border: 1px solid var(--border-light);">
+                            <div style="font-size:13px; font-weight:900; color:var(--text-main); margin-bottom:12px;">统一设置（应用给上述任务）</div>
+                            <label style="color:var(--text-main);">分类</label>
                             <select id="ocrCategory" onchange="updateOcrSubjectOptions()">
                                 <option value="校内任务">校内任务</option>
                                 <option value="校外任务">校外任务</option>
                             </select>
-                            <label style="color:var(--ink);">学科</label>
+                            <label style="color:var(--text-main);">学科</label>
                             <div id="ocrSubjectContainer">
                                 <select id="ocrSubjectSelect">
                                     <option value="语文">语文</option>
@@ -1999,20 +2013,20 @@
                             </div>
                             <div style="display:flex; gap:12px; margin-bottom:16px;">
                                 <div style="flex:1;">
-                                    <label style="color:var(--ink);">开始时间</label>
-                                    <input id="ocrStartDate" type="date" value="${today}" style="margin-bottom:0;" />
+                                    <label style="color:var(--text-main);">开始时间</label>
+                                    <input id="ocrStartDate" type="date" value="${today}" style="margin-bottom:0; background:var(--bg-nav);" />
                                 </div>
                                 <div style="flex:1;">
-                                    <label style="color:var(--ink);">结束时间(留空即当日)</label>
+                                    <label style="color:var(--text-main);">结束时间(留空即当日)</label>
                                     <div style="display:flex; gap:6px;">
-                                        <input id="ocrEndDate" type="date" value="" style="margin-bottom:0;" />
+                                        <input id="ocrEndDate" type="date" value="" style="margin-bottom:0; background:var(--bg-nav);" />
                                         <button type="button" class="btn-outline" onclick="document.getElementById('ocrEndDate').value=''" style="padding:0 10px; font-size:12px; height: 50px;">清空</button>
                                     </div>
                                 </div>
                             </div>
                             
-                            <label style="color:var(--ink);">每日重复</label>
-                            <select id="ocrDaily" style="margin-bottom:0;">
+                            <label style="color:var(--text-main);">每日重复</label>
+                            <select id="ocrDaily" style="margin-bottom:0; background:var(--bg-nav);">
                                 <option value="false" selected>否</option>
                                 <option value="true">是</option>
                             </select>
@@ -2356,23 +2370,23 @@
                     
                     let html = `
                         <div style="padding: 10px;">
-                            <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--aqua); color:white; padding:16px 24px; border-radius:20px;">
+                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
                                 <span>今日获得</span>
-                                <div style="display:flex; align-items:center; gap:12px;">
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
                                     <span>${calcTodayStars()}</span>
                                     <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px;">
                                 </div>
                             </div>
-                            <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--lilac); color:white; padding:16px 24px; border-radius:20px;">
+                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-page); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
                                 <span>本月累计</span>
-                                <div style="display:flex; align-items:center; gap:12px;">
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
                                     <span>${monthData.total}</span>
                                     <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px;">
                                 </div>
                             </div>
-                            <div style="font-size:18px; font-weight:900; color:var(--ink); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--white); border: 2px solid var(--icy-blue); padding:16px 24px; border-radius:20px;">
+                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-wrapper); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
                                 <span>本月奖励</span>
-                                <div style="display:flex; align-items:center; gap:12px; color:var(--lilac);">
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
                                     <span>${monthData.total}</span>
                                     <img src="icon_currency.svg" class="zoom-icon" style="width: 22px; height: 22px;">
                                 </div>
