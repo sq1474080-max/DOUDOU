@@ -774,15 +774,12 @@
                 min-width: 0; 
             }
             
-            /* 核心修改：学科内部的任务改成双列 */
             .task-grid-inner {
                 display: grid;
-                grid-template-columns: 1fr 1fr; /* 两列等宽 */
+                grid-template-columns: 1fr 1fr;
                 gap: 16px;
             }
             
-            /* 未完成任务也直接用双列（因为外层容器是 task-grid-inner） */
-            /* 左侧面板的额外任务保持单列，不应用 task-grid-inner */
             #extraTaskList {
                 display: flex;
                 flex-direction: column;
@@ -1257,7 +1254,6 @@
                 }
 
                 sortedSubjects.forEach(sub => {
-                    // 生成 sub-title 和内部双列容器
                     html += `<div class="sub-title"><img src="icon_subject.svg" class="zoom-icon" style="width: 16px; height: 16px;"> ${sub}</div>`;
                     html += `<div class="task-grid-inner">`;
                     groups[sub].forEach(task => {
@@ -1435,8 +1431,6 @@
                 document.getElementById('overdueCountBadge').textContent = `${overdueTasks.length}项`;
 
                 if (overdueTasks.length === 0) {
-                    // 注意：这里的外层容器是 task-grid-inner，所以内部的 no-data 提示如果不带 grid-column: 1/-1，可能只会占左半边。
-                    // 为了安全，加上 style 占据全宽。
                     container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 8px; padding:16px;color:var(--ink);background:rgba(255,255,255,0.6);border-radius:var(--radius-card);font-weight:800;box-shadow:var(--shadow-soft);"><img src="icon_done.svg" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;"> 全部完成啦！</div>`;
                     return;
                 }
@@ -1461,6 +1455,15 @@
                     }
                     tagsHtml += `<span class="tag tag-pink">${dateLabel}</span>`;
 
+                    // 修改未完成任务卡片的右侧操作区
+                    const showAdminActions = (currentRole === 'admin' && isAdminAuthenticated);
+                    const actionHtml = showAdminActions ? `
+                        <div class="task-actions">
+                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}" style="color: var(--ink);"><img src="icon_edit.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
+                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}" style="color: var(--coral);"><img src="icon_delete.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
+                        </div>
+                    ` : '';
+
                     return `
                         <div class="task-item overdue">
                             <div class="task-icon">
@@ -1472,7 +1475,7 @@
                                     ${tagsHtml}
                                 </div>
                             </div>
-                            <span class="overdue-badge">未完成</span>
+                            ${actionHtml}
                         </div>
                     `;
                 }).join('');
