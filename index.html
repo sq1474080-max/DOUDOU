@@ -25,8 +25,9 @@
             --bg-wrapper: #fefefe;     /* 栏目分组底色 */
             --text-main: #383b42;      /* 主字体 */
             --text-sub: #b7b7b7;       /* 副字体 */
-            --accent: #4ac310;         /* 提亮/标注 */
-            --accent-light: #e3f5db;   /* 提亮浅底 */
+            --accent: #74b0e1;         /* 主色：蓝色 */
+            --accent-light: #c0e2f9;   /* 辅助色：浅蓝 */
+            --accent-warm: #f4c65c;    /* 辅助色2：暖黄 */
             --bg-nav: #ffffff;         /* 导航栏/标题栏 */
             --border-light: #ebebeb;   /* 极浅边框用于区分卡片 */
             
@@ -133,7 +134,7 @@
             padding: 16px;
             margin-bottom: 12px;
             transition: 0.3s;
-            background-color: var(--bg-wrapper) !important;
+            background-color: var(--bg-wrapper) !important; /* 强制统一底色 */
             box-shadow: var(--shadow-soft);
             border: 1px solid var(--border-light);
         }
@@ -258,19 +259,10 @@
             box-shadow: var(--shadow-card);
             border: 1px solid var(--border-light);
         }
-        
-        /* 调整点 1：今日获得用深绿底白字 */
-        .stats-card.today { 
-            background: var(--accent); 
-            color: var(--bg-nav); 
-            border-color: var(--accent);
-        }
-        .stats-card.today .stats-label { color: var(--bg-nav); }
-        .stats-card.today .stats-number { color: var(--bg-nav); }
-        /* 让今日获得里的黑色星星图标反转为纯白 */
-        .stats-card.today .stats-number img { filter: brightness(0) invert(1); }
-        
+        /* 今日获得用主色蓝突出，本月获得用白底 */
+        .stats-card.today { background: var(--accent); color: #ffffff; border-color: var(--accent); }
         .stats-card.month { background: var(--bg-wrapper); color: var(--text-main); }
+        .stats-card.today .stats-number { color: #ffffff; }
 
         .stats-label {
             font-size: 14px;
@@ -359,10 +351,9 @@
 
         .calendar-day.other-month { color: var(--text-sub); }
         
-        /* 调整点 3：日历今天用深绿底白字 */
         .calendar-day.today {
-            background: var(--accent);
-            color: var(--bg-nav);
+            background: var(--accent-light);
+            color: var(--accent);
             font-weight: 900;
             aspect-ratio: 1 / 1;
             width: 100%;
@@ -449,7 +440,7 @@
         }
         
         .task-item.overdue {
-            background: #fff4f4; 
+            background: color-mix(in srgb, var(--accent-warm) 16%, var(--bg-wrapper));
         }
 
         .task-icon {
@@ -485,7 +476,7 @@
             flex-wrap: wrap;
         }
 
-        /* 标签胶囊全部极简灰/浅绿化 */
+        /* 标签胶囊全部极简灰/浅蓝/浅黄化 */
         .tag {
             padding: 4px 10px;
             border-radius: 999px;
@@ -498,9 +489,10 @@
             background: var(--border-light);
             color: var(--text-main);
         }
+        /* 用极简灰、浅蓝和浅黄区分标签 */
         .tag-green { background: var(--accent-light); color: var(--accent); } 
         .tag-purple, .tag-pink, .tag-blue { background: var(--bg-page); color: var(--text-main); } 
-        .tag-orange { background: var(--border-light); color: var(--text-main); } 
+        .tag-orange { background: color-mix(in srgb, var(--accent-warm) 30%, var(--bg-wrapper)); color: var(--text-main); } 
         .tag-date { background: transparent; color: var(--text-sub); padding-left: 0; }
         .tag-today { background: var(--accent-light); color: var(--accent); }
         .tag-deadline { background: var(--border-light); color: var(--text-main); }
@@ -530,8 +522,6 @@
             transition: 0.2s;
             background: var(--bg-wrapper);
         }
-        
-        /* 调整点 2：打卡打勾的底色 #4ac310 */
         .task-item.completed .task-check {
             background: var(--accent);
             border-color: var(--accent);
@@ -560,7 +550,7 @@
         }
 
         .overdue-badge {
-            background: var(--border-light);
+            background: var(--accent-warm);
             color: var(--text-main);
             padding: 6px 14px;
             border-radius: 999px;
@@ -755,7 +745,7 @@
         }
         .btn-cancel { background: var(--bg-page); color: var(--text-main); }
         .btn-confirm { background: var(--accent); color: var(--bg-nav); }
-        .btn-danger { background: #ff4d4f; color: var(--bg-nav); }
+        .btn-danger { background: var(--accent-warm); color: var(--text-main); }
 
         /* Toast */
         .toast-container { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; }
@@ -1913,6 +1903,7 @@
                         const name = document.getElementById('extraNameInput').value.trim();
                         const reward = parseInt(document.getElementById('extraRewardInput').value, 10);
                         if (!name) { alert('请输入名称'); return false; }
+                        // 允许负数
                         if (isNaN(reward) || reward < -50 || reward > 50) { alert('星值必须在-50到50之间'); return false; }
                         
                         if (isEdit) {
@@ -2162,6 +2153,7 @@
                 }, 100);
             }
 
+            // 重点修复：增加切回前台自动拉取最新数据的机制
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
                     if (supabaseClient) {
@@ -2170,6 +2162,7 @@
                 }
             });
 
+            // 下拉刷新逻辑
             let touchStartY = 0;
             let isPulling = false;
 
@@ -2379,11 +2372,11 @@
                     
                     let html = `
                         <div style="padding: 10px;">
-                            <div style="font-size:18px; font-weight:900; color:var(--bg-nav); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--accent); padding:16px 24px; border-radius:20px;">
+                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
                                 <span>今日获得</span>
-                                <div style="display:flex; align-items:center; gap:12px;">
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
                                     <span>${calcTodayStars()}</span>
-                                    <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px; filter: brightness(0) invert(1);">
+                                    <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px;">
                                 </div>
                             </div>
                             <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-page); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
