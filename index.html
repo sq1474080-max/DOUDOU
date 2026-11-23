@@ -102,10 +102,22 @@
             cursor: pointer;
             transition: 0.3s;
         }
-        .header-btn.active { color: var(--text-main); background: var(--bg-card); }
+        .header-btn.active {
+            color: var(--text-main);
+            background: var(--bg-card);
+        }
 
-        .layout-container { display: flex; flex-direction: column; gap: 10px; }
-        .left-panel, .right-panel { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .layout-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
 
         .section-wrapper {
             border-radius: var(--radius-wrapper);
@@ -255,7 +267,7 @@
             gap: 12px;
         }
 
-        /* 日历：周视图 */
+        /* ============ 日历（周视图） ============ */
         .calendar-card {
             background: var(--bg-wrapper);
             border-radius: var(--radius-card);
@@ -327,21 +339,25 @@
             color: var(--text-main);
         }
 
+        /* 今天：保持原样式，浅蓝底蓝字，不参与完成统计 */
         .calendar-day.today {
             background: var(--accent-light);
             color: var(--accent);
             font-weight: 900;
         }
-
+        /* 过去日期：全部完成 = 蓝底白字 */
         .calendar-day.completed {
             background: var(--accent);
             color: #ffffff;
+            font-weight: 900;
         }
-
+        /* 过去日期：有未完成 = 黄底白字 */
         .calendar-day.incomplete {
             background: var(--accent-warm);
             color: #ffffff;
+            font-weight: 900;
         }
+        /* 未来日期：无底色，保持普通文字色 */
 
         .section-title {
             display: flex;
@@ -353,8 +369,16 @@
             font-size: 21px;
             width: 100%;
         }
-        .section-title .title-left { display: flex; align-items: center; gap: 8px; }
-        .section-title .title-right { display: flex; align-items: center; gap: 8px; }
+        .section-title .title-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title .title-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
         .collapse-btn {
             background: transparent;
@@ -376,8 +400,19 @@
             gap: 6px;
         }
 
-        .task-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 4px; width: 100%; }
-        .task-grid-inner { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 4px;
+            width: 100%;
+        }
+
+        .task-grid-inner {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
 
         .task-item {
             background: var(--bg-card);
@@ -411,7 +446,12 @@
             background: transparent;
         }
 
-        .task-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .task-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
         .task-name {
             font-weight: 800;
@@ -419,9 +459,16 @@
             color: var(--text-main);
             word-break: break-word;
         }
-        .task-item.completed .task-name { color: var(--text-sub); text-decoration: line-through; }
+        .task-item.completed .task-name {
+            color: var(--text-sub);
+            text-decoration: line-through;
+        }
 
-        .task-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+        .task-meta {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
 
         .tag {
             padding: 4px 10px;
@@ -471,7 +518,12 @@
             color: var(--bg-nav);
         }
 
-        .task-actions { display: flex; gap: 4px; align-items: center; justify-content: center; }
+        .task-actions {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            justify-content: center;
+        }
         .icon-btn {
             background: var(--bg-wrapper);
             border: 1px solid var(--border-light);
@@ -567,7 +619,7 @@
         }
         .exam-stars.zero { color: var(--text-sub); }
 
-        /* 底部导航：只保留图标 */
+        /* ============ 底部导航（只保留图标） ============ */
         .bottom-bar {
             position: fixed;
             bottom: 20px;
@@ -711,10 +763,29 @@
                 margin: 0 auto;
                 gap: 20px;
             }
-            .left-panel { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 10px; }
-            .right-panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-            .task-grid-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-            #extraTaskList { display: flex; flex-direction: column; gap: 16px; }
+            .left-panel {
+                position: sticky;
+                top: 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .right-panel {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                min-width: 0;
+            }
+            .task-grid-inner {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            #extraTaskList {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
         }
     </style>
 </head>
@@ -755,7 +826,7 @@
             <div class="calendar-card">
                 <div class="calendar-header">
                     <button class="calendar-nav-btn" id="prevMonth">‹</button>
-                    <span class="month-label" id="calendarMonth">2026年11月</span>
+                    <span class="month-label" id="calendarMonth"></span>
                     <button class="calendar-nav-btn" id="nextMonth">›</button>
                 </div>
                 <div class="calendar-weekdays">
@@ -1082,7 +1153,8 @@
                 }
             }
 
-            // 判断某一天（过去）的完成状态：'completed' | 'incomplete' | 'none'
+            // 新增：判断某天的完成状态
+            // 返回 'completed' | 'incomplete' | 'none'
             function getDayCompletionStatus(dateStr) {
                 const regularTasks = state.tasks.filter(task => {
                     if (task.startDate > dateStr) return false;
@@ -1129,7 +1201,7 @@
                 }
             }
 
-            // 周历渲染
+            // 重写：周历渲染
             function renderCalendar() {
                 const start = calendarWeekStart;
                 const monthLabel = document.getElementById('calendarMonth');
@@ -1145,6 +1217,7 @@
                     const isToday = dateStr === todayStr;
                     const isFuture = dateStr > todayStr;
                     let status = '';
+                    // 今天不参与完成统计；未来日期不上色
                     if (!isToday && !isFuture) {
                         const s = getDayCompletionStatus(dateStr);
                         if (s === 'completed') status = 'completed';
@@ -2205,3 +2278,188 @@
                 document.body.addEventListener('click', (e) => {
                     const target = e.target.closest('[data-action]');
                     if (!target) return;
+                    const action = target.dataset.action;
+
+                    if (action === 'toggle-check') {
+                        toggleTaskCheck(target.dataset.taskId);
+                    } else if (action === 'toggle-extra') {
+                        toggleExtraCheck(target.dataset.extraId);
+                    } else if (action === 'edit-task') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const task = state.tasks.find(t => t.id === target.dataset.taskId);
+                            if (task) openTaskModal(task);
+                        }
+                    } else if (action === 'delete-task') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) deleteTaskConfirm(target.dataset.taskId);
+                    } else if (action === 'edit-extra') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const extra = state.extraTasks.find(t => t.id === target.dataset.extraId);
+                            if (extra) openExtraModal(extra);
+                        }
+                    } else if (action === 'delete-extra') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const extraId = target.dataset.extraId;
+                            showModal({
+                                title: '删除额外任务',
+                                content: '确定删除吗？',
+                                confirmText: '删除',
+                                danger: true,
+                                onConfirm: () => {
+                                    state.extraTasks = state.extraTasks.filter(t => t.id !== extraId);
+                                    state.checkins = state.checkins.filter(c => !(c.taskId === extraId && c.isExtra));
+                                    saveState();
+                                    renderAll();
+                                    showToast('已删除');
+                                }
+                            });
+                        }
+                    } else if (action === 'edit-exam') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const exam = state.exams.find(x => x.id === target.dataset.examId);
+                            if (exam) openExamModal(exam);
+                        }
+                    } else if (action === 'delete-exam') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const examId = target.dataset.examId;
+                            showModal({
+                                title: '删除考试',
+                                content: '确定删除该考试记录吗？',
+                                confirmText: '删除',
+                                danger: true,
+                                onConfirm: () => {
+                                    state.exams = state.exams.filter(x => x.id !== examId);
+                                    saveState();
+                                    renderAll();
+                                    showToast('已删除');
+                                }
+                            });
+                        }
+                    }
+                });
+
+                // 翻周（保持原有按钮 id，只改逻辑）
+                document.getElementById('prevMonth').addEventListener('click', () => {
+                    calendarWeekStart = new Date(calendarWeekStart.getFullYear(), calendarWeekStart.getMonth(), calendarWeekStart.getDate() - 7);
+                    renderCalendar();
+                });
+                document.getElementById('nextMonth').addEventListener('click', () => {
+                    calendarWeekStart = new Date(calendarWeekStart.getFullYear(), calendarWeekStart.getMonth(), calendarWeekStart.getDate() + 7);
+                    renderCalendar();
+                });
+
+                document.getElementById('exportCsvBtn').addEventListener('click', () => {
+                    const rows = [['日期', '类型', '名称', '详情/分数', '获得星值']];
+                    state.checkins.forEach(c => {
+                        if (c.isExtra) {
+                            const t = state.extraTasks.find(x => x.id === c.taskId);
+                            rows.push([c.date, '额外任务', t ? t.name : '已删除', '-', c.reward + '星']);
+                        } else {
+                            const t = state.tasks.find(x => x.id === c.taskId);
+                            rows.push([c.date, '日常打卡', t ? t.name : '已删除', '-', '见月度奖励']);
+                        }
+                    });
+                    state.exams.forEach(e => {
+                        if (e.score !== null) {
+                            rows.push([e.date, '考试', e.name, e.score + '分', getExamStars(e.score)]);
+                        }
+                    });
+                    const csv = rows.map(r => r.join(',')).join('\n');
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], {type:'text/csv'}));
+                    link.download = `星值记录_${getBeijingDateStr()}.csv`;
+                    link.click();
+                    showToast('CSV 已导出');
+                });
+
+                document.getElementById('bottomHome').addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                document.getElementById('bottomStats').addEventListener('click', () => {
+                    const monthData = calcMonthStars();
+                    const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
+
+                    let html = `
+                        <div style="padding: 10px;">
+                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
+                                <span>今日获得</span>
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
+                                    <span>${calcTodayStars()}</span>
+                                    <img src="icon_star.svg" class="zoom-icon" style="width: 18px; height: 18px;">
+                                </div>
+                            </div>
+                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-page); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
+                                <span>本月累计</span>
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
+                                    <span>${monthData.total}</span>
+                                    <img src="icon_star.svg" class="zoom-icon" style="width: 18px; height: 18px;">
+                                </div>
+                            </div>
+                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-wrapper); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
+                                <span>本月奖励</span>
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
+                                    <span>${monthData.total}</span>
+                                    <img src="icon_currency.svg" class="zoom-icon" style="width: 18px; height: 18px;">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    if (isAdmin) {
+                        showModal({
+                            title: '<img src="icon_stats_title.svg" style="width: 32px; height: 32px; vertical-align: middle;"> 星值统计',
+                            contentHTML: html,
+                            confirmText: '知道了',
+                            cancelText: '清零',
+                            onCancel: () => {
+                                setTimeout(() => {
+                                    showModal({
+                                        title: '⚠️ 清零确认',
+                                        content: '确定要清空现有所有任务、打卡记录、额外任务和考试记录吗？清零后不影响后续新增。',
+                                        confirmText: '确认',
+                                        cancelText: '取消',
+                                        danger: true,
+                                        onConfirm: () => {
+                                            state.tasks = [];
+                                            state.checkins = [];
+                                            state.extraTasks = [];
+                                            state.exams = [];
+                                            saveState();
+                                            renderAll();
+                                            showToast('已清空现有所有记录');
+                                        }
+                                    });
+                                }, 50);
+                            }
+                        });
+                    } else {
+                        showModal({
+                            title: '<img src="icon_stats_title.svg" style="width: 32px; height: 32px; vertical-align: middle;"> 星值统计',
+                            contentHTML: html,
+                            confirmText: '知道了',
+                            cancelText: ''
+                        });
+                    }
+                });
+            }
+
+            function init() {
+                if (!state.checkins) state.checkins = [];
+                if (!state.exams) state.exams = [];
+                if (!state.extraTasks) state.extraTasks = [];
+                if (!state.profile) state.profile = { name: 'HEIDI', avatar: '' };
+
+                bindEvents();
+                renderAll();
+
+                if (supabaseClient) {
+                    fetchCloudState();
+                    setupRealtime();
+                }
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
