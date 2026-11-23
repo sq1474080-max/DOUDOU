@@ -78,10 +78,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 12px;
             background: var(--bg-nav);
             border-radius: var(--radius-btn);
-            padding: 6px 12px;
+            padding: 4px 10px;
             box-shadow: var(--shadow-soft);
             flex-shrink: 0;
             border: 1px solid var(--border-light);
@@ -97,7 +97,7 @@
             font-size: 13px;
             font-weight: 700;
             color: var(--text-sub);
-            padding: 8px 14px;
+            padding: 6px 12px;
             border-radius: var(--radius-btn);
             cursor: pointer;
             transition: 0.3s;
@@ -122,11 +122,17 @@
         .section-wrapper {
             border-radius: var(--radius-wrapper);
             padding: 16px;
-            margin-bottom: 12px;
+            margin-bottom: 0;
             transition: 0.3s;
             background-color: var(--bg-wrapper) !important;
             box-shadow: var(--shadow-soft);
             border: 1px solid var(--border-light);
+        }
+        .section-wrapper.collapsed {
+            padding-bottom: 0;
+        }
+        .section-wrapper.collapsed .section-title {
+            margin-bottom: 0;
         }
 
         .profile-stats-bar {
@@ -267,7 +273,6 @@
             gap: 12px;
         }
 
-        /* ============ 日历（周视图） ============ */
         .calendar-card {
             background: var(--bg-wrapper);
             border-radius: var(--radius-card);
@@ -339,25 +344,21 @@
             color: var(--text-main);
         }
 
-        /* 今天：保持原样式，浅蓝底蓝字，不参与完成统计 */
         .calendar-day.today {
             background: var(--accent-light);
             color: var(--accent);
             font-weight: 900;
         }
-        /* 过去日期：全部完成 = 蓝底白字 */
         .calendar-day.completed {
             background: var(--accent);
             color: #ffffff;
             font-weight: 900;
         }
-        /* 过去日期：有未完成 = 黄底白字 */
         .calendar-day.incomplete {
             background: var(--accent-warm);
             color: #ffffff;
             font-weight: 900;
         }
-        /* 未来日期：无底色，保持普通文字色 */
 
         .section-title {
             display: flex;
@@ -619,7 +620,6 @@
         }
         .exam-stars.zero { color: var(--text-sub); }
 
-        /* ============ 底部导航（只保留图标） ============ */
         .bottom-bar {
             position: fixed;
             bottom: 20px;
@@ -651,8 +651,8 @@
             padding: 0;
         }
         .bottom-btn.active {
-            background: var(--accent-light);
-            transform: scale(1.05);
+            background: transparent;
+            transform: none;
         }
 
         .modal-overlay {
@@ -753,7 +753,7 @@
 
         @media (min-width: 900px) {
             body { padding: 24px 40px 100px; }
-            .app-header { max-width: 1200px; width: 100%; margin: 0 auto 24px auto; }
+            .app-header { max-width: 1200px; width: 100%; margin: 0 auto 12px auto; }
             .layout-container {
                 display: grid;
                 grid-template-columns: 380px 1fr;
@@ -830,7 +830,7 @@
                     <button class="calendar-nav-btn" id="nextMonth">›</button>
                 </div>
                 <div class="calendar-weekdays">
-                    <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+                    <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
                 </div>
                 <div class="calendar-grid" id="calendarGrid"></div>
             </div>
@@ -894,7 +894,7 @@
             <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left" style="font-size:18px;">
-                        <img src="icon_overdue_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 未完成任务
+                        <img src="icon_overdue_title.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 未完成任务
                     </div>
                     <div class="title-right">
                         <span id="overdueCountBadge" style="font-size:13px; background:var(--bg-page); color:var(--text-main); padding:4px 12px; border-radius:999px; font-weight:900;">0项</span>
@@ -1153,8 +1153,6 @@
                 }
             }
 
-            // 新增：判断某天的完成状态
-            // 返回 'completed' | 'incomplete' | 'none'
             function getDayCompletionStatus(dateStr) {
                 const regularTasks = state.tasks.filter(task => {
                     if (task.startDate > dateStr) return false;
@@ -1201,11 +1199,11 @@
                 }
             }
 
-            // 重写：周历渲染
             function renderCalendar() {
                 const start = calendarWeekStart;
+                const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
                 const monthLabel = document.getElementById('calendarMonth');
-                monthLabel.textContent = `${start.getFullYear()}年${start.getMonth() + 1}月`;
+                monthLabel.textContent = monthNames[start.getMonth()];
 
                 const grid = document.getElementById('calendarGrid');
                 const todayStr = getBeijingDateStr();
@@ -1217,7 +1215,6 @@
                     const isToday = dateStr === todayStr;
                     const isFuture = dateStr > todayStr;
                     let status = '';
-                    // 今天不参与完成统计；未来日期不上色
                     if (!isToday && !isFuture) {
                         const s = getDayCompletionStatus(dateStr);
                         if (s === 'completed') status = 'completed';
@@ -1566,6 +1563,7 @@
                     document.querySelectorAll('.task-list, #inSchoolGroups, #outSchoolGroups, #examTaskList').forEach(el => {
                         el.style.display = '';
                     });
+                    document.querySelectorAll('.section-wrapper').forEach(el => el.classList.remove('collapsed'));
                     collapseBtns.forEach(btn => btn.innerHTML = '<img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;">');
                 }
             }
@@ -2224,13 +2222,16 @@
                         const btn = e.target.closest('.collapse-btn');
                         const targetId = btn.dataset.target;
                         const targetEl = document.getElementById(targetId);
+                        const wrapper = btn.closest('.section-wrapper');
                         if (targetEl) {
                             if (targetEl.style.display === 'none') {
                                 targetEl.style.display = '';
                                 btn.innerHTML = '<img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;">';
+                                if (wrapper) wrapper.classList.remove('collapsed');
                             } else {
                                 targetEl.style.display = 'none';
                                 btn.innerHTML = '<img src="icon_collapse.svg" class="zoom-icon" style="width: 14px; height: 14px;">';
+                                if (wrapper) wrapper.classList.add('collapsed');
                             }
                         }
                     }
@@ -2337,7 +2338,6 @@
                     }
                 });
 
-                // 翻周（保持原有按钮 id，只改逻辑）
                 document.getElementById('prevMonth').addEventListener('click', () => {
                     calendarWeekStart = new Date(calendarWeekStart.getFullYear(), calendarWeekStart.getMonth(), calendarWeekStart.getDate() - 7);
                     renderCalendar();
