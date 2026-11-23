@@ -3,34 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <!-- PWA 核心配置 -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="HEIDI STAR">
     <link rel="apple-touch-icon" href="icon.png">
-    
     <title>HEIDI星旅</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <style>
-        /* 引入圆润现代无衬线字体 */
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 
         :root {
-            /* 全局色彩规范 */
-            --bg-page: #f5f5f5;        /* 页面背景 */
-            --bg-card: #f7f7f7;        /* 任务卡片 */
-            --bg-wrapper: #fefefe;     /* 栏目分组底色 */
-            --text-main: #383b42;      /* 主字体 */
-            --text-sub: #b7b7b7;       /* 副字体 */
-            --accent: #74b0e1;         /* 主色：蓝色 */
-            --accent-light: #c0e2f9;   /* 辅助色：浅蓝 */
-            --accent-warm: #f4c65c;    /* 辅助色2：暖黄 */
-            --bg-nav: #ffffff;         /* 导航栏/标题栏 */
-            --border-light: #ebebeb;   /* 极浅边框用于区分卡片 */
-            
+            --bg-page: #f5f5f5;
+            --bg-card: #f7f7f7;
+            --bg-wrapper: #fefefe;
+            --text-main: #383b42;
+            --text-sub: #b7b7b7;
+            --accent: #74b0e1;
+            --accent-light: #c0e2f9;
+            --accent-warm: #f4c65c;
+            --bg-nav: #ffffff;
+            --border-light: #ebebeb;
             --radius-card: 22px;
             --radius-wrapper: 32px;
             --radius-btn: 999px;
@@ -46,7 +40,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* 彻底解决背景跟随滑动：使用固定背景层 */
         .fixed-bg {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -56,8 +49,8 @@
         }
 
         html, body {
-            overscroll-behavior-y: none; 
-            background-color: transparent; 
+            overscroll-behavior-y: none;
+            background-color: transparent;
         }
 
         body {
@@ -72,16 +65,15 @@
             -webkit-user-select: none;
         }
 
-        /* 核心设置：图标放大，但不改变原盒模型大小 */
         .zoom-icon {
             transform: scale(2);
             transform-origin: center;
             max-width: none !important;
             object-fit: contain;
             z-index: 10;
+            display: block;
         }
 
-        /* 顶部控制区 */
         .app-header {
             display: flex;
             justify-content: space-between;
@@ -110,36 +102,21 @@
             cursor: pointer;
             transition: 0.3s;
         }
-        .header-btn.active { 
-            color: var(--text-main); 
-            background: var(--bg-card);
-        }
-        
-        /* 布局容器 */
-        .layout-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .left-panel, .right-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-        }
+        .header-btn.active { color: var(--text-main); background: var(--bg-card); }
 
-        /* 栏目分组底衬 */
+        .layout-container { display: flex; flex-direction: column; gap: 10px; }
+        .left-panel, .right-panel { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+
         .section-wrapper {
             border-radius: var(--radius-wrapper);
             padding: 16px;
             margin-bottom: 12px;
             transition: 0.3s;
-            background-color: var(--bg-wrapper) !important; /* 强制统一底色 */
+            background-color: var(--bg-wrapper) !important;
             box-shadow: var(--shadow-soft);
             border: 1px solid var(--border-light);
         }
 
-        /* 第一栏：头像+名字 | 星值 */
         .profile-stats-bar {
             display: flex;
             gap: 16px;
@@ -191,7 +168,7 @@
         }
         .avatar-eye.left { left: 25%; }
         .avatar-eye.right { right: 25%; }
-        
+
         .avatar-smile {
             position: absolute;
             width: 20px;
@@ -241,7 +218,6 @@
             font-weight: 800;
         }
 
-        /* 右侧星值统计 */
         .stats-group {
             flex: 1;
             display: flex;
@@ -259,7 +235,6 @@
             box-shadow: var(--shadow-card);
             border: 1px solid var(--border-light);
         }
-        /* 今日获得用主色蓝突出，本月获得用白底 */
         .stats-card.today { background: var(--accent); color: #ffffff; border-color: var(--accent); }
         .stats-card.month { background: var(--bg-wrapper); color: var(--text-main); }
         .stats-card.today .stats-number { color: #ffffff; }
@@ -280,7 +255,7 @@
             gap: 12px;
         }
 
-        /* 第二栏：日历 */
+        /* 日历：周视图 */
         .calendar-card {
             background: var(--bg-wrapper);
             border-radius: var(--radius-card);
@@ -324,7 +299,7 @@
 
         .calendar-weekdays {
             display: grid;
-            grid-template-columns: repeat(7,1fr);
+            grid-template-columns: repeat(7, 1fr);
             text-align: center;
             font-size: 12px;
             color: var(--text-sub);
@@ -334,12 +309,15 @@
 
         .calendar-grid {
             display: grid;
-            grid-template-columns: repeat(7,1fr);
+            grid-template-columns: repeat(7, 1fr);
             gap: 4px;
         }
 
         .calendar-day {
-            height: 36px;
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            max-width: 40px;
+            margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -349,40 +327,35 @@
             color: var(--text-main);
         }
 
-        .calendar-day.other-month { color: var(--text-sub); }
-        
         .calendar-day.today {
             background: var(--accent-light);
             color: var(--accent);
             font-weight: 900;
-            aspect-ratio: 1 / 1;
-            width: 100%;
-            max-width: 36px;
-            margin: 0 auto;
         }
 
-        /* 通用标题 */
+        .calendar-day.completed {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        .calendar-day.incomplete {
+            background: var(--accent-warm);
+            color: #ffffff;
+        }
+
         .section-title {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 0 0 12px 0; 
+            margin: 0 0 12px 0;
             font-weight: 800;
             color: var(--text-main);
             font-size: 21px;
             width: 100%;
         }
-        .section-title .title-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .section-title .title-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
+        .section-title .title-left { display: flex; align-items: center; gap: 8px; }
+        .section-title .title-right { display: flex; align-items: center; gap: 8px; }
+
         .collapse-btn {
             background: transparent;
             border: none;
@@ -394,32 +367,18 @@
         }
 
         .sub-title {
-            font-size: 14px; 
-            color: var(--text-main); 
-            font-weight: 800; 
+            font-size: 14px;
+            color: var(--text-main);
+            font-weight: 800;
             margin: 12px 0 6px 4px;
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        /* 任务列表通用外层 */
-        .task-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 4px;
-            width: 100%;
-        }
+        .task-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 4px; width: 100%; }
+        .task-grid-inner { display: grid; grid-template-columns: 1fr; gap: 12px; }
 
-        /* 学科内部的任务网格（手机单列，平板双列） */
-        .task-grid-inner {
-            display: grid;
-            grid-template-columns: 1fr; 
-            gap: 12px;
-        }
-
-        /* 任务卡片 */
         .task-item {
             background: var(--bg-card);
             border-radius: var(--radius-card);
@@ -438,7 +397,7 @@
             box-shadow: none;
             opacity: 0.6;
         }
-        
+
         .task-item.overdue {
             background: color-mix(in srgb, var(--accent-warm) 16%, var(--bg-wrapper));
         }
@@ -452,12 +411,7 @@
             background: transparent;
         }
 
-        .task-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
+        .task-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 
         .task-name {
             font-weight: 800;
@@ -465,39 +419,29 @@
             color: var(--text-main);
             word-break: break-word;
         }
-        .task-item.completed .task-name {
-            color: var(--text-sub);
-            text-decoration: line-through;
-        }
+        .task-item.completed .task-name { color: var(--text-sub); text-decoration: line-through; }
 
-        .task-meta {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
+        .task-meta { display: flex; gap: 6px; flex-wrap: wrap; }
 
-        /* 标签胶囊全部极简灰/浅蓝/浅黄化 */
         .tag {
             padding: 4px 10px;
             border-radius: 999px;
             font-size: 11px;
             font-weight: 800;
-            display: inline-flex; 
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 4px;
             background: var(--border-light);
             color: var(--text-main);
         }
-        /* 用极简灰、浅蓝和浅黄区分标签 */
-        .tag-green { background: var(--accent-light); color: var(--accent); } 
-        .tag-purple, .tag-pink, .tag-blue { background: var(--bg-page); color: var(--text-main); } 
-        .tag-orange { background: color-mix(in srgb, var(--accent-warm) 30%, var(--bg-wrapper)); color: var(--text-main); } 
+        .tag-green { background: var(--accent-light); color: var(--accent); }
+        .tag-purple, .tag-pink, .tag-blue { background: var(--bg-page); color: var(--text-main); }
+        .tag-orange { background: color-mix(in srgb, var(--accent-warm) 30%, var(--bg-wrapper)); color: var(--text-main); }
         .tag-date { background: transparent; color: var(--text-sub); padding-left: 0; }
         .tag-today { background: var(--accent-light); color: var(--accent); }
         .tag-deadline { background: var(--border-light); color: var(--text-main); }
 
-        /* 循环图标居中缩小 */
         .icon-repeat-small {
             width: 12px;
             height: 12px;
@@ -506,7 +450,6 @@
             margin-right: 2px;
         }
 
-        /* 打卡圆形选择点 */
         .task-check {
             width: 36px;
             height: 36px;
@@ -528,13 +471,7 @@
             color: var(--bg-nav);
         }
 
-        /* 操作按钮 */
-        .task-actions {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-            justify-content: center;
-        }
+        .task-actions { display: flex; gap: 4px; align-items: center; justify-content: center; }
         .icon-btn {
             background: var(--bg-wrapper);
             border: 1px solid var(--border-light);
@@ -558,7 +495,6 @@
             font-weight: 800;
         }
 
-        /* 按钮 */
         .btn-primary {
             background: var(--accent);
             border: none;
@@ -575,7 +511,7 @@
             transition: 0.2s;
         }
         .btn-primary:active { transform: scale(0.96); }
-        
+
         .btn-outline {
             background: var(--bg-nav);
             border: 1px solid var(--border-light);
@@ -596,7 +532,6 @@
 
         .hidden { display: none !important; }
 
-        /* 考试任务 */
         .exam-item {
             background: var(--bg-card);
             border-radius: var(--radius-card);
@@ -632,7 +567,7 @@
         }
         .exam-stars.zero { color: var(--text-sub); }
 
-        /* 底部导航 */
+        /* 底部导航：只保留图标 */
         .bottom-bar {
             position: fixed;
             bottom: 20px;
@@ -641,7 +576,7 @@
             width: calc(100% - 40px);
             max-width: 400px;
             background: var(--bg-nav);
-            padding: 12px 20px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-around;
             align-items: center;
@@ -652,22 +587,22 @@
         }
         .bottom-btn {
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text-sub);
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
             background: transparent;
             border: none;
-            gap: 4px;
             cursor: pointer;
             transition: 0.2s;
-            padding: 4px 20px;
+            padding: 0;
         }
-        .bottom-btn.active { color: var(--accent); transform: scale(1.1); }
+        .bottom-btn.active {
+            background: var(--accent-light);
+            transform: scale(1.05);
+        }
 
-        /* 模态框 */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -689,7 +624,7 @@
             max-height: 90vh;
             overflow-y: auto;
         }
-        
+
         .modal-content h3 {
             font-size: 22px;
             margin-bottom: 24px;
@@ -703,7 +638,7 @@
         }
 
         .modal-content label { font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; display: block; }
-        
+
         .modal-content input, .modal-content textarea, .modal-content select {
             width: 100%;
             padding: 14px 18px;
@@ -719,7 +654,7 @@
             box-sizing: border-box;
         }
         .modal-content input:focus, .modal-content select:focus { border-color: var(--accent); background: var(--bg-nav); }
-        
+
         .modal-content input[type="date"] {
             height: 50px;
             min-height: 50px;
@@ -747,7 +682,6 @@
         .btn-confirm { background: var(--accent); color: var(--bg-nav); }
         .btn-danger { background: var(--accent-warm); color: var(--text-main); }
 
-        /* Toast */
         .toast-container { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; }
         .toast {
             background: var(--text-main);
@@ -765,56 +699,32 @@
         }
         @keyframes dropDown { from { opacity: 0; transform: translateY(-30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-        /* --- 大屏 / iPad 横屏适配 --- */
         @media (min-width: 900px) {
             body { padding: 24px 40px 100px; }
             .app-header { max-width: 1200px; width: 100%; margin: 0 auto 24px auto; }
-            
-            .layout-container { 
+            .layout-container {
                 display: grid;
                 grid-template-columns: 380px 1fr;
                 align-items: start;
-                max-width: 1200px; 
-                width: 100%; 
+                max-width: 1200px;
+                width: 100%;
                 margin: 0 auto;
                 gap: 20px;
             }
-            
-            .left-panel { 
-                position: sticky; 
-                top: 24px; 
-                display: flex; 
-                flex-direction: column; 
-                gap: 10px;
-            }
-            .right-panel { 
-                display: flex; 
-                flex-direction: column; 
-                gap: 10px;
-                min-width: 0; 
-            }
-            
-            .task-grid-inner {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-            }
-            
-            #extraTaskList {
-                display: flex;
-                flex-direction: column;
-                gap: 16px;
-            }
+            .left-panel { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 10px; }
+            .right-panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+            .task-grid-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+            #extraTaskList { display: flex; flex-direction: column; gap: 16px; }
         }
     </style>
 </head>
 <body>
     <div class="fixed-bg"></div>
-    
+
     <div class="app-header">
-        <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 儿童模式</button>
-        <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 管理员</button>
-        <button class="header-btn" id="exportCsvBtn"><img src="icon_export.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 导出CSV</button>
+        <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 儿童模式</button>
+        <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 管理员</button>
+        <button class="header-btn" id="exportCsvBtn"><img src="icon_export.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 导出CSV</button>
     </div>
 
     <div class="layout-container">
@@ -833,11 +743,11 @@
                 <div class="stats-group">
                     <div class="stats-card today">
                         <span class="stats-label">今日获得</span>
-                        <span class="stats-number" id="todayStars">0 <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px; margin-left: 12px;"></span>
+                        <span class="stats-number" id="todayStars">0 <img src="icon_star.svg" class="zoom-icon" style="width: 18px; height: 18px; margin-left: 12px;"></span>
                     </div>
                     <div class="stats-card month">
                         <span class="stats-label">本月获得</span>
-                        <span class="stats-number" id="monthStars">0 <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px; margin-left: 12px;"></span>
+                        <span class="stats-number" id="monthStars">0 <img src="icon_star.svg" class="zoom-icon" style="width: 18px; height: 18px; margin-left: 12px;"></span>
                     </div>
                 </div>
             </div>
@@ -849,20 +759,19 @@
                     <button class="calendar-nav-btn" id="nextMonth">›</button>
                 </div>
                 <div class="calendar-weekdays">
-                    <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+                    <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
                 </div>
                 <div class="calendar-grid" id="calendarGrid"></div>
             </div>
 
-            <!-- 额外任务分组 -->
             <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left">
-                        <img src="icon_gift_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 额外任务
+                        <img src="icon_gift_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 额外任务
                     </div>
                     <div class="title-right">
                         <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增</button>
-                        <button class="collapse-btn hidden" data-target="extraTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;"></button>
+                        <button class="collapse-btn hidden" data-target="extraTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;"></button>
                     </div>
                 </div>
                 <div id="extraTaskList" class="task-list"></div>
@@ -870,75 +779,70 @@
         </div>
 
         <div class="right-panel">
-            <!-- 校内任务分组 -->
             <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left">
-                        <img src="icon_school_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 校内任务
+                        <img src="icon_school_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 校内任务
                         <span id="inSchoolCountBadge" style="font-size:13px; background:var(--bg-page); color:var(--text-main); padding:4px 12px; border-radius:999px; font-weight:900;">0项</span>
                     </div>
                     <div class="title-right">
                         <button class="btn-outline btn-sm" id="addInSchoolBtn">+ 新增</button>
-                        <button class="collapse-btn hidden" data-target="inSchoolGroups"><img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;"></button>
+                        <button class="collapse-btn hidden" data-target="inSchoolGroups"><img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;"></button>
                     </div>
                 </div>
                 <div id="inSchoolGroups"></div>
             </div>
 
-            <!-- 校外任务分组 -->
             <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left">
-                        <img src="icon_out_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 校外任务
+                        <img src="icon_out_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 校外任务
                         <span id="outSchoolCountBadge" style="font-size:13px; background:var(--bg-page); color:var(--text-main); padding:4px 12px; border-radius:999px; font-weight:900;">0项</span>
                     </div>
                     <div class="title-right">
                         <button class="btn-outline btn-sm" id="addOutSchoolBtn">+ 新增</button>
-                        <button class="collapse-btn hidden" data-target="outSchoolGroups"><img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;"></button>
+                        <button class="collapse-btn hidden" data-target="outSchoolGroups"><img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;"></button>
                     </div>
                 </div>
                 <div id="outSchoolGroups"></div>
             </div>
 
-            <!-- 考试任务分组 -->
             <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left">
-                        <img src="icon_exam_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 考试任务
+                        <img src="icon_exam_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 考试任务
                     </div>
                     <div class="title-right">
                         <button class="btn-outline btn-sm" id="addExamBtn">+ 新增考试</button>
-                        <button class="collapse-btn hidden" data-target="examTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;"></button>
+                        <button class="collapse-btn hidden" data-target="examTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;"></button>
                     </div>
                 </div>
                 <div id="examTaskList"></div>
             </div>
 
-            <!-- 未完成任务分组 -->
             <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left" style="font-size:18px;">
-                        <img src="icon_overdue_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 未完成任务
+                        <img src="icon_overdue_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 未完成任务
                     </div>
                     <div class="title-right">
                         <span id="overdueCountBadge" style="font-size:13px; background:var(--bg-page); color:var(--text-main); padding:4px 12px; border-radius:999px; font-weight:900;">0项</span>
-                        <button class="collapse-btn hidden" data-target="overdueTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;"></button>
+                        <button class="collapse-btn hidden" data-target="overdueTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;"></button>
                     </div>
                 </div>
                 <div id="overdueTaskList" class="task-grid-inner" style="margin-bottom:4px;"></div>
             </div>
 
-            <!-- 任务库管理 -->
             <div id="adminTaskLibrarySection" class="hidden section-wrapper">
                 <div class="section-title" style="margin-bottom: 12px;">
                     <div class="title-left" style="display:flex; align-items:center; gap:8px;">
-                        <img src="icon_book_title.svg" class="zoom-icon" style="width: 22px; height: 22px;"> 
+                        <img src="icon_book_title.svg" class="zoom-icon" style="width: 18px; height: 18px;">
                         <span>任务库管理</span>
                     </div>
                     <div class="title-right" style="display:flex; align-items:center; gap:8px;">
                         <button class="btn-primary btn-sm" id="openCreateTaskBtn" style="height: 36px;">+ 新增任务</button>
                         <button class="btn-outline btn-sm" id="ocrBtn" style="height: 36px; padding: 0 12px;">
-                            <img src="icon_camera.svg" class="zoom-icon" style="width: 18px; height: 18px;">
+                            <img src="icon_camera.svg" class="zoom-icon" style="width: 14px; height: 14px;">
                         </button>
                         <button class="btn-outline btn-sm" id="resetStarsBtn" style="display:none;"></button>
                     </div>
@@ -950,10 +854,10 @@
 
     <div class="bottom-bar">
         <button class="bottom-btn active" id="bottomHome">
-            <img src="icon_nav_home.svg" class="zoom-icon" style="width: 24px; height: 24px;"> 今日
+            <img src="icon_nav_home.svg" class="zoom-icon" style="width: 20px; height: 20px;">
         </button>
         <button class="bottom-btn" id="bottomStats">
-            <img src="icon_nav_stats.svg" class="zoom-icon" style="width: 24px; height: 24px;"> 统计
+            <img src="icon_nav_stats.svg" class="zoom-icon" style="width: 20px; height: 20px;">
         </button>
     </div>
 
@@ -988,6 +892,16 @@
                 const bj = getBeijingNow();
                 return `${bj.getFullYear()}-${String(bj.getMonth()+1).padStart(2,'0')}-${String(bj.getDate()).padStart(2,'0')}`;
             }
+            function formatDate(d) {
+                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            }
+            function getMondayOf(date) {
+                const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                const day = d.getDay();
+                const diff = day === 0 ? -6 : 1 - day;
+                d.setDate(d.getDate() + diff);
+                return d;
+            }
 
             const defaultTasks = [
                 { id: 't1', name: '习题册', reward: 0, daily: true, note: '', category: '校内任务', subject: '语文', startDate: '2026-11-01', endDate: '' },
@@ -1006,7 +920,7 @@
             function loadStateLocal() {
                 const stored = localStorage.getItem(STORAGE_KEY);
                 if (stored) {
-                    try { 
+                    try {
                         const parsed = JSON.parse(stored);
                         parsed.tasks = (parsed.tasks || []).map(t => {
                             let cat = t.category;
@@ -1031,8 +945,7 @@
             let isAdminAuthenticated = false;
 
             const bjInit = getBeijingNow();
-            let calendarYear = bjInit.getFullYear();
-            let calendarMonth = bjInit.getMonth();
+            let calendarWeekStart = getMondayOf(bjInit);
 
             let saveTimeout = null;
             let isSyncingFromCloud = false;
@@ -1127,20 +1040,20 @@
                 const prefix = `${bj.getFullYear()}-${String(bj.getMonth()+1).padStart(2,'0')}`;
                 const todayDate = bj.getDate();
                 const lastDay = new Date(bj.getFullYear(), bj.getMonth() + 1, 0).getDate();
-                
+
                 let extraSum = 0;
                 let examSum = 0;
-                
+
                 state.checkins.forEach(c => {
                     if (c.date.startsWith(prefix) && c.isExtra) extraSum += (c.reward || 0);
                 });
-                
+
                 state.exams.forEach(e => {
                     if (e.date.startsWith(prefix)) examSum += getExamStars(e.score);
                 });
-                
+
                 const monthlyBonus = (todayDate === lastDay) ? 20 : 0;
-                
+
                 return { total: extraSum + examSum + monthlyBonus, extraSum, examSum, monthlyBonus };
             }
 
@@ -1164,22 +1077,47 @@
                     const parts = task.startDate.split('-');
                     const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
                     deadline.setDate(deadline.getDate() + 1);
-                    deadline.setHours(6, 0, 0, 0); 
+                    deadline.setHours(6, 0, 0, 0);
                     return now.getTime() < deadline.getTime();
                 }
+            }
+
+            // 判断某一天（过去）的完成状态：'completed' | 'incomplete' | 'none'
+            function getDayCompletionStatus(dateStr) {
+                const regularTasks = state.tasks.filter(task => {
+                    if (task.startDate > dateStr) return false;
+                    if (task.endDate) {
+                        if (dateStr > task.endDate) return false;
+                    } else if (!task.daily) {
+                        if (task.startDate !== dateStr) return false;
+                    }
+                    return true;
+                });
+                const extraTasks = state.extraTasks.filter(t => t.createdDate === dateStr);
+                const total = regularTasks.length + extraTasks.length;
+                if (total === 0) return 'none';
+
+                let completed = 0;
+                regularTasks.forEach(t => {
+                    if (state.checkins.some(c => c.date === dateStr && c.taskId === t.id && !c.isExtra)) completed++;
+                });
+                extraTasks.forEach(t => {
+                    if (state.checkins.some(c => c.date === dateStr && c.taskId === t.id && c.isExtra)) completed++;
+                });
+                return completed >= total ? 'completed' : 'incomplete';
             }
 
             function renderProfile() {
                 const name = state.profile.name || 'HEIDI';
                 const avatar = state.profile.avatar || '';
                 const avatarEl = document.getElementById('avatarDisplay');
-                
+
                 if (avatar) {
                     avatarEl.style.backgroundImage = `url(${avatar})`;
                     avatarEl.textContent = '';
                 } else {
                     avatarEl.style.backgroundImage = '';
-                    avatarEl.textContent = ''; 
+                    avatarEl.textContent = '';
                 }
                 document.getElementById('profileName').textContent = name;
 
@@ -1191,36 +1129,36 @@
                 }
             }
 
+            // 周历渲染
             function renderCalendar() {
+                const start = calendarWeekStart;
                 const monthLabel = document.getElementById('calendarMonth');
-                monthLabel.textContent = `${calendarYear}年${calendarMonth + 1}月`;
+                monthLabel.textContent = `${start.getFullYear()}年${start.getMonth() + 1}月`;
 
                 const grid = document.getElementById('calendarGrid');
-                const firstDay = new Date(calendarYear, calendarMonth, 1);
-                const startWeekday = firstDay.getDay();
-                const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-                const prevMonthDays = new Date(calendarYear, calendarMonth, 0).getDate();
-
-                const bj = getBeijingNow();
-                const todayY = bj.getFullYear();
-                const todayM = bj.getMonth();
-                const todayD = bj.getDate();
-
+                const todayStr = getBeijingDateStr();
                 const cells = [];
-                for (let i = 0; i < startWeekday; i++) {
-                    cells.push({ day: prevMonthDays - startWeekday + 1 + i, otherMonth: true, isToday: false });
-                }
-                for (let d = 1; d <= daysInMonth; d++) {
-                    cells.push({ day: d, otherMonth: false, isToday: (calendarYear === todayY && calendarMonth === todayM && d === todayD) });
-                }
-                let nextDay = 1;
-                while (cells.length % 7 !== 0) {
-                    cells.push({ day: nextDay++, otherMonth: true, isToday: false });
+
+                for (let i = 0; i < 7; i++) {
+                    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+                    const dateStr = formatDate(d);
+                    const isToday = dateStr === todayStr;
+                    const isFuture = dateStr > todayStr;
+                    let status = '';
+                    if (!isToday && !isFuture) {
+                        const s = getDayCompletionStatus(dateStr);
+                        if (s === 'completed') status = 'completed';
+                        else if (s === 'incomplete') status = 'incomplete';
+                    }
+                    cells.push({ day: d.getDate(), isToday, status });
                 }
 
-                grid.innerHTML = cells.map(c => `
-                    <div class="calendar-day ${c.otherMonth ? 'other-month' : ''} ${c.isToday ? 'today' : ''}">${c.day}</div>
-                `).join('');
+                grid.innerHTML = cells.map(c => {
+                    let cls = 'calendar-day';
+                    if (c.isToday) cls += ' today';
+                    else if (c.status) cls += ' ' + c.status;
+                    return `<div class="${cls}">${c.day}</div>`;
+                }).join('');
             }
 
             function getTagClass(text) {
@@ -1235,7 +1173,7 @@
 
                 const today = getBeijingDateStr();
                 const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
-                
+
                 const tasks = state.tasks.filter(task => {
                     if (task.category !== category) return false;
                     if (todayCheckTaskIds.has(task.id)) return true;
@@ -1271,7 +1209,7 @@
                 }
 
                 sortedSubjects.forEach(sub => {
-                    html += `<div class="sub-title"><img src="icon_subject.svg" class="zoom-icon" style="width: 16px; height: 16px;"> ${sub}</div>`;
+                    html += `<div class="sub-title"><img src="icon_subject.svg" class="zoom-icon" style="width: 14px; height: 14px;"> ${sub}</div>`;
                     html += `<div class="task-grid-inner">`;
                     groups[sub].forEach(task => {
                         html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
@@ -1293,7 +1231,7 @@
             function renderTaskItem(task, completed, overdue) {
                 const showAdminActions = (currentRole === 'admin' && isAdminAuthenticated);
                 const today = getBeijingDateStr();
-                
+
                 let tagsHtml = '';
                 if (task.subject) {
                     tagsHtml += `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>`;
@@ -1304,7 +1242,7 @@
                 if (task.daily) {
                     tagsHtml += `<span class="tag tag-green"><img src="icon_repeat.svg" class="icon-repeat-small"> 每日</span>`;
                 }
-                
+
                 if (overdue) {
                     tagsHtml += `<span class="tag tag-pink">原定：${task.startDate}${task.endDate ? ' 至 ' + task.endDate : ''}</span>`;
                 } else {
@@ -1319,14 +1257,14 @@
                     }
                 }
 
-                const checkHtml = overdue 
-                    ? `<span class="overdue-badge">未完成</span>` 
+                const checkHtml = overdue
+                    ? `<span class="overdue-badge">未完成</span>`
                     : `<div class="task-check" data-action="toggle-check" data-task-id="${task.id}">${completed ? '✓' : ''}</div>`;
 
                 return `
                     <div class="task-item ${completed ? 'completed' : ''} ${overdue ? 'overdue' : ''}" data-task-id="${task.id}">
                         <div class="task-icon">
-                            <img src="${task.category === '校内任务' ? 'icon_in_card.svg' : 'icon_out_card.svg'}" class="zoom-icon" style="width: 28px; height: 28px;">
+                            <img src="${task.category === '校内任务' ? 'icon_in_card.svg' : 'icon_out_card.svg'}" class="zoom-icon" style="width: 22px; height: 22px;">
                         </div>
                         <div class="task-info">
                             <div class="task-name">${escapeHtml(task.name)}</div>
@@ -1336,7 +1274,7 @@
                         </div>
                         ${showAdminActions ? `
                         <div class="task-actions">
-                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
+                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
                         </div>` : ''}
                         ${checkHtml}
                     </div>
@@ -1346,10 +1284,10 @@
             function renderExtraTasks() {
                 const container = document.getElementById('extraTaskList');
                 if (!container) return;
-                
+
                 const today = getBeijingDateStr();
                 let todayExtras = state.extraTasks.filter(t => t.createdDate === today);
-                
+
                 if (currentRole !== 'admin') {
                     todayExtras = todayExtras.slice(-3);
                 }
@@ -1358,12 +1296,12 @@
                     container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">暂无额外任务</div>`;
                     return;
                 }
-                
+
                 container.innerHTML = todayExtras.map(task => {
                     const completed = state.checkins.some(c => c.date === today && c.taskId === task.id && c.isExtra);
                     return `
                         <div class="task-item ${completed ? 'completed' : ''}">
-                            <div class="task-icon"><img src="icon_gift_card.svg" class="zoom-icon" style="width: 28px; height: 28px;"></div>
+                            <div class="task-icon"><img src="icon_gift_card.svg" class="zoom-icon" style="width: 22px; height: 22px;"></div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(task.name)}</div>
                                 <div class="task-meta">
@@ -1373,8 +1311,8 @@
                             </div>
                             ${currentRole === 'admin' && isAdminAuthenticated ? `
                             <div class="task-actions">
-                                <button class="icon-btn" data-action="edit-extra" data-extra-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
-                                <button class="icon-btn" data-action="delete-extra" data-extra-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
+                                <button class="icon-btn" data-action="edit-extra" data-extra-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                                <button class="icon-btn" data-action="delete-extra" data-extra-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
                             </div>` : ''}
                             <div class="task-check" data-action="toggle-extra" data-extra-id="${task.id}">${completed ? '✓' : ''}</div>
                         </div>
@@ -1385,32 +1323,32 @@
             function renderExams() {
                 const container = document.getElementById('examTaskList');
                 if (!container) return;
-                
+
                 if (state.exams.length === 0) {
                     container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">暂无考试记录</div>`;
                     return;
                 }
-                
+
                 const sortedExams = [...state.exams].sort((a,b) => b.date.localeCompare(a.date));
-                
+
                 container.innerHTML = sortedExams.map(exam => {
                     const stars = exam.score !== null ? getExamStars(exam.score) : 0;
                     const isZero = stars === 0;
-                    const starText = exam.score !== null 
-                        ? `<span style="display:flex; align-items:center; gap:6px;">获得 ${stars} <img src="icon_star.svg" class="zoom-icon" style="width:16px; height:16px; object-fit:contain;"></span>` 
+                    const starText = exam.score !== null
+                        ? `<span style="display:flex; align-items:center; gap:6px;">获得 ${stars} <img src="icon_star.svg" class="zoom-icon" style="width:12px; height:12px; object-fit:contain;"></span>`
                         : '未录入';
-                    
+
                     const canEditScore = (currentRole === 'admin' && isAdminAuthenticated) || (exam.score === null);
 
                     const scoreHtml = canEditScore
                         ? `<input type="number" step="0.5" min="0" max="100" class="exam-score-input" data-exam-id="${exam.id}" value="${exam.score !== null ? exam.score : ''}" placeholder="输入分数">`
                         : `<span style="font-weight:900; color:var(--text-main); font-size:16px; margin-left:4px;">${exam.score}分</span>`;
-                        
+
                     return `
                         <div class="exam-item">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div style="font-weight:800; font-size:16px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
-                                    <img src="icon_exam_card.svg" class="zoom-icon" style="width: 20px; height: 20px; vertical-align: middle;"> 
+                                    <img src="icon_exam_card.svg" class="zoom-icon" style="width: 16px; height: 16px; vertical-align: middle;">
                                     <span style="line-height: 1.2;">${escapeHtml(exam.name)}</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:8px;">
@@ -1422,8 +1360,8 @@
                                 <div>${scoreHtml}</div>
                                 ${currentRole === 'admin' && isAdminAuthenticated ? `
                                 <div class="task-actions">
-                                    <button class="icon-btn" data-action="edit-exam" data-exam-id="${exam.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
-                                    <button class="icon-btn" data-action="delete-exam" data-exam-id="${exam.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
+                                    <button class="icon-btn" data-action="edit-exam" data-exam-id="${exam.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                                    <button class="icon-btn" data-action="delete-exam" data-exam-id="${exam.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
                                 </div>
                                 ` : ''}
                             </div>
@@ -1448,7 +1386,7 @@
                 document.getElementById('overdueCountBadge').textContent = `${overdueTasks.length}项`;
 
                 if (overdueTasks.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 8px; padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;"><img src="icon_done.svg" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;"> 全部完成啦！</div>`;
+                    container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 8px; padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;"><img src="icon_done.svg" class="zoom-icon" style="width: 18px; height: 18px; object-fit: contain;"> 全部完成啦！</div>`;
                     return;
                 }
 
@@ -1459,7 +1397,7 @@
                         <span class="tag ${getTagClass(task.category)}">${task.category}</span>
                         ${task.subject ? `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>` : ''}
                     `;
-                    
+
                     if (task.daily) {
                         tagsHtml += `<span class="tag tag-green"><img src="icon_repeat.svg" class="icon-repeat-small"> 每日</span>`;
                     }
@@ -1475,15 +1413,15 @@
                     const showAdminActions = (currentRole === 'admin' && isAdminAuthenticated);
                     const actionHtml = showAdminActions ? `
                         <div class="task-actions">
-                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
-                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
+                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
                         </div>
                     ` : '';
 
                     return `
                         <div class="task-item overdue">
                             <div class="task-icon">
-                                <img src="${task.category === '校内任务' ? 'icon_in_card.svg' : 'icon_out_card.svg'}" class="zoom-icon" style="width: 28px; height: 28px;">
+                                <img src="${task.category === '校内任务' ? 'icon_in_card.svg' : 'icon_out_card.svg'}" class="zoom-icon" style="width: 22px; height: 22px;">
                             </div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(task.name)}</div>
@@ -1508,7 +1446,7 @@
                     <div class="task-item">
                         <div class="task-info">
                             <div class="task-name">
-                                ${escapeHtml(task.name)} 
+                                ${escapeHtml(task.name)}
                                 ${task.daily ? '<img src="icon_repeat.svg" class="icon-repeat-small">' : ''}
                             </div>
                             <div class="task-meta">
@@ -1518,8 +1456,8 @@
                             </div>
                         </div>
                         <div class="task-actions">
-                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
-                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 16px; height: 16px;"></button>
+                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
                         </div>
                     </div>
                 `).join('');
@@ -1528,9 +1466,9 @@
             function renderStats() {
                 const todaySum = calcTodayStars();
                 const monthData = calcMonthStars();
-                
-                document.getElementById('todayStars').innerHTML = `${todaySum} <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px; margin-left: 12px;">`;
-                document.getElementById('monthStars').innerHTML = `${monthData.total} <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px; margin-left: 12px;">`;
+
+                document.getElementById('todayStars').innerHTML = `${todaySum} <img src="icon_star.svg" class="zoom-icon" style="width: 18px; height: 18px; margin-left: 12px;">`;
+                document.getElementById('monthStars').innerHTML = `${monthData.total} <img src="icon_star.svg" class="zoom-icon" style="width: 18px; height: 18px; margin-left: 12px;">`;
             }
 
             function updateRoleUI() {
@@ -1555,7 +1493,7 @@
                     document.querySelectorAll('.task-list, #inSchoolGroups, #outSchoolGroups, #examTaskList').forEach(el => {
                         el.style.display = '';
                     });
-                    collapseBtns.forEach(btn => btn.innerHTML = '<img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;">');
+                    collapseBtns.forEach(btn => btn.innerHTML = '<img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;">');
                 }
             }
 
@@ -1577,7 +1515,7 @@
                 const toast = document.createElement('div');
                 toast.className = 'toast';
                 const icon = isSuccess ? 'icon_toast_ok.svg' : 'icon_toast_warn.svg';
-                toast.innerHTML = `<img src="${icon}" class="zoom-icon" style="width: 18px; height: 18px;"> ${escapeHtml(message)}`;
+                toast.innerHTML = `<img src="${icon}" class="zoom-icon" style="width: 14px; height: 14px;"> ${escapeHtml(message)}`;
                 container.appendChild(toast);
                 setTimeout(() => {
                     toast.style.opacity = '0';
@@ -1591,7 +1529,7 @@
                 const today = getBeijingDateStr();
                 const task = state.tasks.find(t => t.id === taskId);
                 if (!task) return;
-                
+
                 if (!canTaskCheck(task) && !isTaskCheckedToday(taskId)) {
                     showToast('该任务已过期无法打卡', false);
                     return;
@@ -1662,7 +1600,7 @@
                     confirmText: '重置',
                     danger: true,
                     onConfirm: () => {
-                        state.checkins = []; 
+                        state.checkins = [];
                         state.extraTasks = [];
                         state.exams = [];
                         saveState();
@@ -1678,7 +1616,7 @@
                 overlay.className = 'modal-overlay';
                 const modal = document.createElement('div');
                 modal.className = 'modal-content';
-                
+
                 const cancelBtnHtml = cancelText ? `<button class="btn-cancel" id="modalCancel">${cancelText}</button>` : '';
                 const actionStyle = cancelText ? '' : 'width: 100%;';
 
@@ -1696,7 +1634,7 @@
                 modalRoot.appendChild(overlay);
 
                 const closeModal = () => overlay.remove();
-                
+
                 const cancelBtn = document.getElementById('modalCancel');
                 if (cancelBtn) {
                     cancelBtn.onclick = () => {
@@ -1704,7 +1642,7 @@
                         closeModal();
                     };
                 }
-                
+
                 document.getElementById('modalConfirm').onclick = () => {
                     if (onConfirm && onConfirm() === false) return;
                     closeModal();
@@ -1773,7 +1711,7 @@
             window.updateSubjectOptions = function() {
                 const cat = document.getElementById('modalTaskCategory').value;
                 const subContainer = document.getElementById('subjectContainer');
-                
+
                 if (cat === '校内任务') {
                     subContainer.innerHTML = `
                         <select id="modalTaskSubjectSelect">
@@ -1815,7 +1753,7 @@
                     contentHTML: `
                         <label>任务名称</label>
                         <input id="modalTaskName" type="text" value="${escapeHtml(task.name)}" placeholder="输入任务名称" />
-                        
+
                         <label>分类</label>
                         <select id="modalTaskCategory" onchange="updateSubjectOptions()" ${isEdit ? 'disabled' : ''}>
                             <option value="校内任务" ${task.category === '校内任务' ? 'selected' : ''}>校内任务</option>
@@ -1839,7 +1777,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <label>每日重复</label>
                         <select id="modalTaskDaily">
                             <option value="false" ${!task.daily ? 'selected' : ''}>否</option>
@@ -1853,7 +1791,7 @@
                     onConfirm: () => {
                         const name = document.getElementById('modalTaskName').value.trim();
                         const category = document.getElementById('modalTaskCategory').value;
-                        
+
                         let subject = '';
                         if (category === '校内任务') {
                             subject = document.getElementById('modalTaskSubjectSelect').value;
@@ -1903,9 +1841,8 @@
                         const name = document.getElementById('extraNameInput').value.trim();
                         const reward = parseInt(document.getElementById('extraRewardInput').value, 10);
                         if (!name) { alert('请输入名称'); return false; }
-                        // 允许负数
                         if (isNaN(reward) || reward < -50 || reward > 50) { alert('星值必须在-50到50之间'); return false; }
-                        
+
                         if (isEdit) {
                             const idx = state.extraTasks.findIndex(t => t.id === task.id);
                             if (idx !== -1) {
@@ -1948,7 +1885,7 @@
                         const date = document.getElementById('examDateInput').value;
                         if (!name) { alert('请输入考试名称'); return false; }
                         if (!date) { alert('请选择日期'); return false; }
-                        
+
                         if (isEdit) {
                             const idx = state.exams.findIndex(t => t.id === exam.id);
                             if (idx !== -1) {
@@ -1974,13 +1911,13 @@
             function openOcrModal() {
                 if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
                 const today = getBeijingDateStr();
-                
+
                 showModal({
                     title: '拍照 / 相册 OCR 识别',
                     contentHTML: `
                         <div style="margin-bottom:16px; text-align:center;">
                             <label class="btn-outline" style="display:inline-flex; cursor:pointer; padding:12px 24px; font-size:15px;">
-                                <img src="icon_camera.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 选择图片 / 拍照
+                                <img src="icon_camera.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 选择图片 / 拍照
                                 <input type="file" accept="image/*" id="ocrFileInput" style="display:none;">
                             </label>
                             <div id="ocrStatus" style="margin-top:12px; font-size:13px; color:var(--text-main); font-weight:800;"></div>
@@ -1988,10 +1925,10 @@
                         <div id="ocrPreviewContainer" style="display:none; margin-bottom:16px; text-align:center;">
                             <img id="ocrPreviewImg" style="max-width:100%; max-height:120px; border-radius:16px; border:2px solid var(--border-light);">
                         </div>
-                        
+
                         <label>识别文字（可编辑，按行拆分）</label>
                         <textarea id="ocrResult" rows="6" placeholder="识别结果会显示在这里..."></textarea>
-                        
+
                         <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
                             <input type="checkbox" id="ocrSplitCheck" checked style="width:20px; height:20px; margin:0; accent-color:var(--accent);" />
                             <label for="ocrSplitCheck" style="margin:0; font-size:14px; color:var(--text-main); cursor:pointer; font-weight:800;">按换行拆分多个任务</label>
@@ -2026,7 +1963,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <label style="color:var(--text-main);">每日重复</label>
                             <select id="ocrDaily" style="margin-bottom:0; background:var(--bg-nav);">
                                 <option value="false" selected>否</option>
@@ -2038,7 +1975,7 @@
                     onConfirm: () => {
                         const rawText = document.getElementById('ocrResult').value.trim();
                         if (!rawText) { showToast('请先识别或输入文字', false); return false; }
-                        
+
                         const isSplit = document.getElementById('ocrSplitCheck').checked;
                         const category = document.getElementById('ocrCategory').value;
                         let subject = '';
@@ -2054,7 +1991,7 @@
                         let taskNames = [];
                         if (isSplit) {
                             taskNames = rawText.split('\n')
-                                .map(line => line.replace(/^\d+[\.\、\s]+/, '').trim()) 
+                                .map(line => line.replace(/^\d+[\.\、\s]+/, '').trim())
                                 .filter(name => name.length > 0);
                         } else {
                             taskNames = [rawText.replace(/\n/g, ' ')];
@@ -2068,16 +2005,16 @@
                         taskNames.forEach(name => {
                             state.tasks.push({
                                 id: 'task_ocr_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
-                                name: name, 
-                                daily: daily, 
-                                note: 'OCR导入', 
-                                category: category, 
-                                subject: subject, 
-                                startDate: startDate, 
+                                name: name,
+                                daily: daily,
+                                note: 'OCR导入',
+                                category: category,
+                                subject: subject,
+                                startDate: startDate,
                                 endDate: endDate
                             });
                         });
-                        
+
                         saveState();
                         renderAll();
                         showToast(`成功生成 ${taskNames.length} 个任务`);
@@ -2123,23 +2060,23 @@
 
                         statusEl.innerHTML = '⏳ 正在识别中，请稍候...';
                         resultEl.value = '';
-                        
+
                         try {
                             const { data: { text } } = await Tesseract.recognize(
                                 file,
-                                'chi_sim+eng', 
+                                'chi_sim+eng',
                                 { logger: m => {
                                     if (m.status === 'recognizing text') {
                                         statusEl.innerHTML = `⏳ 识别进度：${Math.round(m.progress * 100)}%`;
                                     }
                                 }}
                             );
-                            
+
                             let cleanText = text.split('\n')
                                 .map(l => l.trim())
                                 .filter(l => l.length > 0)
                                 .join('\n');
-                                
+
                             resultEl.value = cleanText;
                             statusEl.innerHTML = '✅ 识别完成，请在文本框内修改';
                             if (!cleanText) {
@@ -2153,7 +2090,6 @@
                 }, 100);
             }
 
-            // 重点修复：增加切回前台自动拉取最新数据的机制
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
                     if (supabaseClient) {
@@ -2162,7 +2098,6 @@
                 }
             });
 
-            // 下拉刷新逻辑
             let touchStartY = 0;
             let isPulling = false;
 
@@ -2219,10 +2154,10 @@
                         if (targetEl) {
                             if (targetEl.style.display === 'none') {
                                 targetEl.style.display = '';
-                                btn.innerHTML = '<img src="icon_expand.svg" class="zoom-icon" style="width: 18px; height: 18px;">';
+                                btn.innerHTML = '<img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;">';
                             } else {
                                 targetEl.style.display = 'none';
-                                btn.innerHTML = '<img src="icon_collapse.svg" class="zoom-icon" style="width: 18px; height: 18px;">';
+                                btn.innerHTML = '<img src="icon_collapse.svg" class="zoom-icon" style="width: 14px; height: 14px;">';
                             }
                         }
                     }
@@ -2270,187 +2205,3 @@
                 document.body.addEventListener('click', (e) => {
                     const target = e.target.closest('[data-action]');
                     if (!target) return;
-                    const action = target.dataset.action;
-                    
-                    if (action === 'toggle-check') {
-                        toggleTaskCheck(target.dataset.taskId);
-                    } else if (action === 'toggle-extra') {
-                        toggleExtraCheck(target.dataset.extraId);
-                    } else if (action === 'edit-task') {
-                        if (currentRole === 'admin' && isAdminAuthenticated) {
-                            const task = state.tasks.find(t => t.id === target.dataset.taskId);
-                            if (task) openTaskModal(task);
-                        }
-                    } else if (action === 'delete-task') {
-                        if (currentRole === 'admin' && isAdminAuthenticated) deleteTaskConfirm(target.dataset.taskId);
-                    } else if (action === 'edit-extra') {
-                        if (currentRole === 'admin' && isAdminAuthenticated) {
-                            const extra = state.extraTasks.find(t => t.id === target.dataset.extraId);
-                            if (extra) openExtraModal(extra);
-                        }
-                    } else if (action === 'delete-extra') {
-                        if (currentRole === 'admin' && isAdminAuthenticated) {
-                            const extraId = target.dataset.extraId;
-                            showModal({
-                                title: '删除额外任务',
-                                content: '确定删除吗？',
-                                confirmText: '删除',
-                                danger: true,
-                                onConfirm: () => {
-                                    state.extraTasks = state.extraTasks.filter(t => t.id !== extraId);
-                                    state.checkins = state.checkins.filter(c => !(c.taskId === extraId && c.isExtra));
-                                    saveState();
-                                    renderAll();
-                                    showToast('已删除');
-                                }
-                            });
-                        }
-                    } else if (action === 'edit-exam') {
-                        if (currentRole === 'admin' && isAdminAuthenticated) {
-                            const exam = state.exams.find(x => x.id === target.dataset.examId);
-                            if (exam) openExamModal(exam);
-                        }
-                    } else if (action === 'delete-exam') {
-                        if (currentRole === 'admin' && isAdminAuthenticated) {
-                            const examId = target.dataset.examId;
-                            showModal({
-                                title: '删除考试',
-                                content: '确定删除该考试记录吗？',
-                                confirmText: '删除',
-                                danger: true,
-                                onConfirm: () => {
-                                    state.exams = state.exams.filter(x => x.id !== examId);
-                                    saveState();
-                                    renderAll();
-                                    showToast('已删除');
-                                }
-                            });
-                        }
-                    }
-                });
-
-                document.getElementById('prevMonth').addEventListener('click', () => {
-                    calendarMonth--; if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
-                    renderCalendar();
-                });
-                document.getElementById('nextMonth').addEventListener('click', () => {
-                    calendarMonth++; if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
-                    renderCalendar();
-                });
-
-                document.getElementById('exportCsvBtn').addEventListener('click', () => {
-                    const rows = [['日期', '类型', '名称', '详情/分数', '获得星值']];
-                    state.checkins.forEach(c => {
-                        if (c.isExtra) {
-                            const t = state.extraTasks.find(x => x.id === c.taskId);
-                            rows.push([c.date, '额外任务', t ? t.name : '已删除', '-', c.reward + '星']);
-                        } else {
-                            const t = state.tasks.find(x => x.id === c.taskId);
-                            rows.push([c.date, '日常打卡', t ? t.name : '已删除', '-', '见月度奖励']);
-                        }
-                    });
-                    state.exams.forEach(e => {
-                        if (e.score !== null) {
-                            rows.push([e.date, '考试', e.name, e.score + '分', getExamStars(e.score)]);
-                        }
-                    });
-                    const csv = rows.map(r => r.join(',')).join('\n');
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], {type:'text/csv'}));
-                    link.download = `星值记录_${getBeijingDateStr()}.csv`;
-                    link.click();
-                    showToast('CSV 已导出');
-                });
-
-                document.getElementById('bottomHome').addEventListener('click', () => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                });
-                
-                document.getElementById('bottomStats').addEventListener('click', () => {
-                    const monthData = calcMonthStars();
-                    const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
-                    
-                    let html = `
-                        <div style="padding: 10px;">
-                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
-                                <span>今日获得</span>
-                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
-                                    <span>${calcTodayStars()}</span>
-                                    <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px;">
-                                </div>
-                            </div>
-                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-page); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
-                                <span>本月累计</span>
-                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
-                                    <span>${monthData.total}</span>
-                                    <img src="icon_star.svg" class="zoom-icon" style="width: 22px; height: 22px;">
-                                </div>
-                            </div>
-                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-wrapper); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
-                                <span>本月奖励</span>
-                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
-                                    <span>${monthData.total}</span>
-                                    <img src="icon_currency.svg" class="zoom-icon" style="width: 22px; height: 22px;">
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
-                    if (isAdmin) {
-                        showModal({
-                            title: '<img src="icon_stats_title.svg" style="width: 32px; height: 32px; vertical-align: middle;"> 星值统计',
-                            contentHTML: html,
-                            confirmText: '知道了',
-                            cancelText: '清零',
-                            onCancel: () => {
-                                setTimeout(() => {
-                                    showModal({
-                                        title: '⚠️ 清零确认',
-                                        content: '确定要清空现有所有任务、打卡记录、额外任务和考试记录吗？清零后不影响后续新增。',
-                                        confirmText: '确认',
-                                        cancelText: '取消',
-                                        danger: true,
-                                        onConfirm: () => {
-                                            state.tasks = [];
-                                            state.checkins = [];
-                                            state.extraTasks = [];
-                                            state.exams = [];
-                                            saveState();
-                                            renderAll();
-                                            showToast('已清空现有所有记录');
-                                        }
-                                    });
-                                }, 50);
-                            }
-                        });
-                    } else {
-                        showModal({
-                            title: '<img src="icon_stats_title.svg" style="width: 32px; height: 32px; vertical-align: middle;"> 星值统计',
-                            contentHTML: html,
-                            confirmText: '知道了',
-                            cancelText: '' 
-                        });
-                    }
-                });
-            }
-
-            function init() {
-                if (!state.checkins) state.checkins = [];
-                if (!state.exams) state.exams = [];
-                if (!state.extraTasks) state.extraTasks = [];
-                if (!state.profile) state.profile = { name: 'HEIDI', avatar: '' };
-                
-                bindEvents();
-                renderAll();
-                
-                if (supabaseClient) {
-                    fetchCloudState();
-                    setupRealtime();
-                }
-            }
-
-            init();
-        })();
-    </script>
-</body>
-</html>
