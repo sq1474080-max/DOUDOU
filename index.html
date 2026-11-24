@@ -450,8 +450,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 44px;
-            height: 44px;
+            min-width: 48px;
+            height: 48px;
             background: transparent;
             flex-shrink: 0;
         }
@@ -640,6 +640,112 @@
             flex-shrink: 0;
         }
 
+        .view-page { padding-bottom: 90px; }
+        .shop-hero {
+            background: linear-gradient(135deg, var(--accent) 0%, #5a9dd4 100%);
+            border-radius: var(--radius-wrapper);
+            padding: 24px 26px;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(116, 176, 225, 0.32);
+            margin-bottom: 14px;
+        }
+        .shop-hero-label { font-size: 14px; font-weight: 800; opacity: 0.92; letter-spacing: 0.5px; }
+        .shop-hero-num {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 40px; font-weight: 900; line-height: 1;
+            margin: 10px 0 8px 0;
+        }
+        .shop-hero-num img { filter: brightness(0) invert(1); }
+        .shop-hero-tip { font-size: 12px; font-weight: 700; opacity: 0.85; line-height: 1.4; }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 4px;
+        }
+        .shop-item {
+            position: relative;
+            background: var(--bg-wrapper);
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-card);
+            padding: 14px 12px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            overflow: hidden;
+        }
+        .shop-item.selected {
+            border-color: var(--accent);
+            background: #f2f9ff;
+        }
+        .shop-item-img {
+            width: 64px; height: 64px;
+            border-radius: 18px;
+            background: var(--bg-card);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .shop-item-img img { width: 100%; height: 100%; object-fit: cover; }
+        .shop-item-name {
+            font-size: 13px; font-weight: 800; color: var(--text-main);
+            text-align: center; line-height: 1.25;
+            word-break: break-all;
+        }
+        .shop-item-cost {
+            display: flex; align-items: center; gap: 4px;
+            font-size: 14px; font-weight: 900; color: var(--accent); line-height: 1;
+        }
+        .shop-item-cost img { width: 16px; height: 16px; object-fit: contain; }
+        .shop-check {
+            position: absolute; top: 10px; right: 10px;
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 2px solid var(--border-light);
+            background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 900; color: #fff;
+            transition: 0.2s;
+        }
+        .shop-item.selected .shop-check {
+            background: var(--accent); border-color: var(--accent);
+        }
+        .shop-item-del {
+            position: absolute; top: 8px; left: 8px;
+            width: 24px; height: 24px; border-radius: 50%;
+            border: none; background: #ffeeee; color: #e46a6a;
+            font-size: 15px; font-weight: 900; line-height: 1;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .shop-actions {
+            display: flex; gap: 10px; margin-top: 14px;
+        }
+        .shop-actions button { flex: 1; height: 48px; }
+        .shop-empty {
+            text-align: center; padding: 32px 0; color: var(--text-sub);
+            font-size: 14px; font-weight: 800;
+        }
+        .stats-page-card {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-wrapper); border: 1px solid var(--border-light);
+            border-radius: 20px; padding: 16px 22px; margin-bottom: 12px;
+        }
+        .stats-page-card.hl { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .stats-page-card .lbl { font-size: 15px; font-weight: 800; }
+        .stats-page-card .val { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 900; color: var(--accent); line-height: 1; }
+        .stats-page-card.hl .val { color: #fff; }
+        .stats-page-card .val img { width: 20px; height: 20px; object-fit: contain; }
+        .stats-page-card.hl .val img { filter: brightness(0) invert(1); }
+        .redeem-log-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; background: var(--bg-card);
+            border-radius: 16px; margin-bottom: 8px; font-size: 13px; font-weight: 800;
+        }
+        .redeem-log-row .meta { color: var(--text-sub); font-size: 11px; font-weight: 700; margin-top: 3px; }
+
         .bottom-bar {
             position: fixed;
             bottom: 20px;
@@ -647,15 +753,15 @@
             transform: translateX(-50%);
             width: calc(100% - 40px);
             max-width: 400px;
-            background: var(--bg-nav);
+            background: var(--accent);
             padding: 10px 20px;
             display: flex;
             justify-content: space-around;
             align-items: center;
             border-radius: var(--radius-btn);
             z-index: 100;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-            border: 1px solid var(--border-light);
+            box-shadow: 0 8px 24px rgba(116, 176, 225, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.35);
         }
         .bottom-btn {
             display: flex;
@@ -671,8 +777,16 @@
             padding: 0;
         }
         .bottom-btn.active {
-            background: transparent;
+            background: rgba(255, 255, 255, 0.28);
             transform: none;
+        }
+        /* 蓝底导航：图标统一转白，保证对比度 */
+        .bottom-btn img {
+            filter: brightness(0) invert(1);
+            opacity: 0.92;
+        }
+        .bottom-btn.active img {
+            opacity: 1;
         }
 
         .modal-overlay {
@@ -813,11 +927,12 @@
     <div class="fixed-bg"></div>
 
     <div class="app-header">
-        <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 儿童模式</button>
-        <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 管理员</button>
-        <button class="header-btn" id="exportCsvBtn"><img src="icon_export.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 导出CSV</button>
+        <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 儿童模式</button>
+        <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 管理员</button>
+        <button class="header-btn" id="exportCsvBtn"><img src="icon_export.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 导出CSV</button>
     </div>
 
+    <div id="viewHome" class="view-page">
     <div class="layout-container">
         <div class="left-panel">
             <div class="profile-stats-bar">
@@ -943,11 +1058,44 @@
         </div>
     </div>
 
+    </div>
+
+    <div id="viewShop" class="view-page hidden">
+        <div class="shop-hero">
+            <div class="shop-hero-label">可用星值</div>
+            <div class="shop-hero-num"><span id="shopBalanceNum">0</span><img src="icon_star.svg" style="width: 26px; height: 26px; object-fit: contain;"></div>
+            <div class="shop-hero-tip" id="shopHeroTip">每月 1 日自动结算上月星值，兑换成功后才核销</div>
+        </div>
+
+        <div class="section-wrapper">
+            <div class="section-title">
+                <span>兑换商品</span>
+                <div class="title-right">
+                    <button class="btn-primary btn-sm hidden" id="addShopItemBtn" style="height: 36px;">+ 新增商品</button>
+                </div>
+            </div>
+            <div id="shopGrid" class="shop-grid"></div>
+            <div id="shopEmpty" class="shop-empty hidden">还没有可兑换的商品</div>
+        </div>
+
+        <div class="shop-actions">
+            <button class="btn-primary" id="redeemBtn">兑换</button>
+            <button class="btn-outline" id="clearSelBtn">清空</button>
+        </div>
+    </div>
+
+    <div id="viewStats" class="view-page hidden">
+        <div id="statsPageContent"></div>
+    </div>
+
     <div class="bottom-bar">
-        <button class="bottom-btn active" id="bottomHome">
+        <button class="bottom-btn active" id="navHome" data-view="home">
             <img src="icon_nav_home.svg" class="zoom-icon" style="width: 20px; height: 20px;">
         </button>
-        <button class="bottom-btn" id="bottomStats">
+        <button class="bottom-btn" id="navShop" data-view="shop">
+            <img src="icon_nav_shop.svg" class="zoom-icon" style="width: 20px; height: 20px;">
+        </button>
+        <button class="bottom-btn" id="navStats" data-view="stats">
             <img src="icon_nav_stats.svg" class="zoom-icon" style="width: 20px; height: 20px;">
         </button>
     </div>
@@ -1021,6 +1169,8 @@
                 checkins: [],
                 exams: [],
                 extraTasks: [],
+                shopItems: [],
+                redemptions: [],
                 profile: { name: 'HEIDI', avatar: '' }
             };
 
@@ -1041,6 +1191,8 @@
                         if (!parsed.exams) parsed.exams = [];
                         if (!parsed.extraTasks) parsed.extraTasks = [];
                         if (!parsed.checkins) parsed.checkins = [];
+                        if (!parsed.shopItems) parsed.shopItems = [];
+                        if (!parsed.redemptions) parsed.redemptions = [];
                         return parsed;
                     } catch (e) {}
                 }
@@ -1154,26 +1306,57 @@
                 return sum;
             }
 
-            function calcMonthStars() {
-                const bj = getBeijingNow();
-                const prefix = `${bj.getFullYear()}-${String(bj.getMonth()+1).padStart(2,'0')}`;
-                const todayDate = bj.getDate();
-                const lastDay = new Date(bj.getFullYear(), bj.getMonth() + 1, 0).getDate();
+            const MONTH_SETTLE_BONUS = 20;   // 每月结算固定奖励
 
+            function getBeijingMonthPrefix(offsetMonths = 0) {
+                const bj = getBeijingNow();
+                const d = new Date(bj.getFullYear(), bj.getMonth() + offsetMonths, 1);
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            }
+
+            // 某月是否产生过星值（有额外任务打卡或考试记录）；空月份不结算 20 奖励，避免凭空累积
+            function monthHasActivity(prefix) {
+                return state.checkins.some(c => c.isExtra && c.date && c.date.startsWith(prefix))
+                    || state.exams.some(e => e.date && e.date.startsWith(prefix));
+            }
+
+            // 某月结算星值 = 额外任务 + 考试 + 20（该月有记录才给）
+            function calcMonthSettled(prefix) {
+                let sum = 0;
+                state.checkins.forEach(c => { if (c.isExtra && c.date && c.date.startsWith(prefix)) sum += (c.reward || 0); });
+                state.exams.forEach(e => { if (e.date && e.date.startsWith(prefix)) sum += getExamStars(e.score); });
+                if (monthHasActivity(prefix)) sum += MONTH_SETTLE_BONUS;
+                return sum;
+            }
+
+            // 本月获得（当月未结束 → 尚未结算，不含 20 奖励）
+            function calcMonthStars() {
+                const prefix = getBeijingMonthPrefix(0);
                 let extraSum = 0;
                 let examSum = 0;
+                state.checkins.forEach(c => { if (c.isExtra && c.date && c.date.startsWith(prefix)) extraSum += (c.reward || 0); });
+                state.exams.forEach(e => { if (e.date && e.date.startsWith(prefix)) examSum += getExamStars(e.score); });
+                return { total: extraSum + examSum, extraSum, examSum, monthlyBonus: 0, prefix };
+            }
 
-                state.checkins.forEach(c => {
-                    if (c.date.startsWith(prefix) && c.isExtra) extraSum += (c.reward || 0);
-                });
+            // 已结算累计：所有"已过完"的月份（本月之前）结算之和，跨月不清零
+            function calcSettledStars() {
+                const cur = getBeijingMonthPrefix(0);
+                const months = new Set();
+                state.checkins.forEach(c => { if (c.isExtra && c.date) months.add(c.date.slice(0, 7)); });
+                state.exams.forEach(e => { if (e.date) months.add(e.date.slice(0, 7)); });
+                let total = 0;
+                months.forEach(m => { if (m < cur) total += calcMonthSettled(m); });
+                return total;
+            }
 
-                state.exams.forEach(e => {
-                    if (e.date.startsWith(prefix)) examSum += getExamStars(e.score);
-                });
+            function calcRedeemedStars() {
+                return (state.redemptions || []).reduce((sum, r) => sum + (r.cost || 0), 0);
+            }
 
-                const monthlyBonus = (todayDate === lastDay) ? 20 : 0;
-
-                return { total: extraSum + examSum + monthlyBonus, extraSum, examSum, monthlyBonus };
+            // 星值商店可用余额 = 已结算累计 − 已兑换核销
+            function calcShopBalance() {
+                return calcSettledStars() - calcRedeemedStars();
             }
 
             // ===== 统一时间基准：全部用北京时间日期字符串 YYYY-MM-DD（字典序即时间序），不再混用 Date 时间戳 =====
@@ -1316,10 +1499,13 @@
                 const today = getBeijingDateStr();
                 const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
 
+                const isAdminOp = (currentRole === 'admin' && isAdminAuthenticated);
                 const tasks = state.tasks.filter(task => {
                     if (task.category !== category) return false;
                     // 打过卡的任务仍显示（带完成态）；其余按有效期判断是否该出现
                     if (todayCheckTaskIds.has(task.id)) return true;
+                    // 管理员：已过截止的周期任务若有打卡，仍显示，便于取消打卡
+                    if (isAdminOp && isPeriodTask(task) && isPeriodTaskChecked(task)) return true;
                     return isTaskInValidPeriod(task, today);
                 });
 
@@ -1351,7 +1537,7 @@
                 }
 
                 sortedSubjects.forEach(sub => {
-                    html += `<div class="sub-title"><img src="icon_subject.svg" class="zoom-icon" style="width: 14px; height: 14px;"> ${sub}</div>`;
+                    html += `<div class="sub-title"><img src="icon_subject.svg" class="zoom-icon" style="width: 12px; height: 12px;"> ${sub}</div>`;
                     html += `<div class="task-grid-inner">`;
                     groups[sub].forEach(task => {
                         html += renderTaskItem(task, isTaskCheckedForDisplay(task, today), false);
@@ -1404,7 +1590,7 @@
                 return `
                     <div class="task-item ${completed ? 'completed' : ''} ${overdue ? 'overdue' : ''}" data-task-id="${task.id}">
                         <div class="task-icon">
-                            <img src="${getSubjectIcon(task.subject)}" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;">
+                            <img src="${getSubjectIcon(task.subject)}" class="zoom-icon" style="width: 26px; height: 26px; object-fit: contain;">
                         </div>
                         <div class="task-info">
                             <div class="task-name">${escapeHtml(task.name)}</div>
@@ -1441,7 +1627,7 @@
                     const completed = state.checkins.some(c => c.date === today && c.taskId === task.id && c.isExtra);
                     return `
                         <div class="task-item ${completed ? 'completed' : ''}">
-                            <div class="task-icon"><img src="icon_gift_card.png" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;"></div>
+                            <div class="task-icon"><img src="icon_gift_card.png" class="zoom-icon" style="width: 26px; height: 26px; object-fit: contain;"></div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(task.name)}</div>
                                 <div class="task-meta">
@@ -1489,7 +1675,7 @@
                     return `
                         <div class="task-item">
                             <div class="task-icon">
-                                <img src="icon_exam_card.png" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;">
+                                <img src="icon_exam_card.png" class="zoom-icon" style="width: 26px; height: 26px; object-fit: contain;">
                             </div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(exam.name)}</div>
@@ -1583,7 +1769,7 @@
                     return `
                         <div class="task-item overdue">
                             <div class="task-icon">
-                                <img src="${getSubjectIcon(task.subject)}" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;">
+                                <img src="${getSubjectIcon(task.subject)}" class="zoom-icon" style="width: 26px; height: 26px; object-fit: contain;">
                             </div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(task.name)}</div>
@@ -1671,6 +1857,280 @@
                 renderOverdueTasks();
                 renderTaskLibrary();
                 updateRoleUI();
+                if (currentView === 'shop') renderShopPage();
+                if (currentView === 'stats') renderStatsPage();
+            }
+
+            // ================= 视图切换 =================
+            let currentView = 'home';
+            let selectedShopIds = new Set();
+
+            function switchView(view) {
+                currentView = view;
+                ['home', 'shop', 'stats'].forEach(v => {
+                    const el = document.getElementById('view' + v.charAt(0).toUpperCase() + v.slice(1));
+                    if (el) el.classList.toggle('hidden', v !== view);
+                });
+                document.querySelectorAll('.bottom-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.view === view);
+                });
+                if (view === 'shop') renderShopPage();
+                if (view === 'stats') renderStatsPage();
+                window.scrollTo({ top: 0, behavior: 'auto' });
+            }
+
+            // ================= 星值商店 =================
+            function uid() {
+                return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+            }
+
+            function renderShopPage() {
+                const balanceEl = document.getElementById('shopBalanceNum');
+                if (!balanceEl) return;
+                const balance = Math.max(0, calcShopBalance());
+                balanceEl.textContent = balance;
+                const pending = calcMonthStars().total;   // 本月尚未结算，过月底 24:00 后才进入总星值
+                const tip = document.getElementById('shopHeroTip');
+                if (tip) {
+                    tip.innerHTML = `本月待结算 <b>${pending}</b> 星值 · 月底另加 20，过 24:00 后一并计入可用星值`;
+                }
+
+                const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
+                const addBtn = document.getElementById('addShopItemBtn');
+                if (addBtn) addBtn.classList.toggle('hidden', !isAdmin);
+
+                const items = state.shopItems || [];
+                // 清掉已被删除商品的选择
+                selectedShopIds = new Set([...selectedShopIds].filter(id => items.some(i => i.id === id)));
+
+                const grid = document.getElementById('shopGrid');
+                const empty = document.getElementById('shopEmpty');
+                empty.classList.toggle('hidden', items.length > 0);
+
+                grid.innerHTML = items.map(item => `
+                    <div class="shop-item ${selectedShopIds.has(item.id) ? 'selected' : ''}" data-shop-id="${item.id}">
+                        ${isAdmin ? `<button class="shop-item-del" data-action="del-shop-item" data-shop-id="${item.id}">×</button>` : ''}
+                        <div class="shop-check">✓</div>
+                        <div class="shop-item-img">
+                            ${item.image
+                                ? `<img src="${item.image}" alt="">`
+                                : `<img src="icon_gift_card.png" style="width: 40px; height: 40px; object-fit: contain;">`}
+                        </div>
+                        <div class="shop-item-name">${escapeHtml(item.name)}</div>
+                        <div class="shop-item-cost"><img src="icon_star.svg">${item.cost}</div>
+                    </div>
+                `).join('');
+            }
+
+            function toggleShopSelect(id) {
+                if (selectedShopIds.has(id)) selectedShopIds.delete(id);
+                else selectedShopIds.add(id);
+                renderShopPage();
+            }
+
+            function doClearSelection() {
+                if (selectedShopIds.size === 0) { showToast('当前没有选择', false); return; }
+                selectedShopIds.clear();
+                renderShopPage();
+                showToast('已清空选择');
+            }
+
+            function doRedeem() {
+                if (selectedShopIds.size === 0) { showToast('请先选择要兑换的商品', false); return; }
+                const items = [...selectedShopIds].map(id => (state.shopItems || []).find(i => i.id === id)).filter(Boolean);
+                const cost = items.reduce((sum, i) => sum + (i.cost || 0), 0);
+                const balance = calcShopBalance();
+                if (cost > balance) {
+                    showToast(`星值不足，还差 ${cost - balance}`, false);
+                    return;
+                }
+                const names = items.map(i => `${escapeHtml(i.name)}（${i.cost}★）`).join('、');
+                showModal({
+                    title: '确认兑换',
+                    contentHTML: `<div style="font-size:14px; font-weight:800; line-height:1.7; color:var(--text-main);">
+                        商品：${names}<br>
+                        合计扣除：<span style="color:var(--accent);">${cost}</span> 星值<br>
+                        兑换后可用星值：<span style="color:var(--accent);">${balance - cost}</span>
+                    </div>`,
+                    confirmText: '确认兑换',
+                    cancelText: '再想想',
+                    onConfirm: () => {
+                        const today = getBeijingDateStr();
+                        items.forEach(i => {
+                            state.redemptions.push({ id: uid(), itemId: i.id, name: i.name, cost: i.cost || 0, date: today, timestamp: Date.now() });
+                        });
+                        selectedShopIds.clear();
+                        saveState();
+                        renderAll();
+                        renderShopPage();
+                        showToast(`兑换成功，扣除 ${cost} 星值`);
+                    }
+                });
+            }
+
+            function openShopItemModal() {
+                let pendingImage = '';
+                showModal({
+                    title: '新增商品',
+                    contentHTML: `
+                        <div style="display:flex; flex-direction:column; gap:14px;">
+                            <label class="modal-label">商品图片
+                                <div style="display:flex; align-items:center; gap:14px; margin-top:8px;">
+                                    <label for="shopImgInput" style="width:72px; height:72px; border-radius:20px; background:var(--bg-card); border:1px dashed var(--border-light); display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer;" id="shopImgPreview">
+                                        <img src="icon_camera.svg" class="zoom-icon" style="width: 14px; height: 14px;">
+                                    </label>
+                                    <span style="font-size:12px; color:var(--text-sub); font-weight:700;">点击左侧上传（可选）</span>
+                                </div>
+                                <input id="shopImgInput" type="file" accept="image/*" style="display:none;">
+                            </label>
+                            <label class="modal-label">商品名称
+                                <input id="shopItemName" class="modal-input" type="text" placeholder="例如：看动画片 30 分钟">
+                            </label>
+                            <label class="modal-label">所需星值
+                                <input id="shopItemCost" class="modal-input" type="number" min="1" step="1" placeholder="例如：20">
+                            </label>
+                        </div>
+                    `,
+                    confirmText: '保存',
+                    onConfirm: () => {
+                        const name = (document.getElementById('shopItemName').value || '').trim();
+                        const cost = parseInt(document.getElementById('shopItemCost').value, 10);
+                        if (!name) { showToast('请填写商品名称', false); return; }
+                        if (!cost || cost <= 0) { showToast('请填写正确的星值', false); return; }
+                        state.shopItems.push({ id: uid(), name, cost, image: pendingImage, createdAt: getBeijingDateStr() });
+                        saveState();
+                        renderShopPage();
+                        showToast('商品已添加');
+                    }
+                });
+
+                setTimeout(() => {
+                    const input = document.getElementById('shopImgInput');
+                    const preview = document.getElementById('shopImgPreview');
+                    if (!input) return;
+                    input.addEventListener('change', (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const maxSize = 160;
+                                let w = img.width, h = img.height;
+                                if (w > h) { if (w > maxSize) { h = h * maxSize / w; w = maxSize; } }
+                                else { if (h > maxSize) { w = w * maxSize / h; h = maxSize; } }
+                                const canvas = document.createElement('canvas');
+                                canvas.width = w; canvas.height = h;
+                                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                                pendingImage = canvas.toDataURL('image/jpeg', 0.82);
+                                preview.innerHTML = `<img src="${pendingImage}" style="width:100%;height:100%;object-fit:cover;">`;
+                            };
+                            img.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }, 0);
+            }
+
+            function deleteShopItem(id) {
+                const item = (state.shopItems || []).find(i => i.id === id);
+                if (!item) return;
+                showModal({
+                    title: '删除商品',
+                    content: `确定删除「${item.name}」？已兑换的记录会保留。`,
+                    confirmText: '删除',
+                    danger: true,
+                    onConfirm: () => {
+                        state.shopItems = state.shopItems.filter(i => i.id !== id);
+                        selectedShopIds.delete(id);
+                        saveState();
+                        renderShopPage();
+                        showToast('商品已删除');
+                    }
+                });
+            }
+
+            // ================= 统计页面 =================
+            function renderStatsPage() {
+                const el = document.getElementById('statsPageContent');
+                if (!el) return;
+                const monthData = calcMonthStars();
+                const settled = calcSettledStars();
+                const redeemed = calcRedeemedStars();
+                const balance = settled - redeemed;
+                const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
+
+                const logs = (state.redemptions || []).slice().sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 20);
+                const logHtml = logs.length === 0
+                    ? `<div class="shop-empty">还没有兑换记录</div>`
+                    : logs.map(r => `
+                        <div class="redeem-log-row">
+                            <div>
+                                <div>${escapeHtml(r.name)}</div>
+                                <div class="meta">${r.date || ''}</div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="color:var(--accent);">-${r.cost}</span>
+                                ${isAdmin ? `<button class="icon-btn" data-action="revoke-redeem" data-redeem-id="${r.id}" title="撤销并退回星值"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+
+                el.innerHTML = `
+                    <div class="section-title" style="font-size:20px; margin:4px 4px 14px;">星值统计</div>
+                    <div class="stats-page-card hl">
+                        <span class="lbl">今日获得</span>
+                        <span class="val">${calcTodayStars()}<img src="icon_star.svg"></span>
+                    </div>
+                    <div class="stats-page-card">
+                        <span class="lbl">本月获得（未结算）</span>
+                        <span class="val">${monthData.total}<img src="icon_star.svg"></span>
+                    </div>
+                    <div class="stats-page-card">
+                        <span class="lbl">已结算累计</span>
+                        <span class="val">${settled}<img src="icon_star.svg"></span>
+                    </div>
+                    <div class="stats-page-card">
+                        <span class="lbl">已兑换消耗</span>
+                        <span class="val">${redeemed}<img src="icon_star.svg"></span>
+                    </div>
+                    <div class="stats-page-card">
+                        <span class="lbl">可用星值</span>
+                        <span class="val">${Math.max(0, balance)}<img src="icon_star.svg"></span>
+                    </div>
+
+                    <div class="section-wrapper" style="margin-top:14px;">
+                        <div class="section-title"><span>本月明细</span></div>
+                        <div style="padding:4px 4px 12px;">
+                            <div class="redeem-log-row"><div>额外任务奖励</div><div style="color:var(--accent);">${monthData.extraSum}</div></div>
+                            <div class="redeem-log-row"><div>考试任务奖励</div><div style="color:var(--accent);">${monthData.examSum}</div></div>
+                            <div class="redeem-log-row"><div>月底结算奖励</div><div style="color:var(--text-sub);">本月结束后 +20</div></div>
+                        </div>
+                    </div>
+
+                    <div class="section-wrapper" style="margin-top:14px;">
+                        <div class="section-title"><span>兑换记录</span></div>
+                        <div style="padding:8px 4px 4px;">${logHtml}</div>
+                    </div>
+                `;
+            }
+
+            function revokeRedeem(recordId) {
+                const rec = (state.redemptions || []).find(r => r.id === recordId);
+                if (!rec) return;
+                showModal({
+                    title: '撤销兑换',
+                    content: `撤销「${rec.name}」的兑换，${rec.cost} 星值将退回可用星值。`,
+                    confirmText: '撤销',
+                    danger: true,
+                    onConfirm: () => {
+                        state.redemptions = state.redemptions.filter(r => r.id !== recordId);
+                        saveState();
+                        renderStatsPage();
+                        renderShopPage();
+                        showToast(`已撤销，退回 ${rec.cost} 星值`);
+                    }
+                });
             }
 
             function showToast(message, isSuccess = true) {
@@ -1693,16 +2153,43 @@
                 const task = state.tasks.find(t => t.id === taskId);
                 if (!task) return;
 
-                // 只允许操作"今天"这条打卡：历史日期的打卡一律不可取消（跨天不可改）
+                const isAdminOp = (currentRole === 'admin' && isAdminAuthenticated);
+
+                // 周期任务：周期内打一次即完成，因此取消也要能取消"非今天"的那一条
+                if (isPeriodTask(task)) {
+                    const pIdx = state.checkins.findIndex(c => !c.isExtra && c.taskId === taskId
+                        && c.date >= (task.startDate || '0000-01-01') && c.date <= (task.endDate || '9999-12-31'));
+                    const expired = today > (task.endDate || '9999-12-31');   // 过了截止 24:00
+                    if (pIdx !== -1) {
+                        if (expired && !isAdminOp) {
+                            showToast('该周期任务已截止，不可取消', false);
+                            return;
+                        }
+                        state.checkins.splice(pIdx, 1);
+                        showToast('取消完成');
+                    } else {
+                        if (expired && !isAdminOp) {
+                            showToast('该周期任务已截止，不可打卡', false);
+                            return;
+                        }
+                        if (!canTaskCheck(task)) {
+                            showToast('该任务当前不可打卡', false);
+                            return;
+                        }
+                        state.checkins.push({ date: today, taskId, timestamp: Date.now() });
+                        showToast('完成打卡');
+                    }
+                    saveState();
+                    renderAll();
+                    return;
+                }
+
+                // 非周期任务：历史日期的打卡不可取消（跨天不可改），管理员可操作
                 const existingIndex = state.checkins.findIndex(c => c.date === today && c.taskId === taskId && !c.isExtra);
                 if (existingIndex !== -1) {
                     state.checkins.splice(existingIndex, 1);
                     showToast(`取消完成`);
                 } else {
-                    if (isPeriodTask(task) && isPeriodTaskChecked(task)) {
-                        showToast(`该周期任务已完成`, false);
-                        return;
-                    }
                     if (!canTaskCheck(task)) {
                         showToast(`该任务当前不可打卡`, false);
                         return;
@@ -2541,75 +3028,26 @@
                     showToast('CSV 已导出');
                 });
 
-                document.getElementById('bottomHome').addEventListener('click', () => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                // ===== 底部导航：首页 / 星值商店 / 统计 =====
+                document.querySelectorAll('.bottom-btn').forEach(btn => {
+                    btn.addEventListener('click', () => switchView(btn.dataset.view));
                 });
 
-                document.getElementById('bottomStats').addEventListener('click', () => {
-                    const monthData = calcMonthStars();
-                    const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
+                // ===== 星值商店 =====
+                document.getElementById('shopGrid').addEventListener('click', (e) => {
+                    const delBtn = e.target.closest('[data-action="del-shop-item"]');
+                    if (delBtn) { e.stopPropagation(); deleteShopItem(delBtn.dataset.shopId); return; }
+                    const card = e.target.closest('.shop-item');
+                    if (card) toggleShopSelect(card.dataset.shopId);
+                });
+                document.getElementById('redeemBtn').addEventListener('click', doRedeem);
+                document.getElementById('clearSelBtn').addEventListener('click', doClearSelection);
+                document.getElementById('addShopItemBtn').addEventListener('click', openShopItemModal);
 
-                    let html = `
-                        <div style="padding: 10px;">
-                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
-                                <span>今日获得</span>
-                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent); line-height:1;">
-                                    <span>${calcTodayStars()}</span>
-                                    <img src="icon_star.svg" style="width: 20px; height: 20px; object-fit: contain;">
-                                </div>
-                            </div>
-                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-page); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
-                                <span>本月累计</span>
-                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent); line-height:1;">
-                                    <span>${monthData.total}</span>
-                                    <img src="icon_star.svg" style="width: 20px; height: 20px; object-fit: contain;">
-                                </div>
-                            </div>
-                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-wrapper); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
-                                <span>本月奖励</span>
-                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent); line-height:1;">
-                                    <span>${monthData.total}</span>
-                                    <img src="icon_currency.svg" style="width: 20px; height: 20px; object-fit: contain;">
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
-                    if (isAdmin) {
-                        showModal({
-                            title: '<img src="icon_stats_title.svg" style="width: 32px; height: 32px; vertical-align: middle;"> 星值统计',
-                            contentHTML: html,
-                            confirmText: '知道了',
-                            cancelText: '清零',
-                            onCancel: () => {
-                                setTimeout(() => {
-                                    showModal({
-                                        title: '⚠️ 清零确认',
-                                        content: '确定要清空现有所有任务、打卡记录、额外任务和考试记录吗？清零后不影响后续新增。',
-                                        confirmText: '确认',
-                                        cancelText: '取消',
-                                        danger: true,
-                                        onConfirm: () => {
-                                            state.tasks = [];
-                                            state.checkins = [];
-                                            state.extraTasks = [];
-                                            state.exams = [];
-                                            saveState();
-                                            renderAll();
-                                            showToast('已清空现有所有记录');
-                                        }
-                                    });
-                                }, 50);
-                            }
-                        });
-                    } else {
-                        showModal({
-                            title: '<img src="icon_stats_title.svg" style="width: 32px; height: 32px; vertical-align: middle;"> 星值统计',
-                            contentHTML: html,
-                            confirmText: '知道了',
-                            cancelText: ''
-                        });
-                    }
+                // ===== 统计页：管理员撤销兑换 =====
+                document.getElementById('statsPageContent').addEventListener('click', (e) => {
+                    const btn = e.target.closest('[data-action="revoke-redeem"]');
+                    if (btn) revokeRedeem(btn.dataset.redeemId);
                 });
             }
 
