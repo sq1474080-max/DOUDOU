@@ -659,66 +659,95 @@
         .shop-hero-tip { font-size: 12px; font-weight: 700; opacity: 0.85; line-height: 1.4; }
 
         .shop-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            display: flex;
+            flex-direction: column;
             gap: 12px;
             margin-top: 4px;
         }
+        /* 兑换商品卡：与主界面任务卡一致（横向：图标 + 信息 + 勾选圈） */
         .shop-item {
             position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
             background: var(--bg-wrapper);
             border: 2px solid var(--border-light);
             border-radius: var(--radius-card);
-            padding: 14px 12px 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
+            padding: 12px 14px;
             cursor: pointer;
             transition: 0.2s;
-            overflow: hidden;
+            box-shadow: var(--shadow-card);
         }
         .shop-item.selected {
             border-color: var(--accent);
             background: #f2f9ff;
         }
         .shop-item-img {
-            width: 64px; height: 64px;
-            border-radius: 18px;
+            width: 52px; height: 52px;
+            border-radius: 16px;
             background: var(--bg-card);
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
             flex-shrink: 0;
         }
         .shop-item-img img { width: 100%; height: 100%; object-fit: cover; }
+        .shop-item-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
         .shop-item-name {
-            font-size: 13px; font-weight: 800; color: var(--text-main);
-            text-align: center; line-height: 1.25;
-            word-break: break-all;
+            font-size: 15px; font-weight: 800; color: var(--text-main);
+            line-height: 1.25; word-break: break-all;
         }
         .shop-item-cost {
             display: flex; align-items: center; gap: 4px;
-            font-size: 14px; font-weight: 900; color: var(--accent); line-height: 1;
+            font-size: 13px; font-weight: 900; color: var(--accent); line-height: 1;
         }
         .shop-item-cost img { width: 16px; height: 16px; object-fit: contain; }
+        .shop-money-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .shop-money-input {
+            width: 108px; height: 38px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            padding: 0 10px;
+            font-family: inherit;
+            font-size: 15px; font-weight: 900;
+            color: var(--accent);
+            background: var(--bg-nav);
+            outline: none;
+            box-sizing: border-box;
+        }
+        .shop-money-input:focus { border-color: var(--accent); }
+        .shop-money-hint { font-size: 11px; font-weight: 800; color: var(--text-sub); }
         .shop-check {
-            position: absolute; top: 10px; right: 10px;
-            width: 22px; height: 22px; border-radius: 50%;
+            width: 32px; height: 32px;
+            border-radius: 50%;
             border: 2px solid var(--border-light);
             background: #fff;
             display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 900; color: #fff;
+            font-size: 15px; font-weight: 900; color: transparent;
+            flex-shrink: 0;
             transition: 0.2s;
         }
         .shop-item.selected .shop-check {
-            background: var(--accent); border-color: var(--accent);
+            background: var(--accent); border-color: var(--accent); color: #fff;
         }
         .shop-item-del {
-            position: absolute; top: 8px; left: 8px;
-            width: 24px; height: 24px; border-radius: 50%;
-            border: none; background: #ffeeee; color: #e46a6a;
-            font-size: 15px; font-weight: 900; line-height: 1;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--border-light);
+            background: #ffeeee; color: #e46a6a;
+            font-size: 17px; font-weight: 900; line-height: 1;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .shop-item-err {
+            display: none; color: #e46a6a; font-size: 13px; font-weight: 800;
+            text-align: center; margin-bottom: 10px;
         }
         .shop-actions {
             display: flex; gap: 10px; margin-top: 14px;
@@ -888,6 +917,7 @@
         @media (min-width: 900px) {
             body { padding: 24px 40px 100px; }
             .app-header { max-width: 1200px; width: 100%; margin: 0 auto 12px auto; }
+            #viewShop, #viewStats { max-width: 1200px; width: 100%; margin: 0 auto; }
             .layout-container {
                 display: grid;
                 grid-template-columns: 380px 1fr;
@@ -909,6 +939,11 @@
                 flex-direction: column;
                 gap: 10px;
                 min-width: 0;
+            }
+            .shop-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
             }
             .task-grid-inner {
                 display: grid;
@@ -973,7 +1008,7 @@
             <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left">
-                        <img src="icon_gift_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 额外任务
+                        <img src="icon_gift_title.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 额外任务
                     </div>
                     <div class="title-right">
                         <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增</button>
@@ -988,7 +1023,7 @@
             <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left">
-                        <img src="icon_school_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 校内任务
+                        <img src="icon_school_title.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 校内任务
                         <span id="inSchoolCountBadge" style="font-size:13px; background:var(--bg-page); color:var(--text-main); padding:4px 12px; border-radius:999px; font-weight:900;">0项</span>
                     </div>
                     <div class="title-right">
@@ -1002,7 +1037,7 @@
             <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left">
-                        <img src="icon_out_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 校外任务
+                        <img src="icon_out_title.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 校外任务
                         <span id="outSchoolCountBadge" style="font-size:13px; background:var(--bg-page); color:var(--text-main); padding:4px 12px; border-radius:999px; font-weight:900;">0项</span>
                     </div>
                     <div class="title-right">
@@ -1016,7 +1051,7 @@
             <div class="section-wrapper">
                 <div class="section-title">
                     <div class="title-left">
-                        <img src="icon_exam_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 考试任务
+                        <img src="icon_exam_title.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 考试任务
                     </div>
                     <div class="title-right">
                         <button class="btn-outline btn-sm" id="addExamBtn">+ 新增考试</button>
@@ -1884,6 +1919,11 @@
                 return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
             }
 
+            // 固定兑换商品 money：不写入 state.shopItems，始终存在、不可删除
+            const MONEY_ITEM_ID = '__money__';
+            const MONEY_ICON = 'icon_shop_money.png';
+            let moneyAmount = 0;   // 本次要兑换的星值（仅内存，兑换后清零）
+
             function renderShopPage() {
                 const balanceEl = document.getElementById('shopBalanceNum');
                 if (!balanceEl) return;
@@ -1891,55 +1931,100 @@
                 balanceEl.textContent = balance;
                 const pending = calcMonthStars().total;   // 本月尚未结算，过月底 24:00 后才进入总星值
                 const tip = document.getElementById('shopHeroTip');
-                if (tip) {
-                    tip.innerHTML = `本月待结算 <b>${pending}</b> 星值 · 月底另加 20，过 24:00 后一并计入可用星值`;
-                }
+                if (tip) tip.innerHTML = `本月待结算 <b>${pending}</b> 星值`;
 
                 const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
                 const addBtn = document.getElementById('addShopItemBtn');
                 if (addBtn) addBtn.classList.toggle('hidden', !isAdmin);
 
                 const items = state.shopItems || [];
-                // 清掉已被删除商品的选择
-                selectedShopIds = new Set([...selectedShopIds].filter(id => items.some(i => i.id === id)));
+                // money 为固定项，不参与"已删除商品"清理
+                selectedShopIds = new Set([...selectedShopIds].filter(id =>
+                    id === MONEY_ITEM_ID || items.some(i => i.id === id)));
 
                 const grid = document.getElementById('shopGrid');
                 const empty = document.getElementById('shopEmpty');
-                empty.classList.toggle('hidden', items.length > 0);
+                if (empty) empty.classList.add('hidden');   // 固定商品 money 始终存在
 
-                grid.innerHTML = items.map(item => `
-                    <div class="shop-item ${selectedShopIds.has(item.id) ? 'selected' : ''}" data-shop-id="${item.id}">
-                        ${isAdmin ? `<button class="shop-item-del" data-action="del-shop-item" data-shop-id="${item.id}">×</button>` : ''}
+                const moneySelected = selectedShopIds.has(MONEY_ITEM_ID);
+                const moneyCard = `
+                    <div class="shop-item ${moneySelected ? 'selected' : ''}" data-shop-id="${MONEY_ITEM_ID}">
+                        <div class="shop-item-img" style="position:relative; background:#fff6e0;">
+                            <span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:900; color:#e3a53c;">¥</span>
+                            <img src="${MONEY_ICON}" alt="" style="position:relative; object-fit: contain; padding: 6px; background:#fff6e0;"
+                                 onload="this.previousElementSibling.style.display='none'"
+                                 onerror="this.style.display='none';this.removeAttribute('src')">
+                        </div>
+                        <div class="shop-item-info">
+                            <div class="shop-item-name">money</div>
+                            <div class="shop-money-row">
+                                <input id="moneyAmountInput" class="shop-money-input" type="text" inputmode="numeric"
+                                       placeholder="填星值" value="${moneyAmount || ''}" aria-label="兑换星值">
+                                <span class="shop-money-hint">可填 1 ~ ${balance} 的整数</span>
+                            </div>
+                        </div>
                         <div class="shop-check">✓</div>
+                    </div>
+                `;
+
+                const otherCards = items.map(item => `
+                    <div class="shop-item ${selectedShopIds.has(item.id) ? 'selected' : ''}" data-shop-id="${item.id}">
                         <div class="shop-item-img">
                             ${item.image
                                 ? `<img src="${item.image}" alt="">`
-                                : `<img src="icon_gift_card.png" style="width: 40px; height: 40px; object-fit: contain;">`}
+                                : `<img src="icon_gift_card.png" alt="" style="object-fit: contain; padding: 6px;">`}
                         </div>
-                        <div class="shop-item-name">${escapeHtml(item.name)}</div>
-                        <div class="shop-item-cost"><img src="icon_star.svg">${item.cost}</div>
+                        <div class="shop-item-info">
+                            <div class="shop-item-name">${escapeHtml(item.name)}</div>
+                            <div class="shop-item-cost"><img src="icon_star.svg">${item.cost}</div>
+                        </div>
+                        ${isAdmin ? `<button class="shop-item-del" data-action="del-shop-item" data-shop-id="${item.id}" title="删除">×</button>` : ''}
+                        <div class="shop-check">✓</div>
                     </div>
                 `).join('');
+
+                grid.innerHTML = moneyCard + otherCards;
             }
 
             function toggleShopSelect(id) {
+                // money 打勾前必须填好合法整数（1 ~ 可用星值）
+                if (id === MONEY_ITEM_ID && !selectedShopIds.has(id)) {
+                    const balance = Math.max(0, calcShopBalance());
+                    const el = document.getElementById('moneyAmountInput');
+                    const raw = el ? el.value : moneyAmount;
+                    const v = parseInt(String(raw).replace(/[^0-9]/g, ''), 10);
+                    if (!v || v < 1) { showToast('请先填写要兑换的星值', false); return; }
+                    if (v > balance) { showToast(`不能超过可用星值 ${balance}`, false); return; }
+                    moneyAmount = v;
+                }
                 if (selectedShopIds.has(id)) selectedShopIds.delete(id);
                 else selectedShopIds.add(id);
                 renderShopPage();
             }
 
             function doClearSelection() {
-                if (selectedShopIds.size === 0) { showToast('当前没有选择', false); return; }
+                if (selectedShopIds.size === 0 && !moneyAmount) { showToast('当前没有选择', false); return; }
                 selectedShopIds.clear();
+                moneyAmount = 0;
                 renderShopPage();
                 showToast('已清空选择');
             }
 
             function doRedeem() {
                 if (selectedShopIds.size === 0) { showToast('请先选择要兑换的商品', false); return; }
-                const items = [...selectedShopIds].map(id => (state.shopItems || []).find(i => i.id === id)).filter(Boolean);
-                const cost = items.reduce((sum, i) => sum + (i.cost || 0), 0);
                 const balance = calcShopBalance();
+                const items = [...selectedShopIds].map(id => {
+                    if (id === MONEY_ITEM_ID) return { id: MONEY_ITEM_ID, name: 'money', cost: moneyAmount };
+                    return (state.shopItems || []).find(i => i.id === id);
+                }).filter(Boolean);
+
+                // money 金额再次校验，避免输入被改动后超额
+                if (selectedShopIds.has(MONEY_ITEM_ID)) {
+                    if (!moneyAmount || moneyAmount < 1) { showToast('请先填写要兑换的星值', false); return; }
+                    if (moneyAmount > balance) { showToast(`不能超过可用星值 ${balance}`, false); return; }
+                }
+
+                const cost = items.reduce((sum, i) => sum + (i.cost || 0), 0);
                 if (cost > balance) {
                     showToast(`星值不足，还差 ${cost - balance}`, false);
                     return;
@@ -1960,6 +2045,7 @@
                             state.redemptions.push({ id: uid(), itemId: i.id, name: i.name, cost: i.cost || 0, date: today, timestamp: Date.now() });
                         });
                         selectedShopIds.clear();
+                        moneyAmount = 0;
                         saveState();
                         renderAll();
                         renderShopPage();
@@ -1973,30 +2059,40 @@
                 showModal({
                     title: '新增商品',
                     contentHTML: `
-                        <div style="display:flex; flex-direction:column; gap:14px;">
-                            <label class="modal-label">商品图片
-                                <div style="display:flex; align-items:center; gap:14px; margin-top:8px;">
-                                    <label for="shopImgInput" style="width:72px; height:72px; border-radius:20px; background:var(--bg-card); border:1px dashed var(--border-light); display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer;" id="shopImgPreview">
-                                        <img src="icon_camera.svg" class="zoom-icon" style="width: 14px; height: 14px;">
-                                    </label>
-                                    <span style="font-size:12px; color:var(--text-sub); font-weight:700;">点击左侧上传（可选）</span>
-                                </div>
+                        <div style="display:flex; flex-direction:column; gap:2px;">
+                            <div class="modal-label" style="margin-bottom:8px;">商品图片</div>
+                            <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
+                                <label for="shopImgInput" style="width:72px; height:72px; border-radius:20px; background:var(--bg-card); border:1px dashed var(--border-light); display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; flex-shrink:0;" id="shopImgPreview">
+                                    <img src="icon_camera.svg" class="zoom-icon" style="width: 14px; height: 14px;">
+                                </label>
+                                <span style="font-size:12px; color:var(--text-sub); font-weight:700;">点击左侧上传（可选）</span>
                                 <input id="shopImgInput" type="file" accept="image/*" style="display:none;">
-                            </label>
-                            <label class="modal-label">商品名称
-                                <input id="shopItemName" class="modal-input" type="text" placeholder="例如：看动画片 30 分钟">
-                            </label>
-                            <label class="modal-label">所需星值
-                                <input id="shopItemCost" class="modal-input" type="number" min="1" step="1" placeholder="例如：20">
-                            </label>
+                            </div>
+                            <label class="modal-label" for="shopItemName">商品名称</label>
+                            <input id="shopItemName" type="text" placeholder="例如：看动画片 30 分钟">
+                            <label class="modal-label" for="shopItemCost">所需星值</label>
+                            <input id="shopItemCost" type="text" inputmode="numeric" value="20" placeholder="例如：20">
+                            <div class="shop-item-err" id="shopItemErr"></div>
                         </div>
                     `,
                     confirmText: '保存',
                     onConfirm: () => {
-                        const name = (document.getElementById('shopItemName').value || '').trim();
-                        const cost = parseInt(document.getElementById('shopItemCost').value, 10);
-                        if (!name) { showToast('请填写商品名称', false); return; }
-                        if (!cost || cost <= 0) { showToast('请填写正确的星值', false); return; }
+                        // 校验不通过时返回 false → 弹窗保持打开，直接改，不会出现"点了保存却没加上"
+                        const errEl = document.getElementById('shopItemErr');
+                        const fail = (msg) => {
+                            if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+                            showToast(msg, false);
+                            return false;
+                        };
+                        const nameEl = document.getElementById('shopItemName');
+                        const costEl = document.getElementById('shopItemCost');
+                        const name = nameEl ? (nameEl.value || '').trim() : '';
+                        const costRaw = costEl ? String(costEl.value || '').replace(/[^0-9]/g, '') : '';
+                        const cost = parseInt(costRaw, 10);
+                        if (!name) return fail('请填写商品名称');
+                        if (!cost || cost <= 0) return fail('请填写正确的星值（大于 0 的整数）');
+
+                        if (!state.shopItems) state.shopItems = [];
                         state.shopItems.push({ id: uid(), name, cost, image: pendingImage, createdAt: getBeijingDateStr() });
                         saveState();
                         renderShopPage();
@@ -2023,7 +2119,7 @@
                                 canvas.width = w; canvas.height = h;
                                 canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                                 pendingImage = canvas.toDataURL('image/jpeg', 0.82);
-                                preview.innerHTML = `<img src="${pendingImage}" style="width:100%;height:100%;object-fit:cover;">`;
+                                if (preview) preview.innerHTML = `<img src="${pendingImage}" style="width:100%;height:100%;object-fit:cover;">`;
                             };
                             img.src = ev.target.result;
                         };
@@ -2059,6 +2155,13 @@
                 const redeemed = calcRedeemedStars();
                 const balance = settled - redeemed;
                 const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
+
+                // 纯展示：只在当月最后一天显示 20，不写入 state、不参与任何星值计算
+                const bjNow = getBeijingNow();
+                const isMonthLastDay = bjNow.getDate() === new Date(bjNow.getFullYear(), bjNow.getMonth() + 1, 0).getDate();
+                const monthBonusCell = isMonthLastDay
+                    ? `<div style="color:var(--accent); display:flex; align-items:center; gap:4px; font-weight:900;">20<img src="icon_star.svg" style="width:16px;height:16px;object-fit:contain;"></div>`
+                    : `<div></div>`;
 
                 const logs = (state.redemptions || []).slice().sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 20);
                 const logHtml = logs.length === 0
@@ -2104,7 +2207,7 @@
                         <div style="padding:4px 4px 12px;">
                             <div class="redeem-log-row"><div>额外任务奖励</div><div style="color:var(--accent);">${monthData.extraSum}</div></div>
                             <div class="redeem-log-row"><div>考试任务奖励</div><div style="color:var(--accent);">${monthData.examSum}</div></div>
-                            <div class="redeem-log-row"><div>月底结算奖励</div><div style="color:var(--text-sub);">本月结束后 +20</div></div>
+                            <div class="redeem-log-row"><div>月底结算奖励</div>${monthBonusCell}</div>
                         </div>
                     </div>
 
@@ -3035,10 +3138,17 @@
 
                 // ===== 星值商店 =====
                 document.getElementById('shopGrid').addEventListener('click', (e) => {
+                    if (e.target.closest('#moneyAmountInput')) return;   // 点输入框不触发勾选
                     const delBtn = e.target.closest('[data-action="del-shop-item"]');
                     if (delBtn) { e.stopPropagation(); deleteShopItem(delBtn.dataset.shopId); return; }
                     const card = e.target.closest('.shop-item');
                     if (card) toggleShopSelect(card.dataset.shopId);
+                });
+                // 输入金额时同步到内存变量（不重渲染，避免输入框失焦）
+                document.getElementById('shopGrid').addEventListener('input', (e) => {
+                    if (e.target.id !== 'moneyAmountInput') return;
+                    const v = parseInt(String(e.target.value || '').replace(/[^0-9]/g, ''), 10);
+                    moneyAmount = v > 0 ? v : 0;
                 });
                 document.getElementById('redeemBtn').addEventListener('click', doRedeem);
                 document.getElementById('clearSelBtn').addEventListener('click', doClearSelection);
