@@ -599,6 +599,7 @@
 
         .hidden { display: none !important; }
 
+        #examTaskList { display: flex; flex-direction: column; gap: 12px; }
         .exam-item {
             background: var(--bg-card);
             border-radius: var(--radius-card);
@@ -664,6 +665,7 @@
             gap: 12px;
             margin-top: 4px;
         }
+        .shop-grid.money-grid { margin-top: 4px; }
         /* 兑换商品卡：与主界面任务卡一致（横向：图标 + 信息 + 勾选圈） */
         .shop-item {
             position: relative;
@@ -692,6 +694,18 @@
             flex-shrink: 0;
         }
         .shop-item-img img { width: 100%; height: 100%; object-fit: cover; }
+        /* MONEY 固定项：与主界面任务卡一致，图标区透明无底色，图标放到最大 */
+        .shop-item-img.bare {
+            background: transparent;
+            width: 58px; height: 58px;
+            position: relative;
+        }
+        .shop-item-img.bare img { object-fit: contain; padding: 0; }
+        .money-fallback {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; font-weight: 900; color: var(--accent-warm);
+        }
         .shop-item-info {
             flex: 1;
             display: flex;
@@ -749,31 +763,89 @@
             display: none; color: #e46a6a; font-size: 13px; font-weight: 800;
             text-align: center; margin-bottom: 10px;
         }
+        .stats-layout { display: flex; flex-direction: column; gap: 14px; }
+        .shop-layout { display: flex; flex-direction: column; gap: 14px; }
+        .shop-main { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+        .shop-side { min-width: 0; }
+        .shop-hero { margin-bottom: 0; }
         .shop-actions {
-            display: flex; gap: 10px; margin-top: 14px;
+            display: flex; gap: 10px; margin-top: 0;
         }
         .shop-actions button { flex: 1; height: 48px; }
         .shop-empty {
             text-align: center; padding: 32px 0; color: var(--text-sub);
             font-size: 14px; font-weight: 800;
         }
-        .stats-page-card {
-            display: flex; justify-content: space-between; align-items: center;
-            background: var(--bg-wrapper); border: 1px solid var(--border-light);
-            border-radius: 20px; padding: 16px 22px; margin-bottom: 12px;
-        }
-        .stats-page-card.hl { background: var(--accent); color: #fff; border-color: var(--accent); }
-        .stats-page-card .lbl { font-size: 15px; font-weight: 800; }
-        .stats-page-card .val { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 900; color: var(--accent); line-height: 1; }
-        .stats-page-card.hl .val { color: #fff; }
-        .stats-page-card .val img { width: 20px; height: 20px; object-fit: contain; }
-        .stats-page-card.hl .val img { filter: brightness(0) invert(1); }
         .redeem-log-row {
             display: flex; align-items: center; justify-content: space-between;
             padding: 12px 16px; background: var(--bg-card);
             border-radius: 16px; margin-bottom: 8px; font-size: 13px; font-weight: 800;
         }
         .redeem-log-row .meta { color: var(--text-sub); font-size: 11px; font-weight: 700; margin-top: 3px; }
+        /* 统计页整体区块：与「本月明细」同款行式，蓝色高亮给「可用星值」 */
+        .stat-row .val { display: flex; align-items: center; gap: 0; font-size: 18px; font-weight: 900; color: var(--accent); line-height: 1; }
+        .stat-row .lbl { font-size: 14px; font-weight: 800; }
+        .stat-row.hl { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .stat-row.hl .lbl, .stat-row.hl .val { color: #fff; }
+        .stat-row .month-bonus-off { color: var(--text-sub); font-size: 13px; font-weight: 800; }
+        .stat-row .month-bonus-on { color: var(--accent); font-size: 18px; font-weight: 900; line-height: 1; }
+        .stat-row.hl .month-bonus-on { color: #fff; }
+
+        /* 页面右下角装饰层：比 fixed-bg(-10) 高一级、比所有内容低，不参与交互 */
+        .page-decor {
+            position: fixed;
+            right: 5%;
+            bottom: 108px;
+            width: clamp(60px, 16.6vw, 220px);
+            height: auto;
+            z-index: -1;
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* ===== 图片裁剪浮层（1:1 正方形） ===== */
+        .crop-overlay {
+            position: fixed; inset: 0;
+            background: rgba(24, 28, 36, 0.86);
+            z-index: 1100;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 16px; padding: 20px;
+        }
+        .crop-title { color: #fff; font-size: 15px; font-weight: 900; letter-spacing: .5px; }
+        .crop-stage {
+            position: relative;
+            width: min(78vw, 320px); height: min(78vw, 320px);
+            border-radius: 18px; overflow: hidden;
+            background: #1a1a1a;
+            touch-action: none;
+            border: 2px solid rgba(255,255,255,.55);
+            flex-shrink: 0;
+        }
+        .crop-stage img {
+            position: absolute; top: 0; left: 0;
+            transform-origin: 0 0;
+            user-select: none; -webkit-user-select: none;
+            pointer-events: none;
+            max-width: none;
+        }
+        .crop-guide {
+            position: absolute; inset: 0;
+            border: 2px solid rgba(255,255,255,.9);
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+            pointer-events: none;
+        }
+        .crop-guide::before, .crop-guide::after {
+            content: ''; position: absolute; background: rgba(255,255,255,.35);
+        }
+        .crop-guide::before { left: 33.33%; top: 0; bottom: 0; width: 1px; }
+        .crop-guide::after { top: 33.33%; left: 0; right: 0; height: 1px; }
+        .crop-toolbar { display: flex; align-items: center; gap: 12px; width: min(78vw, 320px); }
+        .crop-toolbar span { color: #fff; font-size: 12px; font-weight: 800; white-space: nowrap; }
+        .crop-toolbar input[type=range] { flex: 1; accent-color: var(--accent); }
+        .crop-actions { display: flex; gap: 10px; width: min(78vw, 320px); }
+        .crop-actions button { flex: 1; height: 46px; }
 
         .bottom-bar {
             position: fixed;
@@ -806,15 +878,17 @@
             padding: 0;
         }
         .bottom-btn.active {
-            background: rgba(255, 255, 255, 0.28);
+            background: #ffffff;
             transform: none;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
         }
-        /* 蓝底导航：图标统一转白，保证对比度 */
+        /* 蓝底导航：未选中转白且淡，选中态恢复图标原色（--accent 蓝），形成蓝白对比 */
         .bottom-btn img {
             filter: brightness(0) invert(1);
-            opacity: 0.92;
+            opacity: 0.55;
         }
         .bottom-btn.active img {
+            filter: none;
             opacity: 1;
         }
 
@@ -945,6 +1019,26 @@
                 grid-template-columns: 1fr 1fr;
                 align-items: start;
             }
+            /* 横屏：商店左列放主内容、右列只放兑换记录 */
+            .shop-layout {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 360px;
+                align-items: start;
+                gap: 20px;
+            }
+            /* MONEY 独立区块横屏保持单列（只一张卡） */
+            .shop-grid.money-grid {
+                display: flex;
+                flex-direction: column;
+            }
+            /* 横屏：统计两列，都靠左，右侧留白 */
+            .stats-layout {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 380px));
+                justify-content: start;
+                align-items: start;
+                gap: 20px;
+            }
             .task-grid-inner {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
@@ -960,6 +1054,9 @@
 </head>
 <body>
     <div class="fixed-bg"></div>
+    <img class="page-decor" data-view="home" src="decor_home.png" alt="" onerror="this.remove()">
+    <img class="page-decor hidden" data-view="shop" src="decor_shop.png" alt="" onerror="this.remove()">
+    <img class="page-decor hidden" data-view="stats" src="decor_stats.png" alt="" onerror="this.remove()">
 
     <div class="app-header">
         <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 儿童模式</button>
@@ -1096,26 +1193,42 @@
     </div>
 
     <div id="viewShop" class="view-page hidden">
-        <div class="shop-hero">
-            <div class="shop-hero-label">可用星值</div>
-            <div class="shop-hero-num"><span id="shopBalanceNum">0</span><img src="icon_star.svg" style="width: 26px; height: 26px; object-fit: contain;"></div>
-            <div class="shop-hero-tip" id="shopHeroTip">每月 1 日自动结算上月星值，兑换成功后才核销</div>
-        </div>
+        <div class="shop-layout">
+            <div class="shop-main">
+                <div class="shop-hero">
+                    <div class="shop-hero-label">可用星值</div>
+                    <div class="shop-hero-num"><span id="shopBalanceNum">0</span><img src="icon_star.svg" style="width: 26px; height: 26px; object-fit: contain;"></div>
+                    <div class="shop-hero-tip" id="shopHeroTip">本月待结算 0 星值</div>
+                </div>
 
-        <div class="section-wrapper">
-            <div class="section-title">
-                <span>兑换商品</span>
-                <div class="title-right">
-                    <button class="btn-primary btn-sm hidden" id="addShopItemBtn" style="height: 36px;">+ 新增商品</button>
+                <div class="section-wrapper">
+                    <div class="section-title"><span>MONEY</span></div>
+                    <div id="moneyCardSlot" class="shop-grid money-grid"></div>
+                </div>
+
+                <div class="section-wrapper">
+                    <div class="section-title">
+                        <span>兑换商品</span>
+                        <div class="title-right">
+                            <button class="btn-primary btn-sm hidden" id="addShopItemBtn" style="height: 36px;">+ 新增商品</button>
+                        </div>
+                    </div>
+                    <div id="shopGrid" class="shop-grid"></div>
+                    <div id="shopEmpty" class="shop-empty hidden">还没有可兑换的商品</div>
+                </div>
+
+                <div class="shop-actions">
+                    <button class="btn-primary" id="redeemBtn">兑换</button>
+                    <button class="btn-outline" id="clearSelBtn">清空</button>
                 </div>
             </div>
-            <div id="shopGrid" class="shop-grid"></div>
-            <div id="shopEmpty" class="shop-empty hidden">还没有可兑换的商品</div>
-        </div>
 
-        <div class="shop-actions">
-            <button class="btn-primary" id="redeemBtn">兑换</button>
-            <button class="btn-outline" id="clearSelBtn">清空</button>
+            <div class="shop-side">
+                <div class="section-wrapper">
+                    <div class="section-title"><span>兑换记录</span></div>
+                    <div id="shopRedeemLog"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1647,10 +1760,16 @@
                 if (!container) return;
 
                 const today = getBeijingDateStr();
-                let todayExtras = state.extraTasks.filter(t => t.createdDate === today);
-
-                if (currentRole !== 'admin') {
-                    todayExtras = todayExtras.slice(-3);
+                const isAdminOp = (currentRole === 'admin' && isAdminAuthenticated);
+                let todayExtras;
+                if (isAdminOp) {
+                    // 管理员：显示最近 7 天，改过日期的历史任务仍可见、可编辑
+                    const from = shiftDateStr(today, -6);
+                    todayExtras = state.extraTasks
+                        .filter(t => (t.createdDate || '') >= from && (t.createdDate || '') <= today)
+                        .sort((a, b) => (b.createdDate || '').localeCompare(a.createdDate || ''));
+                } else {
+                    todayExtras = state.extraTasks.filter(t => t.createdDate === today).slice(-3);
                 }
 
                 if (todayExtras.length === 0) {
@@ -1659,7 +1778,7 @@
                 }
 
                 container.innerHTML = todayExtras.map(task => {
-                    const completed = state.checkins.some(c => c.date === today && c.taskId === task.id && c.isExtra);
+                    const completed = state.checkins.some(c => c.taskId === task.id && c.isExtra);
                     return `
                         <div class="task-item ${completed ? 'completed' : ''}">
                             <div class="task-icon"><img src="icon_gift_card.png" class="zoom-icon" style="width: 26px; height: 26px; object-fit: contain;"></div>
@@ -1909,6 +2028,9 @@
                 document.querySelectorAll('.bottom-btn').forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.view === view);
                 });
+                document.querySelectorAll('.page-decor').forEach(img => {
+                    img.classList.toggle('hidden', img.dataset.view !== view);
+                });
                 if (view === 'shop') renderShopPage();
                 if (view === 'stats') renderStatsPage();
                 window.scrollTo({ top: 0, behavior: 'auto' });
@@ -1942,21 +2064,20 @@
                 selectedShopIds = new Set([...selectedShopIds].filter(id =>
                     id === MONEY_ITEM_ID || items.some(i => i.id === id)));
 
+                const moneySlot = document.getElementById('moneyCardSlot');
                 const grid = document.getElementById('shopGrid');
                 const empty = document.getElementById('shopEmpty');
-                if (empty) empty.classList.add('hidden');   // 固定商品 money 始终存在
 
                 const moneySelected = selectedShopIds.has(MONEY_ITEM_ID);
                 const moneyCard = `
                     <div class="shop-item ${moneySelected ? 'selected' : ''}" data-shop-id="${MONEY_ITEM_ID}">
-                        <div class="shop-item-img" style="position:relative; background:#fff6e0;">
-                            <span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:900; color:#e3a53c;">¥</span>
-                            <img src="${MONEY_ICON}" alt="" style="position:relative; object-fit: contain; padding: 6px; background:#fff6e0;"
-                                 onload="this.previousElementSibling.style.display='none'"
-                                 onerror="this.style.display='none';this.removeAttribute('src')">
+                        <div class="shop-item-img bare">
+                            <img src="${MONEY_ICON}" alt="" onload="this.nextElementSibling.style.display='none'"
+                                 onerror="this.remove()">
+                            <span class="money-fallback">¥</span>
                         </div>
                         <div class="shop-item-info">
-                            <div class="shop-item-name">money</div>
+                            <div class="shop-item-name">MONEY</div>
                             <div class="shop-money-row">
                                 <input id="moneyAmountInput" class="shop-money-input" type="text" inputmode="numeric"
                                        placeholder="填星值" value="${moneyAmount || ''}" aria-label="兑换星值">
@@ -1966,6 +2087,7 @@
                         <div class="shop-check">✓</div>
                     </div>
                 `;
+                if (moneySlot) moneySlot.innerHTML = moneyCard;
 
                 const otherCards = items.map(item => `
                     <div class="shop-item ${selectedShopIds.has(item.id) ? 'selected' : ''}" data-shop-id="${item.id}">
@@ -1982,8 +2104,32 @@
                         <div class="shop-check">✓</div>
                     </div>
                 `).join('');
+                if (grid) grid.innerHTML = otherCards;
+                if (empty) empty.classList.toggle('hidden', items.length > 0);
 
-                grid.innerHTML = moneyCard + otherCards;
+                renderRedeemLog();
+            }
+
+            // 兑换记录：渲染在商店页右下方（竖屏在兑换按钮下方）
+            function renderRedeemLog() {
+                const el = document.getElementById('shopRedeemLog');
+                if (!el) return;
+                const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
+                const logs = (state.redemptions || []).slice().sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 20);
+                el.innerHTML = logs.length === 0
+                    ? `<div class="shop-empty">还没有兑换记录</div>`
+                    : logs.map(r => `
+                        <div class="redeem-log-row">
+                            <div>
+                                <div>${escapeHtml(r.name)}</div>
+                                <div class="meta">${r.date || ''}</div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="color:var(--accent);">-${r.cost}</span>
+                                ${isAdmin ? `<button class="icon-btn" data-action="revoke-redeem" data-redeem-id="${r.id}" title="撤销并退回星值"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
             }
 
             function toggleShopSelect(id) {
@@ -2014,7 +2160,7 @@
                 if (selectedShopIds.size === 0) { showToast('请先选择要兑换的商品', false); return; }
                 const balance = calcShopBalance();
                 const items = [...selectedShopIds].map(id => {
-                    if (id === MONEY_ITEM_ID) return { id: MONEY_ITEM_ID, name: 'money', cost: moneyAmount };
+                    if (id === MONEY_ITEM_ID) return { id: MONEY_ITEM_ID, name: 'MONEY', cost: moneyAmount };
                     return (state.shopItems || []).find(i => i.id === id);
                 }).filter(Boolean);
 
@@ -2052,6 +2198,139 @@
                         showToast(`兑换成功，扣除 ${cost} 星值`);
                     }
                 });
+            }
+
+            // ================= 商品图片裁剪（1:1 正方形，原生实现） =================
+            function openImageCropper(src, onDone) {
+                const overlay = document.createElement('div');
+                overlay.className = 'crop-overlay';
+                overlay.innerHTML = `
+                    <div class="crop-title">拖动图片 · 缩放后裁剪</div>
+                    <div class="crop-stage" id="cropStage">
+                        <img id="cropImg" src="${src}" alt="">
+                        <div class="crop-guide"></div>
+                    </div>
+                    <div class="crop-toolbar">
+                        <span>缩放</span>
+                        <input type="range" id="cropZoom" min="100" max="400" value="100">
+                    </div>
+                    <div class="crop-actions">
+                        <button class="btn-outline" id="cropCancel">取消</button>
+                        <button class="btn-primary" id="cropConfirm">使用图片</button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+
+                const stage = overlay.querySelector('#cropStage');
+                const img = overlay.querySelector('#cropImg');
+                const zoomInput = overlay.querySelector('#cropZoom');
+                let zoom = 1, k = 1, left = 0, top = 0;
+                let dragging = false, dsx = 0, dsy = 0, dl = 0, dt = 0;
+                let pinchDist = 0, pinchZoom = 1;
+
+                const apply = () => {
+                    img.style.width = (img.naturalWidth * k) + 'px';
+                    img.style.height = (img.naturalHeight * k) + 'px';
+                    img.style.left = left + 'px';
+                    img.style.top = top + 'px';
+                };
+                const clamp = () => {
+                    const S = stage.clientWidth;
+                    left = Math.min(0, Math.max(S - img.naturalWidth * k, left));
+                    top = Math.min(0, Math.max(S - img.naturalHeight * k, top));
+                };
+                const init = () => {
+                    const S = stage.clientWidth;
+                    k = Math.max(S / img.naturalWidth, S / img.naturalHeight);
+                    left = (S - img.naturalWidth * k) / 2;
+                    top = (S - img.naturalHeight * k) / 2;
+                    clamp(); apply();
+                };
+                const setZoom = (z, cx, cy) => {
+                    if (!img.naturalWidth) return;
+                    const S = stage.clientWidth;
+                    const oldK = k;
+                    zoom = Math.max(1, Math.min(4, z));
+                    k = Math.max(S / img.naturalWidth, S / img.naturalHeight) * zoom;
+                    const ax = (cx == null ? S / 2 : cx), ay = (cy == null ? S / 2 : cy);
+                    left = ax - (ax - left) * (k / oldK);
+                    top = ay - (ay - top) * (k / oldK);
+                    clamp(); apply();
+                    zoomInput.value = Math.round(zoom * 100);
+                };
+                if (img.complete && img.naturalWidth) init(); else img.onload = init;
+
+                // 拖动（鼠标 / 单指）
+                stage.addEventListener('pointerdown', (e) => {
+                    if (e.isPrimary === false) return;
+                    dragging = true; dsx = e.clientX; dsy = e.clientY; dl = left; dt = top;
+                    try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+                });
+                stage.addEventListener('pointermove', (e) => {
+                    if (!dragging) return;
+                    left = dl + (e.clientX - dsx);
+                    top = dt + (e.clientY - dsy);
+                    clamp(); apply();
+                });
+                const endDrag = () => { dragging = false; };
+                stage.addEventListener('pointerup', endDrag);
+                stage.addEventListener('pointercancel', endDrag);
+
+                // 滚轮缩放
+                stage.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    setZoom(zoom * (e.deltaY < 0 ? 1.1 : 0.9));
+                }, { passive: false });
+
+                // 双指缩放
+                stage.addEventListener('touchstart', (e) => {
+                    if (e.touches.length === 2) {
+                        dragging = false;
+                        pinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                                               e.touches[0].clientY - e.touches[1].clientY);
+                        pinchZoom = zoom;
+                    }
+                }, { passive: true });
+                stage.addEventListener('touchmove', (e) => {
+                    if (e.touches.length === 2 && pinchDist) {
+                        const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                                             e.touches[0].clientY - e.touches[1].clientY);
+                        const r = stage.getBoundingClientRect();
+                        setZoom(pinchZoom * d / pinchDist,
+                                (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left,
+                                (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top);
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+                stage.addEventListener('touchend', () => { pinchDist = 0; }, { passive: true });
+
+                // 滑块缩放
+                zoomInput.addEventListener('input', () => setZoom(parseInt(zoomInput.value, 10) / 100));
+
+                const escHandler = (e) => {
+                    if (e.key === 'Escape') { e.stopImmediatePropagation(); e.preventDefault(); close(); }
+                };
+                const close = () => {
+                    overlay.remove();
+                    document.removeEventListener('keydown', escHandler, true);
+                };
+                document.addEventListener('keydown', escHandler, true);
+
+                overlay.querySelector('#cropCancel').onclick = () => close();
+                overlay.querySelector('#cropConfirm').onclick = () => {
+                    if (!img.naturalWidth) { close(); return; }
+                    const S = stage.clientWidth;
+                    const sx = -left / k, sy = -top / k, sw = S / k, sh = S / k;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 160; canvas.height = 160;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, 160, 160);
+                    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, 160, 160);
+                    const out = canvas.toDataURL('image/jpeg', 0.82);
+                    close();
+                    onDone(out);
+                };
             }
 
             function openShopItemModal() {
@@ -2109,21 +2388,13 @@
                         if (!file) return;
                         const reader = new FileReader();
                         reader.onload = (ev) => {
-                            const img = new Image();
-                            img.onload = () => {
-                                const maxSize = 160;
-                                let w = img.width, h = img.height;
-                                if (w > h) { if (w > maxSize) { h = h * maxSize / w; w = maxSize; } }
-                                else { if (h > maxSize) { w = w * maxSize / h; h = maxSize; } }
-                                const canvas = document.createElement('canvas');
-                                canvas.width = w; canvas.height = h;
-                                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                                pendingImage = canvas.toDataURL('image/jpeg', 0.82);
+                            openImageCropper(ev.target.result, (cropped) => {
+                                pendingImage = cropped;
                                 if (preview) preview.innerHTML = `<img src="${pendingImage}" style="width:100%;height:100%;object-fit:cover;">`;
-                            };
-                            img.src = ev.target.result;
+                            });
                         };
                         reader.readAsDataURL(file);
+                        e.target.value = '';   // 允许重复选同一张图
                     });
                 }, 0);
             }
@@ -2154,66 +2425,35 @@
                 const settled = calcSettledStars();
                 const redeemed = calcRedeemedStars();
                 const balance = settled - redeemed;
-                const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
 
-                // 纯展示：只在当月最后一天显示 20，不写入 state、不参与任何星值计算
+                // 纯展示：只在当月最后一天显示 20（蓝色、无图标，与上方一致），日常显示灰色 0
                 const bjNow = getBeijingNow();
                 const isMonthLastDay = bjNow.getDate() === new Date(bjNow.getFullYear(), bjNow.getMonth() + 1, 0).getDate();
                 const monthBonusCell = isMonthLastDay
-                    ? `<div style="color:var(--accent); display:flex; align-items:center; gap:4px; font-weight:900;">20<img src="icon_star.svg" style="width:16px;height:16px;object-fit:contain;"></div>`
-                    : `<div></div>`;
-
-                const logs = (state.redemptions || []).slice().sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 20);
-                const logHtml = logs.length === 0
-                    ? `<div class="shop-empty">还没有兑换记录</div>`
-                    : logs.map(r => `
-                        <div class="redeem-log-row">
-                            <div>
-                                <div>${escapeHtml(r.name)}</div>
-                                <div class="meta">${r.date || ''}</div>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <span style="color:var(--accent);">-${r.cost}</span>
-                                ${isAdmin ? `<button class="icon-btn" data-action="revoke-redeem" data-redeem-id="${r.id}" title="撤销并退回星值"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>` : ''}
-                            </div>
-                        </div>
-                    `).join('');
+                    ? `<div class="month-bonus-on">20</div>`
+                    : `<div class="month-bonus-off">0</div>`;
 
                 el.innerHTML = `
-                    <div class="section-title" style="font-size:20px; margin:4px 4px 14px;">星值统计</div>
-                    <div class="stats-page-card hl">
-                        <span class="lbl">今日获得</span>
-                        <span class="val">${calcTodayStars()}<img src="icon_star.svg"></span>
-                    </div>
-                    <div class="stats-page-card">
-                        <span class="lbl">本月获得（未结算）</span>
-                        <span class="val">${monthData.total}<img src="icon_star.svg"></span>
-                    </div>
-                    <div class="stats-page-card">
-                        <span class="lbl">已结算累计</span>
-                        <span class="val">${settled}<img src="icon_star.svg"></span>
-                    </div>
-                    <div class="stats-page-card">
-                        <span class="lbl">已兑换消耗</span>
-                        <span class="val">${redeemed}<img src="icon_star.svg"></span>
-                    </div>
-                    <div class="stats-page-card">
-                        <span class="lbl">可用星值</span>
-                        <span class="val">${Math.max(0, balance)}<img src="icon_star.svg"></span>
-                    </div>
-
-                    <div class="section-wrapper" style="margin-top:14px;">
-                        <div class="section-title"><span>本月明细</span></div>
-                        <div style="padding:4px 4px 12px;">
-                            <div class="redeem-log-row"><div>额外任务奖励</div><div style="color:var(--accent);">${monthData.extraSum}</div></div>
-                            <div class="redeem-log-row"><div>考试任务奖励</div><div style="color:var(--accent);">${monthData.examSum}</div></div>
-                            <div class="redeem-log-row"><div>月底结算奖励</div>${monthBonusCell}</div>
+                    <div class="stats-layout">
+                        <div class="section-wrapper">
+                            <div class="section-title"><span>星值统计</span></div>
+                            <div style="padding:4px 4px 12px;">
+                                <div class="redeem-log-row stat-row"><div class="lbl">今日获得</div><div class="val">${calcTodayStars()}</div></div>
+                                <div class="redeem-log-row stat-row"><div class="lbl">本月获得（未结算）</div><div class="val">${monthData.total}</div></div>
+                                <div class="redeem-log-row stat-row"><div class="lbl">已结算累计</div><div class="val">${settled}</div></div>
+                                <div class="redeem-log-row stat-row"><div class="lbl">已兑换消耗</div><div class="val">${redeemed}</div></div>
+                                <div class="redeem-log-row stat-row hl"><div class="lbl">可用星值</div><div class="val">${Math.max(0, balance)}</div></div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="section-wrapper" style="margin-top:14px;">
-                        <div class="section-title"><span>兑换记录</span></div>
-                        <div style="padding:8px 4px 4px;">${logHtml}</div>
+                        <div class="section-wrapper">
+                            <div class="section-title"><span>本月明细</span></div>
+                            <div style="padding:4px 4px 12px;">
+                                <div class="redeem-log-row"><div>额外任务奖励</div><div style="color:var(--accent);">${monthData.extraSum}</div></div>
+                                <div class="redeem-log-row"><div>考试任务奖励</div><div style="color:var(--accent);">${monthData.examSum}</div></div>
+                                <div class="redeem-log-row"><div>月底结算奖励</div>${monthBonusCell}</div>
+                            </div>
+                        </div>
                     </div>
                 `;
             }
@@ -2229,7 +2469,7 @@
                     onConfirm: () => {
                         state.redemptions = state.redemptions.filter(r => r.id !== recordId);
                         saveState();
-                        renderStatsPage();
+                        renderAll();
                         renderShopPage();
                         showToast(`已撤销，退回 ${rec.cost} 星值`);
                     }
@@ -2309,9 +2549,9 @@
                 const extraTask = state.extraTasks.find(t => t.id === extraId);
                 if (!extraTask) return;
 
-                const existingIndex = state.checkins.findIndex(c => c.date === today && c.taskId === extraId && c.isExtra);
+                const existingIndex = state.checkins.findIndex(c => c.taskId === extraId && c.isExtra);
                 if (existingIndex !== -1) {
-                    // 统一北京时间：只允许取消当天产生的打卡
+                    // 统一北京时间：只允许取消当天产生的打卡（管理员不受限）
                     if (state.checkins[existingIndex].date !== getBeijingDateStr() && currentRole !== 'admin') {
                         showToast('过期的打卡不可取消', false);
                         return;
@@ -2319,7 +2559,7 @@
                     state.checkins.splice(existingIndex, 1);
                     showToast(`取消额外任务`);
                 } else {
-                    state.checkins.push({ date: today, taskId: extraId, reward: extraTask.reward, timestamp: Date.now(), isExtra: true });
+                    state.checkins.push({ date: extraTask.createdDate || today, taskId: extraId, reward: extraTask.reward, timestamp: Date.now(), isExtra: true });
                     const rewardStr = extraTask.reward >= 0 ? '+' + extraTask.reward : extraTask.reward;
                     showToast(`完成额外任务 ${rewardStr}星`);
                 }
@@ -2638,26 +2878,35 @@
                         <input id="extraNameInput" type="text" value="${escapeHtml(task.name)}" placeholder="如：拼图奖励" />
                         <label>星值 (-50 到 50)</label>
                         <input id="extraRewardInput" type="number" min="-50" max="50" value="${task.reward}" />
+                        <label>日期</label>
+                        <input id="extraDateInput" type="date" value="${task.createdDate || today}" />
                     `,
                     confirmText: '保存',
                     onConfirm: () => {
                         const name = document.getElementById('extraNameInput').value.trim();
                         const reward = parseInt(document.getElementById('extraRewardInput').value, 10);
+                        const date = document.getElementById('extraDateInput').value;
                         if (!name) { alert('请输入名称'); return false; }
                         if (isNaN(reward) || reward < -50 || reward > 50) { alert('星值必须在-50到50之间'); return false; }
+                        if (!date) { alert('请选择日期'); return false; }
 
                         if (isEdit) {
                             const idx = state.extraTasks.findIndex(t => t.id === task.id);
                             if (idx !== -1) {
                                 state.extraTasks[idx].name = name;
                                 state.extraTasks[idx].reward = reward;
+                                state.extraTasks[idx].createdDate = date;
+                                // 同步该任务的打卡日期，避免任务日期与星值归属月份不一致
+                                state.checkins.forEach(c => {
+                                    if (c.taskId === task.id && c.isExtra) { c.date = date; c.reward = reward; }
+                                });
                             }
                         } else {
                             state.extraTasks.push({
                                 id: 'extra_' + Date.now(),
                                 name: name,
                                 reward: reward,
-                                createdDate: today
+                                createdDate: date
                             });
                         }
                         saveState();
@@ -3136,16 +3385,19 @@
                     btn.addEventListener('click', () => switchView(btn.dataset.view));
                 });
 
-                // ===== 星值商店 =====
-                document.getElementById('shopGrid').addEventListener('click', (e) => {
+                // ===== 星值商店（统一委托，覆盖 MONEY 卡 / 商品卡 / 兑换记录）=====
+                const shopView = document.getElementById('viewShop');
+                shopView.addEventListener('click', (e) => {
                     if (e.target.closest('#moneyAmountInput')) return;   // 点输入框不触发勾选
+                    const revokeBtn = e.target.closest('[data-action="revoke-redeem"]');
+                    if (revokeBtn) { revokeRedeem(revokeBtn.dataset.redeemId); return; }
                     const delBtn = e.target.closest('[data-action="del-shop-item"]');
                     if (delBtn) { e.stopPropagation(); deleteShopItem(delBtn.dataset.shopId); return; }
                     const card = e.target.closest('.shop-item');
                     if (card) toggleShopSelect(card.dataset.shopId);
                 });
                 // 输入金额时同步到内存变量（不重渲染，避免输入框失焦）
-                document.getElementById('shopGrid').addEventListener('input', (e) => {
+                shopView.addEventListener('input', (e) => {
                     if (e.target.id !== 'moneyAmountInput') return;
                     const v = parseInt(String(e.target.value || '').replace(/[^0-9]/g, ''), 10);
                     moneyAmount = v > 0 ? v : 0;
@@ -3154,11 +3406,6 @@
                 document.getElementById('clearSelBtn').addEventListener('click', doClearSelection);
                 document.getElementById('addShopItemBtn').addEventListener('click', openShopItemModal);
 
-                // ===== 统计页：管理员撤销兑换 =====
-                document.getElementById('statsPageContent').addEventListener('click', (e) => {
-                    const btn = e.target.closest('[data-action="revoke-redeem"]');
-                    if (btn) revokeRedeem(btn.dataset.redeemId);
-                });
             }
 
             function init() {
