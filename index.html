@@ -128,9 +128,6 @@
             box-shadow: var(--shadow-soft);
             border: 1px solid var(--border-light);
         }
-        .section-wrapper.collapsed {
-            padding-bottom: 0;
-        }
         .section-wrapper.collapsed .section-title {
             margin-bottom: 0;
         }
@@ -139,7 +136,7 @@
             display: flex;
             gap: 16px;
             align-items: stretch;
-            margin-bottom: 20px;
+            margin-bottom: 0;
         }
 
         .profile-card {
@@ -271,6 +268,7 @@
             align-items: center;
             justify-content: flex-end;
             gap: 12px;
+            line-height: 1;
         }
 
         .calendar-card {
@@ -814,11 +812,11 @@
                 <div class="stats-group">
                     <div class="stats-card today">
                         <span class="stats-label">今日获得</span>
-                        <span class="stats-number" id="todayStars">0 <img src="icon_star.svg" class="zoom-icon" style="width: 18px; height: 18px; margin-left: 12px;"></span>
+                        <span class="stats-number" id="todayStars">0 <img src="icon_star.svg" class="zoom-icon" style="width: 20px; height: 20px; margin-left: 12px;"></span>
                     </div>
                     <div class="stats-card month">
                         <span class="stats-label">本月获得</span>
-                        <span class="stats-number" id="monthStars">0 <img src="icon_star.svg" class="zoom-icon" style="width: 18px; height: 18px; margin-left: 12px;"></span>
+                        <span class="stats-number" id="monthStars">0 <img src="icon_star.svg" class="zoom-icon" style="width: 20px; height: 20px; margin-left: 12px;"></span>
                     </div>
                 </div>
             </div>
@@ -1537,8 +1535,8 @@
                 const todaySum = calcTodayStars();
                 const monthData = calcMonthStars();
 
-                document.getElementById('todayStars').innerHTML = `${todaySum} <img src="icon_star.svg" class="zoom-icon" style="width: 18px; height: 18px; margin-left: 12px;">`;
-                document.getElementById('monthStars').innerHTML = `${monthData.total} <img src="icon_star.svg" class="zoom-icon" style="width: 18px; height: 18px; margin-left: 12px;">`;
+                document.getElementById('todayStars').innerHTML = `${todaySum} <img src="icon_star.svg" class="zoom-icon" style="width: 20px; height: 20px; margin-left: 12px;">`;
+                document.getElementById('monthStars').innerHTML = `${monthData.total} <img src="icon_star.svg" class="zoom-icon" style="width: 20px; height: 20px; margin-left: 12px;">`;
             }
 
             function updateRoleUI() {
@@ -2383,23 +2381,23 @@
                         <div style="padding: 10px;">
                             <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
                                 <span>今日获得</span>
-                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent); line-height:1;">
                                     <span>${calcTodayStars()}</span>
-                                    <img src="icon_star.svg" class="zoom-icon" style="width: 18px; height: 18px;">
+                                    <img src="icon_star.svg" class="zoom-icon" style="width: 20px; height: 20px;">
                                 </div>
                             </div>
                             <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-page); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
                                 <span>本月累计</span>
-                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent); line-height:1;">
                                     <span>${monthData.total}</span>
-                                    <img src="icon_star.svg" class="zoom-icon" style="width: 18px; height: 18px;">
+                                    <img src="icon_star.svg" class="zoom-icon" style="width: 20px; height: 20px;">
                                 </div>
                             </div>
                             <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-wrapper); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
                                 <span>本月奖励</span>
-                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent);">
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent); line-height:1;">
                                     <span>${monthData.total}</span>
-                                    <img src="icon_currency.svg" class="zoom-icon" style="width: 18px; height: 18px;">
+                                    <img src="icon_currency.svg" class="zoom-icon" style="width: 20px; height: 20px;">
                                 </div>
                             </div>
                         </div>
