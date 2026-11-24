@@ -1,0 +1,2553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="HEIDI STAR">
+    <link rel="apple-touch-icon" href="icon.png">
+    <title>HEIDI星旅</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+        :root {
+            --bg-page: #f5f5f5;
+            --bg-card: #f7f7f7;
+            --bg-wrapper: #fefefe;
+            --text-main: #383b42;
+            --text-sub: #b7b7b7;
+            --accent: #74b0e1;
+            --accent-light: #c0e2f9;
+            --accent-warm: #f4c65c;
+            --bg-nav: #ffffff;
+            --border-light: #ebebeb;
+            --radius-card: 22px;
+            --radius-wrapper: 32px;
+            --radius-btn: 999px;
+            --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.03);
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', 'URW Gothic', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .fixed-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--bg-page);
+            z-index: -10;
+            pointer-events: none;
+        }
+
+        html, body {
+            overscroll-behavior-y: none;
+            background-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 12px 20px 100px;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: calc(100px + env(safe-area-inset-bottom));
+            display: flex;
+            flex-direction: column;
+            color: var(--text-main);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .zoom-icon {
+            transform: scale(2);
+            transform-origin: center;
+            max-width: none !important;
+            object-fit: contain;
+            z-index: 10;
+            display: block;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            background: var(--bg-nav);
+            border-radius: var(--radius-btn);
+            padding: 4px 10px;
+            box-shadow: var(--shadow-soft);
+            flex-shrink: 0;
+            border: 1px solid var(--border-light);
+        }
+
+        .header-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: transparent;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-sub);
+            padding: 6px 12px;
+            border-radius: var(--radius-btn);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .header-btn.active {
+            color: var(--text-main);
+            background: var(--bg-card);
+        }
+
+        .layout-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .section-wrapper {
+            border-radius: var(--radius-wrapper);
+            padding: 16px;
+            margin-bottom: 0;
+            transition: 0.3s;
+            background-color: var(--bg-wrapper) !important;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-light);
+        }
+        .section-wrapper.collapsed .section-title {
+            margin-bottom: 0;
+        }
+
+        .profile-stats-bar {
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+            margin-bottom: 0;
+        }
+
+        .profile-card {
+            background: var(--bg-wrapper);
+            border-radius: var(--radius-card);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: var(--shadow-soft);
+            flex: 0 0 auto;
+            min-width: 120px;
+            border: 1px solid var(--border-light);
+        }
+
+        .avatar-container {
+            width: 76px;
+            height: 76px;
+            background: var(--accent-light);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            animation: blobFloat 4s ease-in-out infinite alternate;
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.05);
+        }
+
+        @keyframes blobFloat {
+            0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: translateY(0); }
+            100% { border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; transform: translateY(-5px); }
+        }
+
+        .avatar-eye {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--text-main);
+            border-radius: 50%;
+            top: 40%;
+        }
+        .avatar-eye.left { left: 25%; }
+        .avatar-eye.right { right: 25%; }
+
+        .avatar-smile {
+            position: absolute;
+            width: 20px;
+            height: 10px;
+            border-bottom: 3px solid var(--text-main);
+            border-radius: 0 0 20px 20px;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: transparent;
+            font-size: 28px;
+            font-weight: 900;
+            background-size: cover;
+            background-position: center;
+            z-index: 2;
+        }
+        .avatar[style*="url"] ~ .avatar-eye,
+        .avatar[style*="url"] ~ .avatar-smile { display: none; }
+
+        .profile-name {
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--text-main);
+            text-align: center;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .edit-profile-btn {
+            background: var(--bg-page);
+            border: none;
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: var(--radius-btn);
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 800;
+        }
+
+        .stats-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stats-card {
+            flex: 1;
+            border-radius: var(--radius-card);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-light);
+        }
+        .stats-card.today { background: var(--accent); color: #ffffff; border-color: var(--accent); }
+        .stats-card.month { background: var(--bg-wrapper); color: var(--text-main); }
+        .stats-card.today .stats-number { color: #ffffff; }
+
+        .stats-label {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            line-height: 1;
+        }
+
+        .stats-number {
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            line-height: 1;
+        }
+        .stats-number img {
+            display: block;
+            flex-shrink: 0;
+        }
+
+        .calendar-card {
+            background: var(--bg-wrapper);
+            border-radius: var(--radius-card);
+            padding: 20px;
+            box-shadow: var(--shadow-soft);
+            width: 100%;
+            border: 1px solid var(--border-light);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .calendar-header .month-label {
+            font-weight: 800;
+            color: var(--text-main);
+            font-size: 18px;
+        }
+
+        .calendar-nav-btn {
+            position: absolute;
+            background: var(--bg-page);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        #prevMonth { left: 0; }
+        #nextMonth { right: 0; }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            max-width: 40px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 50%;
+            color: var(--text-main);
+        }
+
+        .calendar-day.today {
+            background: var(--accent-light);
+            color: var(--accent);
+            font-weight: 900;
+        }
+        .calendar-day.completed {
+            background: var(--accent);
+            color: #ffffff;
+            font-weight: 900;
+        }
+        .calendar-day.incomplete {
+            background: var(--accent-warm);
+            color: #ffffff;
+            font-weight: 900;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 0 12px 0;
+            font-weight: 800;
+            color: var(--text-main);
+            font-size: 21px;
+            width: 100%;
+        }
+        .section-title .title-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title .title-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .collapse-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sub-title {
+            font-size: 14px;
+            color: var(--text-main);
+            font-weight: 800;
+            margin: 12px 0 6px 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            line-height: 1;
+        }
+        .sub-title img {
+            display: block;
+            flex-shrink: 0;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 4px;
+            width: 100%;
+        }
+
+        .task-grid-inner {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .task-item {
+            background: var(--bg-card);
+            border-radius: var(--radius-card);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow-card);
+            transition: 0.2s;
+            width: 100%;
+            border: 1px solid var(--border-light);
+        }
+
+        .task-item.completed {
+            background: var(--bg-card);
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .task-item.overdue {
+            background: color-mix(in srgb, var(--accent-warm) 16%, var(--bg-wrapper));
+        }
+
+        .task-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            height: 44px;
+            background: transparent;
+            flex-shrink: 0;
+        }
+
+        .task-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .task-name {
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+        .task-item.completed .task-name {
+            color: var(--text-sub);
+            text-decoration: line-through;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: var(--border-light);
+            color: var(--text-main);
+            line-height: 1;
+        }
+        .tag-green { background: var(--accent-light); color: var(--accent); }
+        .tag-purple, .tag-pink, .tag-blue { background: var(--bg-page); color: var(--text-main); }
+        .tag-orange { background: color-mix(in srgb, var(--accent-warm) 30%, var(--bg-wrapper)); color: var(--text-main); }
+        .tag-date { background: transparent; color: var(--text-sub); padding-left: 0; }
+        .tag-today { background: var(--accent-light); color: var(--accent); }
+        .tag-deadline { background: var(--border-light); color: var(--text-main); }
+
+        .icon-repeat-small {
+            width: 12px;
+            height: 12px;
+            object-fit: contain;
+            vertical-align: middle;
+            margin-right: 2px;
+        }
+
+        .task-check {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: transparent;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: 0.2s;
+            background: var(--bg-wrapper);
+        }
+        .task-item.completed .task-check {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg-nav);
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .icon-btn {
+            background: var(--bg-wrapper);
+            border: 1px solid var(--border-light);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-main);
+            font-size: 16px;
+        }
+
+        .overdue-badge {
+            background: var(--accent-warm);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border: none;
+            color: var(--bg-nav);
+            padding: 12px 20px;
+            border-radius: var(--radius-btn);
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: 0.2s;
+        }
+        .btn-primary:active { transform: scale(0.96); }
+
+        .btn-outline {
+            background: var(--bg-nav);
+            border: 1px solid var(--border-light);
+            color: var(--text-main);
+            padding: 10px 16px;
+            border-radius: var(--radius-btn);
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: 0.2s;
+        }
+        .btn-outline:active { background: var(--bg-page); }
+        .btn-sm { padding: 8px 14px; font-size: 13px; }
+
+        .hidden { display: none !important; }
+
+        .exam-item {
+            background: var(--bg-card);
+            border-radius: var(--radius-card);
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-light);
+        }
+        .exam-score-input {
+            width: 90px;
+            padding: 8px 12px;
+            border-radius: var(--radius-btn);
+            border: 2px solid var(--border-light);
+            text-align: center;
+            font-weight: 800;
+            font-size: 15px;
+            color: var(--text-main);
+            outline: none;
+            background: var(--bg-wrapper);
+            line-height: 1;
+        }
+        .exam-score-input:focus { border-color: var(--accent); background: var(--bg-nav); }
+        .exam-stars {
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--accent);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            line-height: 1;
+        }
+        .exam-stars.zero { color: var(--text-sub); }
+        .exam-stars img {
+            display: block;
+            flex-shrink: 0;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 400px;
+            background: var(--bg-nav);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-radius: var(--radius-btn);
+            z-index: 100;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-light);
+        }
+        .bottom-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 0;
+        }
+        .bottom-btn.active {
+            background: transparent;
+            transform: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: var(--bg-nav);
+            border-radius: 28px;
+            padding: 28px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            font-size: 22px;
+            margin-bottom: 24px;
+            color: var(--text-main);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+        }
+
+        .modal-content label { font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; display: block; }
+
+        .modal-content input, .modal-content textarea, .modal-content select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--border-light);
+            border-radius: 16px;
+            font-size: 15px;
+            margin-bottom: 20px;
+            background: var(--bg-page);
+            outline: none;
+            color: var(--text-main);
+            font-weight: 600;
+            transition: 0.2s;
+            box-sizing: border-box;
+        }
+        .modal-content input:focus, .modal-content select:focus { border-color: var(--accent); background: var(--bg-nav); }
+
+        .modal-content input[type="date"] {
+            height: 50px;
+            min-height: 50px;
+            -webkit-appearance: none;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+        }
+
+        .modal-actions { display: flex; gap: 12px; margin-top: 12px; }
+        .modal-actions button {
+            flex: 1;
+            height: 52px;
+            border-radius: var(--radius-btn);
+            border: none;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-cancel { background: var(--bg-page); color: var(--text-main); }
+        .btn-confirm { background: var(--accent); color: var(--bg-nav); }
+        .btn-danger { background: var(--accent-warm); color: var(--text-main); }
+
+        .toast-container { position: fixed; top: 40px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; }
+        .toast {
+            background: var(--text-main);
+            color: var(--bg-nav);
+            padding: 14px 24px;
+            border-radius: var(--radius-btn);
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            animation: dropDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        @keyframes dropDown { from { opacity: 0; transform: translateY(-30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        @media (min-width: 900px) {
+            body { padding: 24px 40px 100px; }
+            .app-header { max-width: 1200px; width: 100%; margin: 0 auto 12px auto; }
+            .layout-container {
+                display: grid;
+                grid-template-columns: 380px 1fr;
+                align-items: start;
+                max-width: 1200px;
+                width: 100%;
+                margin: 0 auto;
+                gap: 20px;
+            }
+            .left-panel {
+                position: sticky;
+                top: 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .right-panel {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                min-width: 0;
+            }
+            .task-grid-inner {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            #extraTaskList {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="fixed-bg"></div>
+
+    <div class="app-header">
+        <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 儿童模式</button>
+        <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 管理员</button>
+        <button class="header-btn" id="exportCsvBtn"><img src="icon_export.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 导出CSV</button>
+    </div>
+
+    <div class="layout-container">
+        <div class="left-panel">
+            <div class="profile-stats-bar">
+                <div class="profile-card">
+                    <div class="avatar-container">
+                        <div class="avatar" id="avatarDisplay"></div>
+                        <div class="avatar-eye left"></div>
+                        <div class="avatar-eye right"></div>
+                        <div class="avatar-smile"></div>
+                    </div>
+                    <div class="profile-name" id="profileName">HEIDI</div>
+                    <button class="edit-profile-btn hidden" id="editProfileBtn">编辑资料</button>
+                </div>
+                <div class="stats-group">
+                    <div class="stats-card today">
+                        <span class="stats-label">今日获得</span>
+                        <span class="stats-number" id="todayStars"><span>0</span><img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;"></span>
+                    </div>
+                    <div class="stats-card month">
+                        <span class="stats-label">本月获得</span>
+                        <span class="stats-number" id="monthStars"><span>0</span><img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <button class="calendar-nav-btn" id="prevMonth">‹</button>
+                    <span class="month-label" id="calendarMonth"></span>
+                    <button class="calendar-nav-btn" id="nextMonth">›</button>
+                </div>
+                <div class="calendar-weekdays">
+                    <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+
+            <div class="section-wrapper">
+                <div class="section-title">
+                    <div class="title-left">
+                        <img src="icon_gift_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 额外任务
+                    </div>
+                    <div class="title-right">
+                        <button class="btn-outline btn-sm hidden" id="addExtraBtn">+ 新增</button>
+                        <button class="collapse-btn hidden" data-target="extraTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;"></button>
+                    </div>
+                </div>
+                <div id="extraTaskList" class="task-list"></div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="section-wrapper">
+                <div class="section-title">
+                    <div class="title-left">
+                        <img src="icon_school_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 校内任务
+                        <span id="inSchoolCountBadge" style="font-size:13px; background:var(--bg-page); color:var(--text-main); padding:4px 12px; border-radius:999px; font-weight:900;">0项</span>
+                    </div>
+                    <div class="title-right">
+                        <button class="btn-outline btn-sm" id="addInSchoolBtn">+ 新增</button>
+                        <button class="collapse-btn hidden" data-target="inSchoolGroups"><img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;"></button>
+                    </div>
+                </div>
+                <div id="inSchoolGroups"></div>
+            </div>
+
+            <div class="section-wrapper">
+                <div class="section-title">
+                    <div class="title-left">
+                        <img src="icon_out_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 校外任务
+                        <span id="outSchoolCountBadge" style="font-size:13px; background:var(--bg-page); color:var(--text-main); padding:4px 12px; border-radius:999px; font-weight:900;">0项</span>
+                    </div>
+                    <div class="title-right">
+                        <button class="btn-outline btn-sm" id="addOutSchoolBtn">+ 新增</button>
+                        <button class="collapse-btn hidden" data-target="outSchoolGroups"><img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;"></button>
+                    </div>
+                </div>
+                <div id="outSchoolGroups"></div>
+            </div>
+
+            <div class="section-wrapper">
+                <div class="section-title">
+                    <div class="title-left">
+                        <img src="icon_exam_title.svg" class="zoom-icon" style="width: 18px; height: 18px;"> 考试任务
+                    </div>
+                    <div class="title-right">
+                        <button class="btn-outline btn-sm" id="addExamBtn">+ 新增考试</button>
+                        <button class="collapse-btn hidden" data-target="examTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;"></button>
+                    </div>
+                </div>
+                <div id="examTaskList"></div>
+            </div>
+
+            <div class="section-wrapper">
+                <div class="section-title">
+                    <div class="title-left" style="font-size:18px;">
+                        <img src="icon_overdue_title.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 未完成任务
+                    </div>
+                    <div class="title-right">
+                        <span id="overdueCountBadge" style="font-size:13px; background:var(--bg-page); color:var(--text-main); padding:4px 12px; border-radius:999px; font-weight:900;">0项</span>
+                        <button class="collapse-btn hidden" data-target="overdueTaskList"><img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;"></button>
+                    </div>
+                </div>
+                <div id="overdueTaskList" class="task-grid-inner" style="margin-bottom:4px;"></div>
+            </div>
+
+            <div id="adminTaskLibrarySection" class="hidden section-wrapper">
+                <div class="section-title" style="margin-bottom: 12px;">
+                    <div class="title-left" style="display:flex; align-items:center; gap:8px;">
+                        <img src="icon_book_title.svg" class="zoom-icon" style="width: 18px; height: 18px;">
+                        <span>任务库管理</span>
+                    </div>
+                    <div class="title-right" style="display:flex; align-items:center; gap:8px;">
+                        <button class="btn-primary btn-sm" id="openCreateTaskBtn" style="height: 36px;">+ 新增任务</button>
+                        <button class="btn-outline btn-sm" id="ocrBtn" style="height: 36px; padding: 0 12px;">
+                            <img src="icon_camera.svg" class="zoom-icon" style="width: 14px; height: 14px;">
+                        </button>
+                        <button class="btn-outline btn-sm" id="resetStarsBtn" style="display:none;"></button>
+                    </div>
+                </div>
+                <div id="taskLibraryList" class="task-list" style="margin-top:0;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="bottom-btn active" id="bottomHome">
+            <img src="icon_nav_home.svg" class="zoom-icon" style="width: 20px; height: 20px;">
+        </button>
+        <button class="bottom-btn" id="bottomStats">
+            <img src="icon_nav_stats.svg" class="zoom-icon" style="width: 20px; height: 20px;">
+        </button>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+    <div id="modalRoot"></div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
+            });
+        }
+
+        const SUPABASE_URL = 'https://skgxcnnagfgwfrccwwrx.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_t96OWboqHhMc4CSJLEuQXQ_TE_xIMdw';
+
+        let supabaseClient = null;
+        if (SUPABASE_URL && SUPABASE_URL !== '替换为您的_SUPABASE_URL') {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        (function() {
+            const STORAGE_KEY = 'star_task_app_v1';
+            const ADMIN_PASSWORD = '111';
+
+            function getBeijingNow() {
+                const now = new Date();
+                const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+                return new Date(utc + 8 * 3600000);
+            }
+            function getBeijingDateStr() {
+                const bj = getBeijingNow();
+                return `${bj.getFullYear()}-${String(bj.getMonth()+1).padStart(2,'0')}-${String(bj.getDate()).padStart(2,'0')}`;
+            }
+            function formatDate(d) {
+                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            }
+            function getMondayOf(date) {
+                const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                const day = d.getDay();
+                const diff = day === 0 ? -6 : 1 - day;
+                d.setDate(d.getDate() + diff);
+                return d;
+            }
+            function getSubjectIcon(subject) {
+                const map = {
+                    '语文': 'icon_subject_chinese.png',
+                    '数学': 'icon_subject_math.png',
+                    '英语': 'icon_subject_english.png',
+                    '其它': 'icon_subject_other.png',
+                    '口语': 'icon_subject_oral.png',
+                    '新东方': 'icon_subject_xdf.png'
+                };
+                return map[subject] || 'icon_subject_custom.png';
+            }
+
+            const defaultTasks = [
+                { id: 't1', name: '习题册', reward: 0, daily: true, note: '', category: '校内任务', subject: '语文', startDate: '2026-11-01', endDate: '' },
+                { id: 't2', name: '口算', reward: 0, daily: true, note: '', category: '校内任务', subject: '数学', startDate: '2026-11-01', endDate: '' },
+                { id: 't3', name: '英语阅读', reward: 0, daily: true, note: '', category: '校内任务', subject: '英语', startDate: '2026-11-01', endDate: '' }
+            ];
+
+            const defaultState = {
+                tasks: [...defaultTasks],
+                checkins: [],
+                exams: [],
+                extraTasks: [],
+                profile: { name: 'HEIDI', avatar: '' }
+            };
+
+            function loadStateLocal() {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    try {
+                        const parsed = JSON.parse(stored);
+                        parsed.tasks = (parsed.tasks || []).map(t => {
+                            let cat = t.category;
+                            if (cat === '校内作业') cat = '校内任务';
+                            if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
+                            let sub = t.subject || '其它';
+                            if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
+                            return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
+                        });
+                        if (!parsed.profile) parsed.profile = { name: 'HEIDI', avatar: '' };
+                        if (!parsed.exams) parsed.exams = [];
+                        if (!parsed.extraTasks) parsed.extraTasks = [];
+                        if (!parsed.checkins) parsed.checkins = [];
+                        return parsed;
+                    } catch (e) {}
+                }
+                return JSON.parse(JSON.stringify(defaultState));
+            }
+
+            let state = loadStateLocal();
+            let currentRole = 'child';
+            let isAdminAuthenticated = false;
+
+            const bjInit = getBeijingNow();
+            let calendarWeekStart = getMondayOf(bjInit);
+
+            let saveTimeout = null;
+            let isSyncingFromCloud = false;
+
+            function saveState() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                if (supabaseClient && !isSyncingFromCloud) {
+                    if (saveTimeout) clearTimeout(saveTimeout);
+                    saveTimeout = setTimeout(async () => {
+                        try {
+                            const payload = JSON.parse(JSON.stringify(state));
+                            await supabaseClient.from('app_state').upsert({ id: 1, state_data: payload, updated_at: new Date().toISOString() });
+                        } catch (error) {}
+                    }, 800);
+                }
+            }
+
+            async function fetchCloudState() {
+                if (!supabaseClient) return;
+                try {
+                    const { data, error } = await supabaseClient.from('app_state').select('state_data').eq('id', 1).single();
+                    if (error) throw error;
+                    if (data && data.state_data && Object.keys(data.state_data).length > 0) {
+                        isSyncingFromCloud = true;
+                        state = data.state_data;
+                        state.tasks = (state.tasks || []).map(t => {
+                            let cat = t.category;
+                            if (cat === '校内作业') cat = '校内任务';
+                            if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
+                            let sub = t.subject || '其它';
+                            if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
+                            return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
+                        });
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                        renderAll();
+                        isSyncingFromCloud = false;
+                    }
+                } catch (error) {}
+            }
+
+            function setupRealtime() {
+                if (!supabaseClient) return;
+                supabaseClient.channel('app_state_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'app_state' }, payload => {
+                    const newState = payload.new.state_data;
+                    if (newState && Object.keys(newState).length > 0) {
+                        isSyncingFromCloud = true;
+                        state = newState;
+                        state.tasks = (state.tasks || []).map(t => {
+                            let cat = t.category;
+                            if (cat === '校内作业') cat = '校内任务';
+                            if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
+                            let sub = t.subject || '其它';
+                            if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
+                            return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
+                        });
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                        renderAll();
+                        setTimeout(() => { isSyncingFromCloud = false; }, 100);
+                    }
+                }).subscribe();
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function getExamStars(score) {
+                if (score === null || score === undefined || score === '') return 0;
+                const s = parseFloat(score);
+                if (s >= 100) return 50;
+                if (s >= 90) return 25;
+                return 0;
+            }
+
+            function calcTodayStars() {
+                const today = getBeijingDateStr();
+                let sum = 0;
+                state.checkins.forEach(c => {
+                    if (c.date === today && c.isExtra) sum += (c.reward || 0);
+                });
+                state.exams.forEach(e => {
+                    if (e.date === today) sum += getExamStars(e.score);
+                });
+                return sum;
+            }
+
+            function calcMonthStars() {
+                const bj = getBeijingNow();
+                const prefix = `${bj.getFullYear()}-${String(bj.getMonth()+1).padStart(2,'0')}`;
+                const todayDate = bj.getDate();
+                const lastDay = new Date(bj.getFullYear(), bj.getMonth() + 1, 0).getDate();
+
+                let extraSum = 0;
+                let examSum = 0;
+
+                state.checkins.forEach(c => {
+                    if (c.date.startsWith(prefix) && c.isExtra) extraSum += (c.reward || 0);
+                });
+
+                state.exams.forEach(e => {
+                    if (e.date.startsWith(prefix)) examSum += getExamStars(e.score);
+                });
+
+                const monthlyBonus = (todayDate === lastDay) ? 20 : 0;
+
+                return { total: extraSum + examSum + monthlyBonus, extraSum, examSum, monthlyBonus };
+            }
+
+            function isTaskCheckedToday(taskId) {
+                const today = getBeijingDateStr();
+                return state.checkins.some(c => c.date === today && c.taskId === taskId && !c.isExtra);
+            }
+
+            function canTaskCheck(task) {
+                const today = getBeijingDateStr();
+                const now = getBeijingNow();
+
+                if (task.endDate) {
+                    const parts = task.endDate.split('-');
+                    const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
+                    deadline.setHours(23, 59, 59, 999);
+                    return now.getTime() <= deadline.getTime();
+                } else {
+                    if (task.startDate === today) return true;
+                    if (task.daily) return true;
+                    const parts = task.startDate.split('-');
+                    const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
+                    deadline.setDate(deadline.getDate() + 1);
+                    deadline.setHours(6, 0, 0, 0);
+                    return now.getTime() < deadline.getTime();
+                }
+            }
+
+            function getDayCompletionStatus(dateStr) {
+                const regularTasks = state.tasks.filter(task => {
+                    if (task.startDate > dateStr) return false;
+                    if (task.endDate) {
+                        if (dateStr > task.endDate) return false;
+                    } else if (!task.daily) {
+                        if (task.startDate !== dateStr) return false;
+                    }
+                    return true;
+                });
+                const extraTasks = state.extraTasks.filter(t => t.createdDate === dateStr);
+                const total = regularTasks.length + extraTasks.length;
+                if (total === 0) return 'none';
+
+                let completed = 0;
+                regularTasks.forEach(t => {
+                    if (state.checkins.some(c => c.date === dateStr && c.taskId === t.id && !c.isExtra)) completed++;
+                });
+                extraTasks.forEach(t => {
+                    if (state.checkins.some(c => c.date === dateStr && c.taskId === t.id && c.isExtra)) completed++;
+                });
+                return completed >= total ? 'completed' : 'incomplete';
+            }
+
+            function renderProfile() {
+                const name = state.profile.name || 'HEIDI';
+                const avatar = state.profile.avatar || '';
+                const avatarEl = document.getElementById('avatarDisplay');
+
+                if (avatar) {
+                    avatarEl.style.backgroundImage = `url(${avatar})`;
+                    avatarEl.textContent = '';
+                } else {
+                    avatarEl.style.backgroundImage = '';
+                    avatarEl.textContent = '';
+                }
+                document.getElementById('profileName').textContent = name;
+
+                const editBtn = document.getElementById('editProfileBtn');
+                if (currentRole === 'admin' && isAdminAuthenticated) {
+                    editBtn.classList.remove('hidden');
+                } else {
+                    editBtn.classList.add('hidden');
+                }
+            }
+
+            function renderCalendar() {
+                const start = calendarWeekStart;
+                const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                const monthLabel = document.getElementById('calendarMonth');
+                monthLabel.textContent = monthNames[start.getMonth()];
+
+                const grid = document.getElementById('calendarGrid');
+                const todayStr = getBeijingDateStr();
+                const cells = [];
+
+                for (let i = 0; i < 7; i++) {
+                    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+                    const dateStr = formatDate(d);
+                    const isToday = dateStr === todayStr;
+                    const isFuture = dateStr > todayStr;
+                    let status = '';
+                    if (!isToday && !isFuture) {
+                        const s = getDayCompletionStatus(dateStr);
+                        if (s === 'completed') status = 'completed';
+                        else if (s === 'incomplete') status = 'incomplete';
+                    }
+                    cells.push({ day: d.getDate(), isToday, status });
+                }
+
+                grid.innerHTML = cells.map(c => {
+                    let cls = 'calendar-day';
+                    if (c.isToday) cls += ' today';
+                    else if (c.status) cls += ' ' + c.status;
+                    return `<div class="${cls}">${c.day}</div>`;
+                }).join('');
+            }
+
+            function getTagClass(text) {
+                if (text === '校内任务' || text === '校外任务') return 'tag-green';
+                if (text === '语文' || text === '数学' || text === '英语') return 'tag-purple';
+                return 'tag-orange';
+            }
+
+            function renderTaskGroup(containerId, category, countBadgeId) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                const today = getBeijingDateStr();
+                const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
+
+                const tasks = state.tasks.filter(task => {
+                    if (task.category !== category) return false;
+                    if (todayCheckTaskIds.has(task.id)) return true;
+                    if (task.startDate > today) return false;
+                    if (!canTaskCheck(task)) return false;
+                    return true;
+                });
+
+                if (countBadgeId) {
+                    const badge = document.getElementById(countBadgeId);
+                    if (badge) badge.textContent = `${tasks.length}项`;
+                }
+
+                if (tasks.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">暂无任务，好好休息~</div>`;
+                    return;
+                }
+
+                const groups = {};
+                tasks.forEach(t => {
+                    const sub = t.subject || '其它';
+                    if (!groups[sub]) groups[sub] = [];
+                    groups[sub].push(t);
+                });
+
+                let html = '';
+                let sortedSubjects = Object.keys(groups);
+                if (category === '校内任务') {
+                    const order = { '语文': 1, '数学': 2, '英语': 3, '其它': 4 };
+                    sortedSubjects.sort((a,b) => (order[a]||99) - (order[b]||99));
+                } else {
+                    const order = { '口语': 1, '新东方': 2 };
+                    sortedSubjects.sort((a,b) => (order[a]||99) - (order[b]||99));
+                }
+
+                sortedSubjects.forEach(sub => {
+                    html += `<div class="sub-title"><img src="${getSubjectIcon(sub)}" style="width: 14px; height: 14px; object-fit: contain;"> ${sub}</div>`;
+                    html += `<div class="task-grid-inner">`;
+                    groups[sub].forEach(task => {
+                        html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
+                    });
+                    html += `</div>`;
+                });
+
+                container.innerHTML = html;
+            }
+
+            function renderInSchoolTasks() {
+                renderTaskGroup('inSchoolGroups', '校内任务', 'inSchoolCountBadge');
+            }
+
+            function renderOutSchoolTasks() {
+                renderTaskGroup('outSchoolGroups', '校外任务', 'outSchoolCountBadge');
+            }
+
+            function renderTaskItem(task, completed, overdue) {
+                const showAdminActions = (currentRole === 'admin' && isAdminAuthenticated);
+                const today = getBeijingDateStr();
+
+                let tagsHtml = '';
+                if (task.subject) {
+                    tagsHtml += `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>`;
+                }
+                if (task.note) {
+                    tagsHtml += `<span class="tag tag-orange">${escapeHtml(task.note)}</span>`;
+                }
+                if (task.daily) {
+                    tagsHtml += `<span class="tag tag-green"><img src="icon_repeat.svg" class="icon-repeat-small"> 每日</span>`;
+                }
+
+                if (overdue) {
+                    tagsHtml += `<span class="tag tag-pink">原定：${task.startDate}${task.endDate ? ' 至 ' + task.endDate : ''}</span>`;
+                } else {
+                    if (task.endDate) {
+                        tagsHtml += `<span class="tag tag-deadline">截止：${task.endDate}</span>`;
+                    } else {
+                        if (task.startDate === today || task.daily) {
+                            tagsHtml += `<span class="tag tag-today">今日任务</span>`;
+                        } else {
+                            tagsHtml += `<span class="tag tag-date">${task.startDate}</span>`;
+                        }
+                    }
+                }
+
+                const checkHtml = overdue
+                    ? `<span class="overdue-badge">未完成</span>`
+                    : `<div class="task-check" data-action="toggle-check" data-task-id="${task.id}">${completed ? '✓' : ''}</div>`;
+
+                return `
+                    <div class="task-item ${completed ? 'completed' : ''} ${overdue ? 'overdue' : ''}" data-task-id="${task.id}">
+                        <div class="task-icon">
+                            <img src="${task.category === '校内任务' ? 'icon_in_card.svg' : 'icon_out_card.svg'}" class="zoom-icon" style="width: 22px; height: 22px;">
+                        </div>
+                        <div class="task-info">
+                            <div class="task-name">${escapeHtml(task.name)}</div>
+                            <div class="task-meta">
+                                ${tagsHtml}
+                            </div>
+                        </div>
+                        ${showAdminActions ? `
+                        <div class="task-actions">
+                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                        </div>` : ''}
+                        ${checkHtml}
+                    </div>
+                `;
+            }
+
+            function renderExtraTasks() {
+                const container = document.getElementById('extraTaskList');
+                if (!container) return;
+
+                const today = getBeijingDateStr();
+                let todayExtras = state.extraTasks.filter(t => t.createdDate === today);
+
+                if (currentRole !== 'admin') {
+                    todayExtras = todayExtras.slice(-3);
+                }
+
+                if (todayExtras.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">暂无额外任务</div>`;
+                    return;
+                }
+
+                container.innerHTML = todayExtras.map(task => {
+                    const completed = state.checkins.some(c => c.date === today && c.taskId === task.id && c.isExtra);
+                    return `
+                        <div class="task-item ${completed ? 'completed' : ''}">
+                            <div class="task-icon"><img src="icon_gift_card.png" class="zoom-icon" style="width: 22px; height: 22px; object-fit: contain;"></div>
+                            <div class="task-info">
+                                <div class="task-name">${escapeHtml(task.name)}</div>
+                                <div class="task-meta">
+                                    <span class="tag tag-orange">⭐${task.reward}</span>
+                                    <span class="tag tag-date">${task.createdDate}</span>
+                                </div>
+                            </div>
+                            ${currentRole === 'admin' && isAdminAuthenticated ? `
+                            <div class="task-actions">
+                                <button class="icon-btn" data-action="edit-extra" data-extra-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                                <button class="icon-btn" data-action="delete-extra" data-extra-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                            </div>` : ''}
+                            <div class="task-check" data-action="toggle-extra" data-extra-id="${task.id}">${completed ? '✓' : ''}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            function renderExams() {
+                const container = document.getElementById('examTaskList');
+                if (!container) return;
+
+                if (state.exams.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">暂无考试记录</div>`;
+                    return;
+                }
+
+                const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
+                const sortedExams = [...state.exams].sort((a,b) => b.date.localeCompare(a.date));
+
+                container.innerHTML = sortedExams.map(exam => {
+                    const stars = exam.score !== null ? getExamStars(exam.score) : 0;
+                    const isZero = stars === 0;
+
+                    const starText = exam.score !== null
+                        ? `<span class="exam-stars ${isZero ? 'zero' : ''}">获得 ${stars} <img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;"></span>`
+                        : `<span class="exam-stars zero">未录入</span>`;
+
+                    const canEditScore = isAdmin || (exam.score === null);
+
+                    const scoreHtml = canEditScore
+                        ? `<input type="number" step="0.5" min="0" max="100" class="exam-score-input" data-exam-id="${exam.id}" value="${exam.score !== null ? exam.score : ''}" placeholder="输入分数">`
+                        : `<span style="font-weight: 900; color: var(--text-main); font-size: 16px; line-height: 1;">${exam.score}分</span>`;
+
+                    return `
+                        <div class="task-item">
+                            <div class="task-icon">
+                                <img src="icon_exam_card.png" class="zoom-icon" style="width: 22px; height: 22px; object-fit: contain;">
+                            </div>
+                            <div class="task-info">
+                                <div class="task-name">${escapeHtml(exam.name)}</div>
+                                <div class="task-meta">
+                                    ${scoreHtml}
+                                    ${starText}
+                                    <span class="tag tag-date" style="font-weight: 800;">${exam.date}</span>
+                                </div>
+                            </div>
+                            ${isAdmin ? `
+                            <div class="task-actions">
+                                <button class="icon-btn" data-action="edit-exam" data-exam-id="${exam.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                                <button class="icon-btn" data-action="delete-exam" data-exam-id="${exam.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            function renderOverdueTasks() {
+                const container = document.getElementById('overdueTaskList');
+                if (!container) return;
+
+                const today = getBeijingDateStr();
+                const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
+
+                const overdueTasks = state.tasks.filter(task => {
+                    if (todayCheckTaskIds.has(task.id)) return false;
+                    if (task.startDate > today) return false;
+                    return !canTaskCheck(task);
+                });
+
+                document.getElementById('overdueCountBadge').textContent = `${overdueTasks.length}项`;
+
+                if (overdueTasks.length === 0) {
+                    container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 8px; padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;"><img src="icon_done.svg" class="zoom-icon" style="width: 18px; height: 18px; object-fit: contain;"> 全部完成啦！</div>`;
+                    return;
+                }
+
+                overdueTasks.sort((a,b) => b.startDate.localeCompare(a.startDate));
+
+                container.innerHTML = overdueTasks.map(task => {
+                    let tagsHtml = `
+                        <span class="tag ${getTagClass(task.category)}">${task.category}</span>
+                        ${task.subject ? `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>` : ''}
+                    `;
+
+                    if (task.daily) {
+                        tagsHtml += `<span class="tag tag-green"><img src="icon_repeat.svg" class="icon-repeat-small"> 每日</span>`;
+                    }
+
+                    let dateLabel = '';
+                    if (task.endDate) {
+                        dateLabel = `${task.startDate} 至 ${task.endDate}`;
+                    } else {
+                        dateLabel = `任务日：${task.startDate}`;
+                    }
+                    tagsHtml += `<span class="tag tag-pink">${dateLabel}</span>`;
+
+                    const showAdminActions = (currentRole === 'admin' && isAdminAuthenticated);
+                    const actionHtml = showAdminActions ? `
+                        <div class="task-actions">
+                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                        </div>
+                    ` : '';
+
+                    return `
+                        <div class="task-item overdue">
+                            <div class="task-icon">
+                                <img src="${task.category === '校内任务' ? 'icon_in_card.svg' : 'icon_out_card.svg'}" class="zoom-icon" style="width: 22px; height: 22px;">
+                            </div>
+                            <div class="task-info">
+                                <div class="task-name">${escapeHtml(task.name)}</div>
+                                <div class="task-meta">
+                                    ${tagsHtml}
+                                </div>
+                            </div>
+                            ${actionHtml}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            function renderTaskLibrary() {
+                const container = document.getElementById('taskLibraryList');
+                if (!container) return;
+                if (state.tasks.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);font-weight:800;">暂无任务</div>`;
+                    return;
+                }
+                container.innerHTML = state.tasks.map(task => `
+                    <div class="task-item">
+                        <div class="task-info">
+                            <div class="task-name">
+                                ${escapeHtml(task.name)}
+                                ${task.daily ? '<img src="icon_repeat.svg" class="icon-repeat-small">' : ''}
+                            </div>
+                            <div class="task-meta">
+                                <span class="tag ${getTagClass(task.category)}">${task.category}</span>
+                                ${task.subject ? `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>` : ''}
+                                ${task.endDate ? `<span class="tag tag-deadline">至 ${task.endDate}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function renderStats() {
+                const todaySum = calcTodayStars();
+                const monthData = calcMonthStars();
+
+                document.getElementById('todayStars').innerHTML = `<span>${todaySum}</span><img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;">`;
+                document.getElementById('monthStars').innerHTML = `<span>${monthData.total}</span><img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;">`;
+            }
+
+            function updateRoleUI() {
+                const btnAdmin = document.getElementById('btnAdminMode');
+                const btnChild = document.getElementById('btnChildMode');
+                const adminSection = document.getElementById('adminTaskLibrarySection');
+                const addExtraBtn = document.getElementById('addExtraBtn');
+                const collapseBtns = document.querySelectorAll('.collapse-btn');
+
+                if (currentRole === 'admin' && isAdminAuthenticated) {
+                    btnAdmin.classList.add('active');
+                    btnChild.classList.remove('active');
+                    adminSection.classList.remove('hidden');
+                    addExtraBtn.classList.remove('hidden');
+                    collapseBtns.forEach(btn => btn.classList.remove('hidden'));
+                } else {
+                    btnAdmin.classList.remove('active');
+                    btnChild.classList.add('active');
+                    adminSection.classList.add('hidden');
+                    addExtraBtn.classList.add('hidden');
+                    collapseBtns.forEach(btn => btn.classList.add('hidden'));
+                    document.querySelectorAll('.task-list, #inSchoolGroups, #outSchoolGroups, #examTaskList').forEach(el => {
+                        el.style.display = '';
+                    });
+                    document.querySelectorAll('.section-wrapper').forEach(el => el.classList.remove('collapsed'));
+                    collapseBtns.forEach(btn => btn.innerHTML = '<img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;">');
+                }
+            }
+
+            function renderAll() {
+                renderProfile();
+                renderStats();
+                renderCalendar();
+                renderInSchoolTasks();
+                renderOutSchoolTasks();
+                renderExtraTasks();
+                renderExams();
+                renderOverdueTasks();
+                renderTaskLibrary();
+                updateRoleUI();
+            }
+
+            function showToast(message, isSuccess = true) {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                const icon = isSuccess ? 'icon_toast_ok.svg' : 'icon_toast_warn.svg';
+                toast.innerHTML = `<img src="${icon}" class="zoom-icon" style="width: 14px; height: 14px;"> ${escapeHtml(message)}`;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-10px)';
+                    toast.style.transition = 'all 0.3s';
+                    setTimeout(() => toast.remove(), 300);
+                }, 2000);
+            }
+
+            function toggleTaskCheck(taskId) {
+                const today = getBeijingDateStr();
+                const task = state.tasks.find(t => t.id === taskId);
+                if (!task) return;
+
+                if (!canTaskCheck(task) && !isTaskCheckedToday(taskId)) {
+                    showToast('该任务已过期无法打卡', false);
+                    return;
+                }
+
+                const existingIndex = state.checkins.findIndex(c => c.date === today && c.taskId === taskId && !c.isExtra);
+                if (existingIndex !== -1) {
+                    state.checkins.splice(existingIndex, 1);
+                    showToast(`取消完成`);
+                } else {
+                    state.checkins.push({ date: today, taskId, timestamp: Date.now() });
+                    showToast(`完成打卡`);
+                }
+                saveState();
+                renderAll();
+            }
+
+            function toggleExtraCheck(extraId) {
+                const today = getBeijingDateStr();
+                const extraTask = state.extraTasks.find(t => t.id === extraId);
+                if (!extraTask) return;
+
+                const existingIndex = state.checkins.findIndex(c => c.date === today && c.taskId === extraId && c.isExtra);
+                if (existingIndex !== -1) {
+                    if (currentRole !== 'admin') {
+                        const checkinTime = state.checkins[existingIndex].timestamp;
+                        const now = Date.now();
+                        if (new Date(checkinTime).toDateString() !== new Date().toDateString()) {
+                            showToast('过期的打卡不可取消', false);
+                            return;
+                        }
+                    }
+                    state.checkins.splice(existingIndex, 1);
+                    showToast(`取消额外任务`);
+                } else {
+                    state.checkins.push({ date: today, taskId: extraId, reward: extraTask.reward, timestamp: Date.now(), isExtra: true });
+                    const rewardStr = extraTask.reward >= 0 ? '+' + extraTask.reward : extraTask.reward;
+                    showToast(`完成额外任务 ${rewardStr}星`);
+                }
+                saveState();
+                renderAll();
+            }
+
+            function deleteTaskConfirm(taskId) {
+                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const task = state.tasks.find(t => t.id === taskId);
+                if (!task) return;
+                showModal({
+                    title: '删除任务',
+                    content: `确定要删除 "${escapeHtml(task.name)}" 吗？相关打卡也会清除。`,
+                    confirmText: '删除',
+                    danger: true,
+                    onConfirm: () => {
+                        state.tasks = state.tasks.filter(t => t.id !== taskId);
+                        state.checkins = state.checkins.filter(c => c.taskId !== taskId);
+                        saveState();
+                        renderAll();
+                        showToast('已删除');
+                    }
+                });
+            }
+
+            function resetStarsConfirm() {
+                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                showModal({
+                    title: '重置星值',
+                    content: '确定清空所有考试分数、额外任务与打卡记录吗？（今日和本月星值将归零，不可撤销）',
+                    confirmText: '重置',
+                    danger: true,
+                    onConfirm: () => {
+                        state.checkins = [];
+                        state.extraTasks = [];
+                        state.exams = [];
+                        saveState();
+                        renderAll();
+                        showToast('已重置归零');
+                    }
+                });
+            }
+
+            function showModal({ title, content, contentHTML, confirmText = '确认', cancelText = '取消', danger = false, onConfirm, onCancel }) {
+                const modalRoot = document.getElementById('modalRoot');
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                const modal = document.createElement('div');
+                modal.className = 'modal-content';
+
+                const cancelBtnHtml = cancelText ? `<button class="btn-cancel" id="modalCancel">${cancelText}</button>` : '';
+                const actionStyle = cancelText ? '' : 'width: 100%;';
+
+                let titleHtml = title.includes('<img') ? `<div style="display:flex; justify-content:center; align-items:center; gap:8px;">${title}</div>` : escapeHtml(title);
+
+                modal.innerHTML = `
+                    <h3>${titleHtml}</h3>
+                    <div id="modalBody">${contentHTML || `<p style="margin-bottom:24px; color:var(--text-main); font-weight:600; text-align:center;">${escapeHtml(content || '')}</p>`}</div>
+                    <div class="modal-actions">
+                        ${cancelBtnHtml}
+                        <button class="${danger ? 'btn-danger' : 'btn-confirm'}" id="modalConfirm" style="${actionStyle}">${confirmText}</button>
+                    </div>
+                `;
+                overlay.appendChild(modal);
+                modalRoot.appendChild(overlay);
+
+                const closeModal = () => overlay.remove();
+
+                const cancelBtn = document.getElementById('modalCancel');
+                if (cancelBtn) {
+                    cancelBtn.onclick = () => {
+                        if (onCancel && onCancel() === false) return;
+                        closeModal();
+                    };
+                }
+
+                document.getElementById('modalConfirm').onclick = () => {
+                    if (onConfirm && onConfirm() === false) return;
+                    closeModal();
+                };
+                overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+            }
+
+            function openProfileModal() {
+                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const currentName = state.profile.name || 'HEIDI';
+                let pendingAvatar = state.profile.avatar || '';
+
+                showModal({
+                    title: '编辑资料',
+                    contentHTML: `
+                        <label>名字</label>
+                        <input id="profileNameInput" type="text" value="${escapeHtml(currentName)}" maxlength="10" />
+                        <label>头像</label>
+                        <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+                            <div id="avatarPreview" class="avatar" style="width:72px;height:72px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:transparent;${pendingAvatar ? `background-image:url(${pendingAvatar});background-size:cover;` : ''}"></div>
+                            <label class="btn-outline" style="cursor:pointer; padding:10px 20px;">
+                                上传图片
+                                <input id="avatarFileInput" type="file" accept="image/*" style="display:none;" />
+                            </label>
+                        </div>
+                    `,
+                    confirmText: '保存',
+                    onConfirm: () => {
+                        const name = document.getElementById('profileNameInput').value.trim() || 'HEIDI';
+                        state.profile.name = name;
+                        state.profile.avatar = pendingAvatar;
+                        saveState();
+                        renderAll();
+                        showToast('资料已更新');
+                    }
+                });
+
+                setTimeout(() => {
+                    const fileInput = document.getElementById('avatarFileInput');
+                    const preview = document.getElementById('avatarPreview');
+                    if (!fileInput) return;
+                    fileInput.addEventListener('change', (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const maxSize = 200;
+                                let w = img.width, h = img.height;
+                                if (w > h) { if (w > maxSize) { h = h * maxSize / w; w = maxSize; } }
+                                else { if (h > maxSize) { w = w * maxSize / h; h = maxSize; } }
+                                const canvas = document.createElement('canvas');
+                                canvas.width = w; canvas.height = h;
+                                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                                pendingAvatar = canvas.toDataURL('image/jpeg', 0.85);
+                                preview.style.backgroundImage = `url(${pendingAvatar})`;
+                            };
+                            img.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }, 0);
+            }
+
+            window.toggleCustomSubjectInput = function() {
+                const select = document.getElementById('modalTaskSubjectSelect');
+                const input = document.getElementById('modalTaskSubjectInput');
+                if (!select || !input) return;
+                if (select.value === '__custom__') {
+                    input.style.display = '';
+                } else {
+                    input.style.display = 'none';
+                }
+            };
+
+            window.updateSubjectOptions = function() {
+                const cat = document.getElementById('modalTaskCategory').value;
+                const subContainer = document.getElementById('subjectContainer');
+
+                if (cat === '校内任务') {
+                    subContainer.innerHTML = `
+                        <select id="modalTaskSubjectSelect">
+                            <option value="语文">语文</option>
+                            <option value="数学">数学</option>
+                            <option value="英语">英语</option>
+                            <option value="其它">其它</option>
+                        </select>
+                    `;
+                } else {
+                    subContainer.innerHTML = `
+                        <select id="modalTaskSubjectSelect" onchange="toggleCustomSubjectInput()">
+                            <option value="口语">口语</option>
+                            <option value="新东方">新东方</option>
+                            <option value="__custom__">自定义</option>
+                        </select>
+                        <input id="modalTaskSubjectInput" type="text" placeholder="输入自定义学科" style="margin-top:8px; display:none; margin-bottom:20px;" />
+                    `;
+                }
+            };
+
+            function openTaskModal(editTask = null, defaultCategory = '校内任务') {
+                if (editTask && !(currentRole === 'admin' && isAdminAuthenticated)) return;
+
+                const isEdit = !!editTask;
+                const task = editTask || { name: '', daily: false, note: '', category: defaultCategory, subject: defaultCategory === '校内任务' ? '语文' : '', startDate: getBeijingDateStr(), endDate: '' };
+
+                let subjectHtml = '';
+                if (task.category === '校内任务') {
+                    subjectHtml = `
+                        <select id="modalTaskSubjectSelect">
+                            <option value="语文" ${task.subject === '语文' ? 'selected' : ''}>语文</option>
+                            <option value="数学" ${task.subject === '数学' ? 'selected' : ''}>数学</option>
+                            <option value="英语" ${task.subject === '英语' ? 'selected' : ''}>英语</option>
+                            <option value="其它" ${task.subject === '其它' ? 'selected' : ''}>其它</option>
+                        </select>
+                    `;
+                } else {
+                    const presets = ['口语', '新东方'];
+                    const defaultVal = task.subject || '口语';
+                    const isCustom = !presets.includes(defaultVal);
+                    subjectHtml = `
+                        <select id="modalTaskSubjectSelect" onchange="toggleCustomSubjectInput()">
+                            <option value="口语" ${defaultVal === '口语' ? 'selected' : ''}>口语</option>
+                            <option value="新东方" ${defaultVal === '新东方' ? 'selected' : ''}>新东方</option>
+                            <option value="__custom__" ${isCustom ? 'selected' : ''}>自定义</option>
+                        </select>
+                        <input id="modalTaskSubjectInput" type="text" value="${isCustom ? escapeHtml(defaultVal) : ''}" placeholder="输入自定义学科" style="margin-top:8px; ${isCustom ? '' : 'display:none;'} margin-bottom:20px;" />
+                    `;
+                }
+
+                showModal({
+                    title: isEdit ? '编辑任务' : '新增任务',
+                    contentHTML: `
+                        <label>任务名称</label>
+                        <input id="modalTaskName" type="text" value="${escapeHtml(task.name)}" placeholder="输入任务名称" />
+
+                        <label>分类</label>
+                        <select id="modalTaskCategory" onchange="updateSubjectOptions()" ${isEdit ? 'disabled' : ''}>
+                            <option value="校内任务" ${task.category === '校内任务' ? 'selected' : ''}>校内任务</option>
+                            <option value="校外任务" ${task.category === '校外任务' ? 'selected' : ''}>校外任务</option>
+                        </select>
+
+                        <label>学科</label>
+                        <div id="subjectContainer">${subjectHtml}</div>
+                        <div style="height:20px;"></div>
+
+                        <div style="display:flex; gap:12px; margin-bottom:20px;">
+                            <div style="flex:1;">
+                                <label>开始时间</label>
+                                <input id="modalTaskStartDate" type="date" value="${task.startDate}" style="margin-bottom:0;" />
+                            </div>
+                            <div style="flex:1;">
+                                <label>结束时间(留空即当日)</label>
+                                <div style="display:flex; gap:6px;">
+                                    <input id="modalTaskEndDate" type="date" value="${task.endDate}" style="margin-bottom:0;" />
+                                    <button type="button" class="btn-outline" onclick="document.getElementById('modalTaskEndDate').value=''" style="padding:0 12px; font-size:13px; height: 50px;">清空</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <label>每日重复</label>
+                        <select id="modalTaskDaily">
+                            <option value="false" ${!task.daily ? 'selected' : ''}>否</option>
+                            <option value="true" ${task.daily ? 'selected' : ''}>是</option>
+                        </select>
+
+                        <label>备注（可选）</label>
+                        <input id="modalTaskNote" type="text" value="${escapeHtml(task.note || '')}" />
+                    `,
+                    confirmText: '保存',
+                    onConfirm: () => {
+                        const name = document.getElementById('modalTaskName').value.trim();
+                        const category = document.getElementById('modalTaskCategory').value;
+
+                        let subject = '';
+                        const subjectSelect = document.getElementById('modalTaskSubjectSelect');
+                        if (category === '校内任务') {
+                            subject = subjectSelect.value;
+                        } else {
+                            if (subjectSelect.value === '__custom__') {
+                                const customVal = (document.getElementById('modalTaskSubjectInput') || {}).value || '';
+                                subject = customVal.trim() || '其它';
+                            } else {
+                                subject = subjectSelect.value;
+                            }
+                        }
+
+                        const startDate = document.getElementById('modalTaskStartDate').value || getBeijingDateStr();
+                        const endDate = document.getElementById('modalTaskEndDate').value;
+                        const daily = document.getElementById('modalTaskDaily').value === 'true';
+                        const note = document.getElementById('modalTaskNote').value.trim();
+
+                        if (!name) { alert('请输入名称'); return false; }
+
+                        if (isEdit) {
+                            const idx = state.tasks.findIndex(t => t.id === task.id);
+                            if (idx !== -1) state.tasks[idx] = { ...state.tasks[idx], name, note, subject, startDate, endDate, daily };
+                        } else {
+                            state.tasks.push({
+                                id: 'task_' + Date.now(),
+                                name, daily, note, category, subject, startDate, endDate
+                            });
+                        }
+                        saveState();
+                        renderAll();
+                        showToast('保存成功');
+                    }
+                });
+            }
+
+            function openExtraModal(editExtra = null) {
+                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const isEdit = !!editExtra;
+                const today = getBeijingDateStr();
+                const task = editExtra || { name: '', reward: 10, createdDate: today };
+
+                showModal({
+                    title: isEdit ? '编辑额外任务' : '新增额外任务',
+                    contentHTML: `
+                        <label>任务名称</label>
+                        <input id="extraNameInput" type="text" value="${escapeHtml(task.name)}" placeholder="如：拼图奖励" />
+                        <label>星值 (-50 到 50)</label>
+                        <input id="extraRewardInput" type="number" min="-50" max="50" value="${task.reward}" />
+                    `,
+                    confirmText: '保存',
+                    onConfirm: () => {
+                        const name = document.getElementById('extraNameInput').value.trim();
+                        const reward = parseInt(document.getElementById('extraRewardInput').value, 10);
+                        if (!name) { alert('请输入名称'); return false; }
+                        if (isNaN(reward) || reward < -50 || reward > 50) { alert('星值必须在-50到50之间'); return false; }
+
+                        if (isEdit) {
+                            const idx = state.extraTasks.findIndex(t => t.id === task.id);
+                            if (idx !== -1) {
+                                state.extraTasks[idx].name = name;
+                                state.extraTasks[idx].reward = reward;
+                            }
+                        } else {
+                            state.extraTasks.push({
+                                id: 'extra_' + Date.now(),
+                                name: name,
+                                reward: reward,
+                                createdDate: today
+                            });
+                        }
+                        saveState();
+                        renderAll();
+                        showToast(isEdit ? '修改成功' : '已添加额外任务');
+                        return true;
+                    }
+                });
+            }
+
+            function openExamModal(editExam = null) {
+                if (editExam && !(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const isEdit = !!editExam;
+                const today = getBeijingDateStr();
+                const exam = editExam || { name: '', date: today, score: null };
+
+                showModal({
+                    title: isEdit ? '编辑考试任务' : '新增考试任务',
+                    contentHTML: `
+                        <label>考试名称</label>
+                        <input id="examNameInput" type="text" value="${escapeHtml(exam.name)}" placeholder="如：期中考试-数学" />
+                        <label>考试日期</label>
+                        <input id="examDateInput" type="date" value="${exam.date}" />
+                    `,
+                    confirmText: '保存',
+                    onConfirm: () => {
+                        const name = document.getElementById('examNameInput').value.trim();
+                        const date = document.getElementById('examDateInput').value;
+                        if (!name) { alert('请输入考试名称'); return false; }
+                        if (!date) { alert('请选择日期'); return false; }
+
+                        if (isEdit) {
+                            const idx = state.exams.findIndex(t => t.id === exam.id);
+                            if (idx !== -1) {
+                                state.exams[idx].name = name;
+                                state.exams[idx].date = date;
+                            }
+                        } else {
+                            state.exams.push({
+                                id: 'exam_' + Date.now(),
+                                name: name,
+                                date: date,
+                                score: null
+                            });
+                        }
+                        saveState();
+                        renderAll();
+                        showToast(isEdit ? '修改成功' : '已添加考试任务');
+                        return true;
+                    }
+                });
+            }
+
+            function openOcrModal() {
+                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
+                const today = getBeijingDateStr();
+
+                showModal({
+                    title: '拍照 / 相册 OCR 识别',
+                    contentHTML: `
+                        <div style="margin-bottom:16px; text-align:center;">
+                            <label class="btn-outline" style="display:inline-flex; cursor:pointer; padding:12px 24px; font-size:15px;">
+                                <img src="icon_camera.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 选择图片 / 拍照
+                                <input type="file" accept="image/*" id="ocrFileInput" style="display:none;">
+                            </label>
+                            <div id="ocrStatus" style="margin-top:12px; font-size:13px; color:var(--text-main); font-weight:800;"></div>
+                        </div>
+                        <div id="ocrPreviewContainer" style="display:none; margin-bottom:16px; text-align:center;">
+                            <img id="ocrPreviewImg" style="max-width:100%; max-height:120px; border-radius:16px; border:2px solid var(--border-light);">
+                        </div>
+
+                        <label>识别文字（可编辑，按行拆分）</label>
+                        <textarea id="ocrResult" rows="6" placeholder="识别结果会显示在这里..."></textarea>
+
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+                            <input type="checkbox" id="ocrSplitCheck" checked style="width:20px; height:20px; margin:0; accent-color:var(--accent);" />
+                            <label for="ocrSplitCheck" style="margin:0; font-size:14px; color:var(--text-main); cursor:pointer; font-weight:800;">按换行拆分多个任务</label>
+                        </div>
+
+                        <div style="background:var(--bg-page); padding:16px; border-radius:20px; border: 1px solid var(--border-light);">
+                            <div style="font-size:13px; font-weight:900; color:var(--text-main); margin-bottom:12px;">统一设置（应用给上述任务）</div>
+                            <label style="color:var(--text-main);">分类</label>
+                            <select id="ocrCategory" onchange="updateOcrSubjectOptions()">
+                                <option value="校内任务">校内任务</option>
+                                <option value="校外任务">校外任务</option>
+                            </select>
+                            <label style="color:var(--text-main);">学科</label>
+                            <div id="ocrSubjectContainer">
+                                <select id="ocrSubjectSelect">
+                                    <option value="语文">语文</option>
+                                    <option value="数学">数学</option>
+                                    <option value="英语" selected>英语</option>
+                                    <option value="其它">其它</option>
+                                </select>
+                            </div>
+                            <div style="display:flex; gap:12px; margin-bottom:16px;">
+                                <div style="flex:1;">
+                                    <label style="color:var(--text-main);">开始时间</label>
+                                    <input id="ocrStartDate" type="date" value="${today}" style="margin-bottom:0; background:var(--bg-nav);" />
+                                </div>
+                                <div style="flex:1;">
+                                    <label style="color:var(--text-main);">结束时间(留空即当日)</label>
+                                    <div style="display:flex; gap:6px;">
+                                        <input id="ocrEndDate" type="date" value="" style="margin-bottom:0; background:var(--bg-nav);" />
+                                        <button type="button" class="btn-outline" onclick="document.getElementById('ocrEndDate').value=''" style="padding:0 10px; font-size:12px; height: 50px;">清空</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <label style="color:var(--text-main);">每日重复</label>
+                            <select id="ocrDaily" style="margin-bottom:0; background:var(--bg-nav);">
+                                <option value="false" selected>否</option>
+                                <option value="true">是</option>
+                            </select>
+                        </div>
+                    `,
+                    confirmText: '批量生成',
+                    onConfirm: () => {
+                        const rawText = document.getElementById('ocrResult').value.trim();
+                        if (!rawText) { showToast('请先识别或输入文字', false); return false; }
+
+                        const isSplit = document.getElementById('ocrSplitCheck').checked;
+                        const category = document.getElementById('ocrCategory').value;
+                        let subject = '';
+                        const ocrSelect = document.getElementById('ocrSubjectSelect');
+                        if (category === '校内任务') {
+                            subject = ocrSelect.value;
+                        } else {
+                            if (ocrSelect.value === '__custom__') {
+                                const customVal = (document.getElementById('ocrSubjectInput') || {}).value || '';
+                                subject = customVal.trim() || '其它';
+                            } else {
+                                subject = ocrSelect.value;
+                            }
+                        }
+                        const startDate = document.getElementById('ocrStartDate').value || today;
+                        const endDate = document.getElementById('ocrEndDate').value;
+                        const daily = document.getElementById('ocrDaily').value === 'true';
+
+                        let taskNames = [];
+                        if (isSplit) {
+                            taskNames = rawText.split('\n')
+                                .map(line => line.replace(/^\d+[\.\、\s]+/, '').trim())
+                                .filter(name => name.length > 0);
+                        } else {
+                            taskNames = [rawText.replace(/\n/g, ' ')];
+                        }
+
+                        if (taskNames.length === 0) {
+                            showToast('没有提取到有效任务名', false);
+                            return false;
+                        }
+
+                        taskNames.forEach(name => {
+                            state.tasks.push({
+                                id: 'task_ocr_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
+                                name: name,
+                                daily: daily,
+                                note: 'OCR导入',
+                                category: category,
+                                subject: subject,
+                                startDate: startDate,
+                                endDate: endDate
+                            });
+                        });
+
+                        saveState();
+                        renderAll();
+                        showToast(`成功生成 ${taskNames.length} 个任务`);
+                    }
+                });
+
+                window.toggleOcrCustomSubjectInput = function() {
+                    const select = document.getElementById('ocrSubjectSelect');
+                    const input = document.getElementById('ocrSubjectInput');
+                    if (!select || !input) return;
+                    if (select.value === '__custom__') {
+                        input.style.display = '';
+                    } else {
+                        input.style.display = 'none';
+                    }
+                };
+
+                window.updateOcrSubjectOptions = function() {
+                    const cat = document.getElementById('ocrCategory').value;
+                    const container = document.getElementById('ocrSubjectContainer');
+                    if (cat === '校内任务') {
+                        container.innerHTML = `
+                            <select id="ocrSubjectSelect">
+                                <option value="语文">语文</option>
+                                <option value="数学">数学</option>
+                                <option value="英语">英语</option>
+                                <option value="其它">其它</option>
+                            </select>
+                        `;
+                    } else {
+                        container.innerHTML = `
+                            <select id="ocrSubjectSelect" onchange="toggleOcrCustomSubjectInput()">
+                                <option value="口语">口语</option>
+                                <option value="新东方">新东方</option>
+                                <option value="__custom__">自定义</option>
+                            </select>
+                            <input id="ocrSubjectInput" type="text" placeholder="输入自定义学科" style="margin-top:8px; display:none; margin-bottom:20px; background:var(--bg-nav);" />
+                        `;
+                    }
+                };
+
+                setTimeout(() => {
+                    const fileInput = document.getElementById('ocrFileInput');
+                    const statusEl = document.getElementById('ocrStatus');
+                    const previewContainer = document.getElementById('ocrPreviewContainer');
+                    const previewImg = document.getElementById('ocrPreviewImg');
+                    const resultEl = document.getElementById('ocrResult');
+
+                    if (!fileInput) return;
+
+                    fileInput.addEventListener('change', async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            previewContainer.style.display = 'block';
+                            previewImg.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+
+                        statusEl.innerHTML = '⏳ 正在识别中，请稍候...';
+                        resultEl.value = '';
+
+                        try {
+                            const { data: { text } } = await Tesseract.recognize(
+                                file,
+                                'chi_sim+eng',
+                                { logger: m => {
+                                    if (m.status === 'recognizing text') {
+                                        statusEl.innerHTML = `⏳ 识别进度：${Math.round(m.progress * 100)}%`;
+                                    }
+                                }}
+                            );
+
+                            let cleanText = text.split('\n')
+                                .map(l => l.trim())
+                                .filter(l => l.length > 0)
+                                .join('\n');
+
+                            resultEl.value = cleanText;
+                            statusEl.innerHTML = '✅ 识别完成，请在文本框内修改';
+                            if (!cleanText) {
+                                statusEl.innerHTML = '⚠️ 未能识别出文字，请重试';
+                            }
+                        } catch (error) {
+                            console.error('OCR Error:', error);
+                            statusEl.innerHTML = '❌ 识别失败，请检查网络或重试';
+                        }
+                    });
+                }, 100);
+            }
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    if (supabaseClient) {
+                        fetchCloudState();
+                    }
+                }
+            });
+
+            let touchStartY = 0;
+            let isPulling = false;
+
+            document.addEventListener('touchstart', (e) => {
+                if (window.scrollY <= 0) {
+                    touchStartY = e.touches[0].clientY;
+                    isPulling = true;
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchend', (e) => {
+                if (!isPulling) return;
+                let distance = e.changedTouches[0].clientY - touchStartY;
+                if (distance > 100 && window.scrollY <= 0) {
+                    window.location.reload();
+                }
+                isPulling = false;
+            });
+
+            function bindEvents() {
+                document.getElementById('btnChildMode').addEventListener('click', () => {
+                    currentRole = 'child';
+                    isAdminAuthenticated = false;
+                    renderAll();
+                });
+
+                document.getElementById('btnAdminMode').addEventListener('click', () => {
+                    if (isAdminAuthenticated && currentRole === 'admin') return;
+                    showModal({
+                        title: '管理员验证',
+                        contentHTML: `<input id="pwdInput" type="password" placeholder="请输入密码" autofocus style="text-align:center; letter-spacing:5px;" />`,
+                        confirmText: '进入',
+                        onConfirm: () => {
+                            const pwd = document.getElementById('pwdInput').value;
+                            if (pwd === ADMIN_PASSWORD) {
+                                currentRole = 'admin';
+                                isAdminAuthenticated = true;
+                                renderAll();
+                                showToast('欢迎回来，管理员');
+                                return true;
+                            } else {
+                                alert('密码错误');
+                                return false;
+                            }
+                        }
+                    });
+                });
+
+                document.body.addEventListener('click', (e) => {
+                    if (e.target.closest('.collapse-btn')) {
+                        const btn = e.target.closest('.collapse-btn');
+                        const targetId = btn.dataset.target;
+                        const targetEl = document.getElementById(targetId);
+                        const wrapper = btn.closest('.section-wrapper');
+                        if (targetEl) {
+                            if (targetEl.style.display === 'none') {
+                                targetEl.style.display = '';
+                                btn.innerHTML = '<img src="icon_expand.svg" class="zoom-icon" style="width: 14px; height: 14px;">';
+                                if (wrapper) wrapper.classList.remove('collapsed');
+                            } else {
+                                targetEl.style.display = 'none';
+                                btn.innerHTML = '<img src="icon_collapse.svg" class="zoom-icon" style="width: 14px; height: 14px;">';
+                                if (wrapper) wrapper.classList.add('collapsed');
+                            }
+                        }
+                    }
+                });
+
+                document.body.addEventListener('change', (e) => {
+                    if (e.target.matches('.exam-score-input')) {
+                        const examId = e.target.dataset.examId;
+                        const exam = state.exams.find(x => x.id === examId);
+                        if (exam && exam.score !== null && !(currentRole === 'admin' && isAdminAuthenticated)) {
+                            showToast('无法修改已录入的分数', false);
+                            renderExams();
+                            return;
+                        }
+
+                        let val = parseFloat(e.target.value);
+                        if (e.target.value.trim() === '') {
+                            val = null;
+                        } else if (isNaN(val) || val < 0 || val > 100) {
+                            showToast('请输入0-100的有效分数', false);
+                            renderExams();
+                            return;
+                        }
+                        if (exam) {
+                            exam.score = val;
+                            saveState();
+                            renderAll();
+                            if (val !== null) {
+                                showToast(`分数已录入，获得 ${getExamStars(val)} 星`);
+                            }
+                        }
+                    }
+                });
+
+                document.getElementById('addExamBtn').addEventListener('click', () => openExamModal(null));
+                document.getElementById('addInSchoolBtn').addEventListener('click', () => openTaskModal(null, '校内任务'));
+                document.getElementById('addOutSchoolBtn').addEventListener('click', () => openTaskModal(null, '校外任务'));
+                document.getElementById('openCreateTaskBtn').addEventListener('click', () => openTaskModal(null, '校内任务'));
+
+                document.getElementById('addExtraBtn').addEventListener('click', () => openExtraModal(null));
+                document.getElementById('editProfileBtn').addEventListener('click', openProfileModal);
+                document.getElementById('ocrBtn').addEventListener('click', openOcrModal);
+                document.getElementById('resetStarsBtn').addEventListener('click', resetStarsConfirm);
+
+                document.body.addEventListener('click', (e) => {
+                    const target = e.target.closest('[data-action]');
+                    if (!target) return;
+                    const action = target.dataset.action;
+
+                    if (action === 'toggle-check') {
+                        toggleTaskCheck(target.dataset.taskId);
+                    } else if (action === 'toggle-extra') {
+                        toggleExtraCheck(target.dataset.extraId);
+                    } else if (action === 'edit-task') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const task = state.tasks.find(t => t.id === target.dataset.taskId);
+                            if (task) openTaskModal(task);
+                        }
+                    } else if (action === 'delete-task') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) deleteTaskConfirm(target.dataset.taskId);
+                    } else if (action === 'edit-extra') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const extra = state.extraTasks.find(t => t.id === target.dataset.extraId);
+                            if (extra) openExtraModal(extra);
+                        }
+                    } else if (action === 'delete-extra') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const extraId = target.dataset.extraId;
+                            showModal({
+                                title: '删除额外任务',
+                                content: '确定删除吗？',
+                                confirmText: '删除',
+                                danger: true,
+                                onConfirm: () => {
+                                    state.extraTasks = state.extraTasks.filter(t => t.id !== extraId);
+                                    state.checkins = state.checkins.filter(c => !(c.taskId === extraId && c.isExtra));
+                                    saveState();
+                                    renderAll();
+                                    showToast('已删除');
+                                }
+                            });
+                        }
+                    } else if (action === 'edit-exam') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const exam = state.exams.find(x => x.id === target.dataset.examId);
+                            if (exam) openExamModal(exam);
+                        }
+                    } else if (action === 'delete-exam') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) {
+                            const examId = target.dataset.examId;
+                            showModal({
+                                title: '删除考试',
+                                content: '确定删除该考试记录吗？',
+                                confirmText: '删除',
+                                danger: true,
+                                onConfirm: () => {
+                                    state.exams = state.exams.filter(x => x.id !== examId);
+                                    saveState();
+                                    renderAll();
+                                    showToast('已删除');
+                                }
+                            });
+                        }
+                    }
+                });
+
+                document.getElementById('prevMonth').addEventListener('click', () => {
+                    calendarWeekStart = new Date(calendarWeekStart.getFullYear(), calendarWeekStart.getMonth(), calendarWeekStart.getDate() - 7);
+                    renderCalendar();
+                });
+                document.getElementById('nextMonth').addEventListener('click', () => {
+                    calendarWeekStart = new Date(calendarWeekStart.getFullYear(), calendarWeekStart.getMonth(), calendarWeekStart.getDate() + 7);
+                    renderCalendar();
+                });
+
+                document.getElementById('exportCsvBtn').addEventListener('click', () => {
+                    const rows = [['日期', '类型', '名称', '详情/分数', '获得星值']];
+                    state.checkins.forEach(c => {
+                        if (c.isExtra) {
+                            const t = state.extraTasks.find(x => x.id === c.taskId);
+                            rows.push([c.date, '额外任务', t ? t.name : '已删除', '-', c.reward + '星']);
+                        } else {
+                            const t = state.tasks.find(x => x.id === c.taskId);
+                            rows.push([c.date, '日常打卡', t ? t.name : '已删除', '-', '见月度奖励']);
+                        }
+                    });
+                    state.exams.forEach(e => {
+                        if (e.score !== null) {
+                            rows.push([e.date, '考试', e.name, e.score + '分', getExamStars(e.score)]);
+                        }
+                    });
+                                        const csv = rows.map(r => r.join(',')).join('\n');
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], {type:'text/csv'}));
+                    link.download = `星值记录_${getBeijingDateStr()}.csv`;
+                    link.click();
+                    showToast('CSV 已导出');
+                });
+
+                document.getElementById('bottomHome').addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                document.getElementById('bottomStats').addEventListener('click', () => {
+                    const monthData = calcMonthStars();
+                    const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
+
+                    let html = `
+                        <div style="padding: 10px;">
+                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
+                                <span>今日获得</span>
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent); line-height:1;">
+                                    <span>${calcTodayStars()}</span>
+                                    <img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;">
+                                </div>
+                            </div>
+                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-page); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
+                                <span>本月累计</span>
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent); line-height:1;">
+                                    <span>${monthData.total}</span>
+                                    <img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;">
+                                </div>
+                            </div>
+                            <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-wrapper); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
+                                <span>本月奖励</span>
+                                <div style="display:flex; align-items:center; gap:12px; color:var(--accent); line-height:1;">
+                                    <span>${monthData.total}</span>
+                                    <img src="icon_currency.svg" style="width: 18px; height: 18px; object-fit: contain;">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    if (isAdmin) {
+                        showModal({
+                            title: '<img src="icon_stats_title.svg" style="width: 32px; height: 32px; vertical-align: middle;"> 星值统计',
+                            contentHTML: html,
+                            confirmText: '知道了',
+                            cancelText: '清零',
+                            onCancel: () => {
+                                setTimeout(() => {
+                                    showModal({
+                                        title: '⚠️ 清零确认',
+                                        content: '确定要清空现有所有任务、打卡记录、额外任务和考试记录吗？清零后不影响后续新增。',
+                                        confirmText: '确认',
+                                        cancelText: '取消',
+                                        danger: true,
+                                        onConfirm: () => {
+                                            state.tasks = [];
+                                            state.checkins = [];
+                                            state.extraTasks = [];
+                                            state.exams = [];
+                                            saveState();
+                                            renderAll();
+                                            showToast('已清空现有所有记录');
+                                        }
+                                    });
+                                }, 50);
+                            }
+                        });
+                    } else {
+                        showModal({
+                            title: '<img src="icon_stats_title.svg" style="width: 32px; height: 32px; vertical-align: middle;"> 星值统计',
+                            contentHTML: html,
+                            confirmText: '知道了',
+                            cancelText: ''
+                        });
+                    }
+                });
+            }
+
+            function init() {
+                if (!state.checkins) state.checkins = [];
+                if (!state.exams) state.exams = [];
+                if (!state.extraTasks) state.extraTasks = [];
+                if (!state.profile) state.profile = { name: 'HEIDI', avatar: '' };
+
+                bindEvents();
+                renderAll();
+
+                if (supabaseClient) {
+                    fetchCloudState();
+                    setupRealtime();
+                }
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
