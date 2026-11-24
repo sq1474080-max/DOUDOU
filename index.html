@@ -966,8 +966,13 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_t96OWboqHhMc4CSJLEuQXQ_TE_xIMdw';
 
         let supabaseClient = null;
-        if (SUPABASE_URL && SUPABASE_URL !== '替换为您的_SUPABASE_URL') {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // CDN 不可达时（如国内网络受限）降级为纯本地模式，保证页面功能照常可用，绝不因外部库缺失而整体崩溃
+        if (typeof supabase !== 'undefined' && SUPABASE_URL && SUPABASE_URL !== '替换为您的_SUPABASE_URL') {
+            try {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } catch (e) {
+                console.warn('云同步初始化失败，已切换为本地模式');
+            }
         }
 
         (function() {
@@ -1051,22 +1056,33 @@
 
             let saveTimeout = null;
             let isSyncingFromCloud = false;
+            let pendingLocalWrite = false;   // 本地改动尚未上传完成
+            let pendingSince = 0;
+
+            function hasPendingLocalWrite() {
+                // 10 秒兜底，避免网络异常时永久阻塞云端读取
+                return pendingLocalWrite && (Date.now() - pendingSince) < 10000;
+            }
 
             function saveState() {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                 if (supabaseClient && !isSyncingFromCloud) {
+                    pendingLocalWrite = true;
+                    pendingSince = Date.now();
                     if (saveTimeout) clearTimeout(saveTimeout);
                     saveTimeout = setTimeout(async () => {
                         try {
                             const payload = JSON.parse(JSON.stringify(state));
                             await supabaseClient.from('app_state').upsert({ id: 1, state_data: payload, updated_at: new Date().toISOString() });
                         } catch (error) {}
+                        pendingLocalWrite = false;
                     }, 800);
                 }
             }
 
             async function fetchCloudState() {
                 if (!supabaseClient) return;
+                if (hasPendingLocalWrite()) return;   // 本地刚打卡，别被云端旧数据覆盖
                 try {
                     const { data, error } = await supabaseClient.from('app_state').select('state_data').eq('id', 1).single();
                     if (error) throw error;
@@ -1091,6 +1107,7 @@
             function setupRealtime() {
                 if (!supabaseClient) return;
                 supabaseClient.channel('app_state_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'app_state' }, payload => {
+                    if (hasPendingLocalWrite()) return;
                     const newState = payload.new.state_data;
                     if (newState && Object.keys(newState).length > 0) {
                         isSyncingFromCloud = true;
@@ -1159,49 +1176,73 @@
                 return { total: extraSum + examSum + monthlyBonus, extraSum, examSum, monthlyBonus };
             }
 
-            function isTaskCheckedToday(taskId) {
-                const today = getBeijingDateStr();
-                return state.checkins.some(c => c.date === today && c.taskId === taskId && !c.isExtra);
+            // ===== 统一时间基准：全部用北京时间日期字符串 YYYY-MM-DD（字典序即时间序），不再混用 Date 时间戳 =====
+            function shiftDateStr(dateStr, days) {
+                const p = (dateStr || '').split('-');
+                if (p.length !== 3) return dateStr;
+                const d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+                d.setUTCDate(d.getUTCDate() + days);
+                return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
             }
+            // 某任务在某一天是否有打卡
+            function isCheckedOnDate(taskId, dateStr) {
+                return state.checkins.some(c => !c.isExtra && c.taskId === taskId && c.date === dateStr);
+            }
+            // 周期任务：周期内任意一天打过卡即算完成（只需打一下）
+            function isPeriodTaskChecked(task) {
+                const from = task.startDate || '0000-01-01';
+                const to = task.endDate || '9999-12-31';
+                return state.checkins.some(c => !c.isExtra && c.taskId === task.id && c.date >= from && c.date <= to);
+            }
+            // 任务三类：每日重复 / 周期任务 / 今日任务（沿用现有字段，不新增必需字段）
+            function isDailyTask(task) { return !!task.daily; }
+            function isPeriodTask(task) { return !task.daily && !!task.endDate; }
 
+            function isTaskCheckedToday(taskId) {
+                return isCheckedOnDate(taskId, getBeijingDateStr());
+            }
+            // 任务是否处于有效期（决定能否出现在打卡列表）
+            function isTaskInValidPeriod(task, today) {
+                const start = task.startDate || today;
+                if (today < start) return false;
+                if (isDailyTask(task)) return !task.endDate || today <= task.endDate;
+                if (isPeriodTask(task)) return today <= task.endDate;
+                return task.startDate === today;   // 今日任务仅当天有效
+            }
             function canTaskCheck(task) {
                 const today = getBeijingDateStr();
-                const now = getBeijingNow();
-
-                if (task.endDate) {
-                    const parts = task.endDate.split('-');
-                    const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
-                    deadline.setHours(23, 59, 59, 999);
-                    return now.getTime() <= deadline.getTime();
-                } else {
-                    if (task.startDate === today) return true;
-                    if (task.daily) return true;
-                    const parts = task.startDate.split('-');
-                    const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
-                    deadline.setDate(deadline.getDate() + 1);
-                    deadline.setHours(6, 0, 0, 0);
-                    return now.getTime() < deadline.getTime();
-                }
+                if (!isTaskInValidPeriod(task, today)) return false;
+                if (isPeriodTask(task) && isPeriodTaskChecked(task)) return false;  // 周期任务只需打一次
+                return true;
+            }
+            // 打卡列表里的"完成态"
+            function isTaskCheckedForDisplay(task, today) {
+                if (isPeriodTask(task)) return isPeriodTaskChecked(task);
+                return isCheckedOnDate(task.id, today);
+            }
+            // 该任务在指定日期是否"应打卡"（日历标注与未完成任务共用同一判定源）
+            function isTaskDueOnDate(task, dateStr) {
+                const start = task.startDate || dateStr;
+                if (dateStr < start) return false;
+                if (isDailyTask(task)) return !task.endDate || dateStr <= task.endDate;
+                if (isPeriodTask(task)) return dateStr === task.endDate;  // 周期任务只在结束日结算
+                return task.startDate === dateStr;                        // 今日任务只在任务日
+            }
+            function isTaskDoneOnDate(task, dateStr) {
+                if (isPeriodTask(task)) return isPeriodTaskChecked(task);
+                return isCheckedOnDate(task.id, dateStr);
             }
 
             function getDayCompletionStatus(dateStr) {
-                const regularTasks = state.tasks.filter(task => {
-                    if (task.startDate > dateStr) return false;
-                    if (task.endDate) {
-                        if (dateStr > task.endDate) return false;
-                    } else if (!task.daily) {
-                        if (task.startDate !== dateStr) return false;
-                    }
-                    return true;
-                });
+                const today = getBeijingDateStr();
+                if (dateStr >= today) return 'none';   // 今天及未来不做完成标注
+                const dueTasks = state.tasks.filter(t => isTaskDueOnDate(t, dateStr));
                 const extraTasks = state.extraTasks.filter(t => t.createdDate === dateStr);
-                const total = regularTasks.length + extraTasks.length;
+                const total = dueTasks.length + extraTasks.length;
                 if (total === 0) return 'none';
 
                 let completed = 0;
-                regularTasks.forEach(t => {
-                    if (state.checkins.some(c => c.date === dateStr && c.taskId === t.id && !c.isExtra)) completed++;
-                });
+                dueTasks.forEach(t => { if (isTaskDoneOnDate(t, dateStr)) completed++; });
                 extraTasks.forEach(t => {
                     if (state.checkins.some(c => c.date === dateStr && c.taskId === t.id && c.isExtra)) completed++;
                 });
@@ -1277,10 +1318,9 @@
 
                 const tasks = state.tasks.filter(task => {
                     if (task.category !== category) return false;
+                    // 打过卡的任务仍显示（带完成态）；其余按有效期判断是否该出现
                     if (todayCheckTaskIds.has(task.id)) return true;
-                    if (task.startDate > today) return false;
-                    if (!canTaskCheck(task)) return false;
-                    return true;
+                    return isTaskInValidPeriod(task, today);
                 });
 
                 if (countBadgeId) {
@@ -1314,7 +1354,7 @@
                     html += `<div class="sub-title"><img src="icon_subject.svg" class="zoom-icon" style="width: 14px; height: 14px;"> ${sub}</div>`;
                     html += `<div class="task-grid-inner">`;
                     groups[sub].forEach(task => {
-                        html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
+                        html += renderTaskItem(task, isTaskCheckedForDisplay(task, today), false);
                     });
                     html += `</div>`;
                 });
@@ -1341,22 +1381,20 @@
                 if (task.note) {
                     tagsHtml += `<span class="tag tag-orange">${escapeHtml(task.note)}</span>`;
                 }
-                if (task.daily) {
+                if (isDailyTask(task)) {
                     tagsHtml += `<span class="tag tag-green"><img src="icon_repeat.svg" class="icon-repeat-small"> 每日</span>`;
+                } else if (isPeriodTask(task)) {
+                    tagsHtml += `<span class="tag tag-date">周期任务</span>`;
+                } else {
+                    tagsHtml += `<span class="tag tag-today">今日任务</span>`;
                 }
 
                 if (overdue) {
                     tagsHtml += `<span class="tag tag-pink">原定：${task.startDate}${task.endDate ? ' 至 ' + task.endDate : ''}</span>`;
-                } else {
-                    if (task.endDate) {
-                        tagsHtml += `<span class="tag tag-deadline">截止：${task.endDate}</span>`;
-                    } else {
-                        if (task.startDate === today || task.daily) {
-                            tagsHtml += `<span class="tag tag-today">今日任务</span>`;
-                        } else {
-                            tagsHtml += `<span class="tag tag-date">${task.startDate}</span>`;
-                        }
-                    }
+                } else if (task.endDate) {
+                    tagsHtml += `<span class="tag tag-deadline">截止：${task.endDate}</span>`;
+                } else if (!isDailyTask(task) && task.startDate !== today) {
+                    tagsHtml += `<span class="tag tag-date">${task.startDate}</span>`;
                 }
 
                 const checkHtml = overdue
@@ -1403,7 +1441,7 @@
                     const completed = state.checkins.some(c => c.date === today && c.taskId === task.id && c.isExtra);
                     return `
                         <div class="task-item ${completed ? 'completed' : ''}">
-                            <div class="task-icon"><img src="icon_gift_card.png" class="zoom-icon" style="width: 22px; height: 22px; object-fit: contain;"></div>
+                            <div class="task-icon"><img src="icon_gift_card.png" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;"></div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(task.name)}</div>
                                 <div class="task-meta">
@@ -1451,7 +1489,7 @@
                     return `
                         <div class="task-item">
                             <div class="task-icon">
-                                <img src="icon_exam_card.png" class="zoom-icon" style="width: 22px; height: 22px; object-fit: contain;">
+                                <img src="icon_exam_card.png" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;">
                             </div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(exam.name)}</div>
@@ -1477,40 +1515,62 @@
                 if (!container) return;
 
                 const today = getBeijingDateStr();
-                const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
+                // 每日任务只回溯最近 2 个"已过 24:00"的日期（昨天、前天）；今天仍可打卡，不计入未完成。
+                // 这里只做渲染过滤，绝不删除 state 里的任何数据。
+                const LOOKBACK_DAYS = 2;
+                const lookbackDates = [];
+                for (let i = 1; i <= LOOKBACK_DAYS; i++) lookbackDates.push(shiftDateStr(today, -i));
 
-                const overdueTasks = state.tasks.filter(task => {
-                    if (todayCheckTaskIds.has(task.id)) return false;
-                    if (task.startDate > today) return false;
-                    return !canTaskCheck(task);
+                const items = [];   // { task, missed: [日期...] }
+
+                state.tasks.forEach(task => {
+                    const start = task.startDate || today;
+                    if (isDailyTask(task)) {
+                        // 每日重复：列出最近两天内漏打卡的日期
+                        const missed = lookbackDates.filter(d => {
+                            if (d < start) return false;
+                            if (task.endDate && d > task.endDate) return false;
+                            return !isCheckedOnDate(task.id, d);
+                        });
+                        if (missed.length > 0) items.push({ task, missed });
+                    } else if (isPeriodTask(task)) {
+                        // 周期任务：结束当天过了 24:00 才结算；周期内打过一次即完成
+                        if (today > task.endDate && !isPeriodTaskChecked(task)) {
+                            items.push({ task, missed: [task.endDate] });
+                        }
+                    } else {
+                        // 今日任务：任务当天过了 24:00 才显示
+                        if (today > start && !isCheckedOnDate(task.id, start)) {
+                            items.push({ task, missed: [start] });
+                        }
+                    }
                 });
 
-                document.getElementById('overdueCountBadge').textContent = `${overdueTasks.length}项`;
+                items.sort((a, b) => (b.missed[0] || '').localeCompare(a.missed[0] || ''));
+                document.getElementById('overdueCountBadge').textContent = `${items.length}项`;
 
-                if (overdueTasks.length === 0) {
+                if (items.length === 0) {
                     container.innerHTML = `<div style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 8px; padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;"><img src="icon_done.svg" class="zoom-icon" style="width: 18px; height: 18px; object-fit: contain;"> 全部完成啦！</div>`;
                     return;
                 }
 
-                overdueTasks.sort((a,b) => b.startDate.localeCompare(a.startDate));
-
-                container.innerHTML = overdueTasks.map(task => {
+                container.innerHTML = items.map(({ task, missed }) => {
                     let tagsHtml = `
                         <span class="tag ${getTagClass(task.category)}">${task.category}</span>
                         ${task.subject ? `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>` : ''}
                     `;
 
-                    if (task.daily) {
+                    if (isDailyTask(task)) {
                         tagsHtml += `<span class="tag tag-green"><img src="icon_repeat.svg" class="icon-repeat-small"> 每日</span>`;
+                    } else if (isPeriodTask(task)) {
+                        tagsHtml += `<span class="tag tag-date">周期任务</span>`;
+                    } else {
+                        tagsHtml += `<span class="tag tag-today">今日任务</span>`;
                     }
 
-                    let dateLabel = '';
-                    if (task.endDate) {
-                        dateLabel = `${task.startDate} 至 ${task.endDate}`;
-                    } else {
-                        dateLabel = `任务日：${task.startDate}`;
-                    }
-                    tagsHtml += `<span class="tag tag-pink">${dateLabel}</span>`;
+                    // 未完成时间：每日任务列出具体漏打卡日期，其余列出结算日
+                    const missedLabel = missed.map(d => d.slice(5)).join('、');
+                    tagsHtml += `<span class="tag tag-pink">未完成：${missedLabel}</span>`;
 
                     const showAdminActions = (currentRole === 'admin' && isAdminAuthenticated);
                     const actionHtml = showAdminActions ? `
@@ -1633,16 +1693,20 @@
                 const task = state.tasks.find(t => t.id === taskId);
                 if (!task) return;
 
-                if (!canTaskCheck(task) && !isTaskCheckedToday(taskId)) {
-                    showToast('该任务已过期无法打卡', false);
-                    return;
-                }
-
+                // 只允许操作"今天"这条打卡：历史日期的打卡一律不可取消（跨天不可改）
                 const existingIndex = state.checkins.findIndex(c => c.date === today && c.taskId === taskId && !c.isExtra);
                 if (existingIndex !== -1) {
                     state.checkins.splice(existingIndex, 1);
                     showToast(`取消完成`);
                 } else {
+                    if (isPeriodTask(task) && isPeriodTaskChecked(task)) {
+                        showToast(`该周期任务已完成`, false);
+                        return;
+                    }
+                    if (!canTaskCheck(task)) {
+                        showToast(`该任务当前不可打卡`, false);
+                        return;
+                    }
                     state.checkins.push({ date: today, taskId, timestamp: Date.now() });
                     showToast(`完成打卡`);
                 }
@@ -1657,13 +1721,10 @@
 
                 const existingIndex = state.checkins.findIndex(c => c.date === today && c.taskId === extraId && c.isExtra);
                 if (existingIndex !== -1) {
-                    if (currentRole !== 'admin') {
-                        const checkinTime = state.checkins[existingIndex].timestamp;
-                        const now = Date.now();
-                        if (new Date(checkinTime).toDateString() !== new Date().toDateString()) {
-                            showToast('过期的打卡不可取消', false);
-                            return;
-                        }
+                    // 统一北京时间：只允许取消当天产生的打卡
+                    if (state.checkins[existingIndex].date !== getBeijingDateStr() && currentRole !== 'admin') {
+                        showToast('过期的打卡不可取消', false);
+                        return;
                     }
                     state.checkins.splice(existingIndex, 1);
                     showToast(`取消额外任务`);
@@ -1751,6 +1812,14 @@
                     closeModal();
                 };
                 overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+                // Esc 关闭弹窗（桌面端/外接键盘的常见预期）
+                const onEsc = (e) => {
+                    if (e.key === 'Escape') {
+                        closeModal();
+                        document.removeEventListener('keydown', onEsc);
+                    }
+                };
+                document.addEventListener('keydown', onEsc);
             }
 
             function openProfileModal() {
@@ -1943,7 +2012,16 @@
 
                         if (isEdit) {
                             const idx = state.tasks.findIndex(t => t.id === task.id);
-                            if (idx !== -1) state.tasks[idx] = { ...state.tasks[idx], name, note, subject, startDate, endDate, daily };
+                            if (idx !== -1) {
+                                const prev = state.tasks[idx];
+                                const dateChanged = prev.startDate !== startDate || (prev.endDate || '') !== (endDate || '') || !!prev.daily !== daily;
+                                state.tasks[idx] = { ...prev, name, note, subject, startDate, endDate, daily };
+                                // 改日期后旧打卡全部作废，必须重新打卡才算完成；
+                                // 日期符合（开始 ≤ 今天 ≤ 结束）时由 isTaskInValidPeriod 自动回到打卡列表
+                                if (dateChanged) {
+                                    state.checkins = state.checkins.filter(c => !(c.taskId === task.id && !c.isExtra));
+                                }
+                            }
                         } else {
                             state.tasks.push({
                                 id: 'task_' + Date.now(),
@@ -2221,6 +2299,10 @@
                         resultEl.value = '';
 
                         try {
+                            if (typeof Tesseract === 'undefined') {
+                                statusEl.innerHTML = '❌ 识别组件未加载（网络受限），请连通网络后重试，或手动输入任务';
+                                return;
+                            }
                             const { data: { text } } = await Tesseract.recognize(
                                 file,
                                 'chi_sim+eng',
@@ -2451,7 +2533,7 @@
                             rows.push([e.date, '考试', e.name, e.score + '分', getExamStars(e.score)]);
                         }
                     });
-                                        const csv = rows.map(r => r.join(',')).join('\n');
+                    const csv = rows.map(r => r.join(',')).join('\n');
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], {type:'text/csv'}));
                     link.download = `星值记录_${getBeijingDateStr()}.csv`;
