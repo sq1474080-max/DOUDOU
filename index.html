@@ -834,11 +834,11 @@
                 <div class="stats-group">
                     <div class="stats-card today">
                         <span class="stats-label">今日获得</span>
-                        <span class="stats-number" id="todayStars"><span>0</span><img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;"></span>
+                        <span class="stats-number" id="todayStars"><span>0</span><img src="icon_star.svg" style="width: 20px; height: 20px; object-fit: contain;"></span>
                     </div>
                     <div class="stats-card month">
                         <span class="stats-label">本月获得</span>
-                        <span class="stats-number" id="monthStars"><span>0</span><img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;"></span>
+                        <span class="stats-number" id="monthStars"><span>0</span><img src="icon_star.svg" style="width: 20px; height: 20px; object-fit: contain;"></span>
                     </div>
                 </div>
             </div>
@@ -1311,7 +1311,7 @@
                 }
 
                 sortedSubjects.forEach(sub => {
-                    html += `<div class="sub-title"><img src="${getSubjectIcon(sub)}" style="width: 14px; height: 14px; object-fit: contain;"> ${sub}</div>`;
+                    html += `<div class="sub-title"><img src="icon_subject.svg" class="zoom-icon" style="width: 14px; height: 14px;"> ${sub}</div>`;
                     html += `<div class="task-grid-inner">`;
                     groups[sub].forEach(task => {
                         html += renderTaskItem(task, isTaskCheckedToday(task.id), false);
@@ -1366,7 +1366,7 @@
                 return `
                     <div class="task-item ${completed ? 'completed' : ''} ${overdue ? 'overdue' : ''}" data-task-id="${task.id}">
                         <div class="task-icon">
-                            <img src="${task.category === '校内任务' ? 'icon_in_card.svg' : 'icon_out_card.svg'}" class="zoom-icon" style="width: 22px; height: 22px;">
+                            <img src="${getSubjectIcon(task.subject)}" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;">
                         </div>
                         <div class="task-info">
                             <div class="task-name">${escapeHtml(task.name)}</div>
@@ -1523,7 +1523,7 @@
                     return `
                         <div class="task-item overdue">
                             <div class="task-icon">
-                                <img src="${task.category === '校内任务' ? 'icon_in_card.svg' : 'icon_out_card.svg'}" class="zoom-icon" style="width: 22px; height: 22px;">
+                                <img src="${getSubjectIcon(task.subject)}" class="zoom-icon" style="width: 24px; height: 24px; object-fit: contain;">
                             </div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(task.name)}</div>
@@ -1569,8 +1569,8 @@
                 const todaySum = calcTodayStars();
                 const monthData = calcMonthStars();
 
-                document.getElementById('todayStars').innerHTML = `<span>${todaySum}</span><img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;">`;
-                document.getElementById('monthStars').innerHTML = `<span>${monthData.total}</span><img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;">`;
+                document.getElementById('todayStars').innerHTML = `<span>${todaySum}</span><img src="icon_star.svg" style="width: 20px; height: 20px; object-fit: contain;">`;
+                document.getElementById('monthStars').innerHTML = `<span>${monthData.total}</span><img src="icon_star.svg" style="width: 20px; height: 20px; object-fit: contain;">`;
             }
 
             function updateRoleUI() {
@@ -2473,21 +2473,21 @@
                                 <span>今日获得</span>
                                 <div style="display:flex; align-items:center; gap:12px; color:var(--accent); line-height:1;">
                                     <span>${calcTodayStars()}</span>
-                                    <img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;">
+                                    <img src="icon_star.svg" style="width: 20px; height: 20px; object-fit: contain;">
                                 </div>
                             </div>
                             <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-page); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
                                 <span>本月累计</span>
                                 <div style="display:flex; align-items:center; gap:12px; color:var(--accent); line-height:1;">
                                     <span>${monthData.total}</span>
-                                    <img src="icon_star.svg" style="width: 18px; height: 18px; object-fit: contain;">
+                                    <img src="icon_star.svg" style="width: 20px; height: 20px; object-fit: contain;">
                                 </div>
                             </div>
                             <div style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-wrapper); padding:16px 24px; border-radius:20px; border: 1px solid var(--border-light);">
                                 <span>本月奖励</span>
                                 <div style="display:flex; align-items:center; gap:12px; color:var(--accent); line-height:1;">
                                     <span>${monthData.total}</span>
-                                    <img src="icon_currency.svg" style="width: 18px; height: 18px; object-fit: contain;">
+                                    <img src="icon_currency.svg" style="width: 20px; height: 20px; object-fit: contain;">
                                 </div>
                             </div>
                         </div>
