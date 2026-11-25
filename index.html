@@ -1294,30 +1294,46 @@
                 shopItems: [],
                 redemptions: [],
                 archive: { lastCleanupMonth: '', months: {} },
-                profile: { name: 'HEIDI', avatar: '' }
+                profile: { name: 'HEIDI', avatar: '' },
+                _rev: 0
             };
+
+            // 统一规范化：本地加载 / 云端拉取 / 实时推送三处共用。
+            // 关键：无论数据来自哪里都补齐全部字段。旧版云端数据缺 shopItems/redemptions 时，
+            // 若不补齐会直接覆盖本地数据造成“商品消失”，也会让 performCleanupIfNeeded 抛错中断。
+            function normalizeState(raw) {
+                const s = (raw && typeof raw === 'object') ? JSON.parse(JSON.stringify(raw)) : {};
+                s.tasks = (s.tasks || []).map(t => {
+                    let cat = t.category;
+                    if (cat === '校内作业') cat = '校内任务';
+                    if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
+                    const sub = t.subject || '其它';
+                    if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
+                    return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
+                });
+                if (!Array.isArray(s.checkins)) s.checkins = [];
+                if (!Array.isArray(s.exams)) s.exams = [];
+                if (!Array.isArray(s.extraTasks)) s.extraTasks = [];
+                if (!Array.isArray(s.shopItems)) s.shopItems = [];
+                if (!Array.isArray(s.redemptions)) s.redemptions = [];
+                if (!s.profile || typeof s.profile !== 'object') s.profile = { name: 'HEIDI', avatar: '' };
+                if (!s.archive || typeof s.archive !== 'object') s.archive = { lastCleanupMonth: '', months: {} };
+                if (!s.archive.months || typeof s.archive.months !== 'object') s.archive.months = {};
+                if (typeof s.archive.lastCleanupMonth !== 'string') s.archive.lastCleanupMonth = '';
+                s._rev = Number.isFinite(s._rev) ? s._rev : 0;
+                return s;
+            }
+
+            // 每次本地改动推高修订号并保持单调，用于拒绝“旧数据覆盖新数据”
+            function bumpRev() {
+                state._rev = Math.max(Date.now(), (state._rev || 0) + 1);
+            }
 
             function loadStateLocal() {
                 const stored = localStorage.getItem(STORAGE_KEY);
                 if (stored) {
                     try {
-                        const parsed = JSON.parse(stored);
-                        parsed.tasks = (parsed.tasks || []).map(t => {
-                            let cat = t.category;
-                            if (cat === '校内作业') cat = '校内任务';
-                            if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
-                            let sub = t.subject || '其它';
-                            if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
-                            return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
-                        });
-                        if (!parsed.profile) parsed.profile = { name: 'HEIDI', avatar: '' };
-                        if (!parsed.exams) parsed.exams = [];
-                        if (!parsed.extraTasks) parsed.extraTasks = [];
-                        if (!parsed.checkins) parsed.checkins = [];
-                        if (!parsed.shopItems) parsed.shopItems = [];
-                        if (!parsed.redemptions) parsed.redemptions = [];
-                        if (!parsed.archive) parsed.archive = { lastCleanupMonth: '', months: {} };
-                        return parsed;
+                        return normalizeState(JSON.parse(stored));
                     } catch (e) {}
                 }
                 return JSON.parse(JSON.stringify(defaultState));
@@ -1339,18 +1355,34 @@
                 return pendingLocalWrite && (Date.now() - pendingSince) < 10000;
             }
 
+            async function uploadStateWithRetry(payload, retries = 2) {
+                for (let attempt = 0; attempt <= retries; attempt++) {
+                    try {
+                        await supabaseClient.from('app_state').upsert({
+                            id: 1, state_data: payload, updated_at: new Date().toISOString()
+                        });
+                        return true;
+                    } catch (error) {
+                        console.warn(`云同步上传失败（第 ${attempt + 1} 次）`, error);
+                        if (attempt < retries) await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
+                    }
+                }
+                return false;
+            }
+
             function saveState() {
+                bumpRev();
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                 if (supabaseClient && !isSyncingFromCloud) {
                     pendingLocalWrite = true;
                     pendingSince = Date.now();
                     if (saveTimeout) clearTimeout(saveTimeout);
                     saveTimeout = setTimeout(async () => {
-                        try {
-                            const payload = JSON.parse(JSON.stringify(state));
-                            await supabaseClient.from('app_state').upsert({ id: 1, state_data: payload, updated_at: new Date().toISOString() });
-                        } catch (error) {}
+                        // 上传时重新取最新 state，避免 debounce 窗口内丢失后续改动
+                        const payload = JSON.parse(JSON.stringify(state));
+                        const ok = await uploadStateWithRetry(payload);
                         pendingLocalWrite = false;
+                        if (!ok) showToast('云端同步失败，数据已存在本机', false);
                     }, 800);
                 }
             }
@@ -1398,50 +1430,34 @@
                     const { data, error } = await supabaseClient.from('app_state').select('state_data').eq('id', 1).single();
                     if (error) throw error;
                     if (data && data.state_data && Object.keys(data.state_data).length > 0) {
+                        const incoming = normalizeState(data.state_data);
+                        // 只接受不比本地旧的版本，防止其他设备的旧数据把刚加的商品覆盖掉
+                        if (incoming._rev < (state._rev || 0)) return;
                         isSyncingFromCloud = true;
-                        state = data.state_data;
-                        state.tasks = (state.tasks || []).map(t => {
-                            let cat = t.category;
-                            if (cat === '校内作业') cat = '校内任务';
-                            if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
-                            let sub = t.subject || '其它';
-                            if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
-                            return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
-                        });
-                        if (!state.archive) state.archive = { lastCleanupMonth: '', months: {} };
-                        if (performCleanupIfNeeded()) {
-                            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                        } else {
-                            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                        }
+                        state = incoming;
+                        performCleanupIfNeeded();
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                         renderAll();
                         isSyncingFromCloud = false;
                     }
-                } catch (error) {}
+                } catch (error) { console.warn('云同步拉取失败', error); }
             }
 
             function setupRealtime() {
                 if (!supabaseClient) return;
                 supabaseClient.channel('app_state_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'app_state' }, payload => {
                     if (hasPendingLocalWrite()) return;
-                    const newState = payload.new.state_data;
-                    if (newState && Object.keys(newState).length > 0) {
-                        isSyncingFromCloud = true;
-                        state = newState;
-                        state.tasks = (state.tasks || []).map(t => {
-                            let cat = t.category;
-                            if (cat === '校内作业') cat = '校内任务';
-                            if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
-                            let sub = t.subject || '其它';
-                            if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
-                            return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
-                        });
-                        if (!state.archive) state.archive = { lastCleanupMonth: '', months: {} };
-                        performCleanupIfNeeded();
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                        renderAll();
-                        setTimeout(() => { isSyncingFromCloud = false; }, 100);
-                    }
+                    const rawState = payload.new && payload.new.state_data;
+                    if (!rawState || Object.keys(rawState).length === 0) return;
+                    const incoming = normalizeState(rawState);
+                    // 同样拒绝旧版本覆盖；这条路径是“加完商品过一会消失”的最常见来源
+                    if (incoming._rev < (state._rev || 0)) return;
+                    isSyncingFromCloud = true;
+                    state = incoming;
+                    performCleanupIfNeeded();
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                    renderAll();
+                    setTimeout(() => { isSyncingFromCloud = false; }, 100);
                 }).subscribe();
             }
 
@@ -1573,16 +1589,11 @@
             function getDayCompletionStatus(dateStr) {
                 const today = getBeijingDateStr();
                 if (dateStr >= today) return 'none';
+                // 额外任务不记录在未完成任务里：只针对"完成"计星值，日历完成状态只看常规任务
                 const dueTasks = state.tasks.filter(t => isTaskDueOnDate(t, dateStr));
-                const extraTasks = state.extraTasks.filter(t => t.createdDate === dateStr);
-                const total = dueTasks.length + extraTasks.length;
-                if (total === 0) return 'none';
-                let completed = 0;
-                dueTasks.forEach(t => { if (isTaskDoneOnDate(t, dateStr)) completed++; });
-                extraTasks.forEach(t => {
-                    if (state.checkins.some(c => c.date === dateStr && c.taskId === t.id && c.isExtra)) completed++;
-                });
-                return completed >= total ? 'completed' : 'incomplete';
+                if (dueTasks.length === 0) return 'none';
+                const completed = dueTasks.filter(t => isTaskDoneOnDate(t, dateStr)).length;
+                return completed >= dueTasks.length ? 'completed' : 'incomplete';
             }
 
             function renderProfile() {
@@ -1761,16 +1772,18 @@
                 if (!container) return;
 
                 const today = getBeijingDateStr();
-                const isAdminOp = (currentRole === 'admin' && isAdminAuthenticated);
-                let todayExtras;
-                if (isAdminOp) {
-                    const from = shiftDateStr(today, -6);
-                    todayExtras = state.extraTasks
-                        .filter(t => (t.createdDate || '') >= from && (t.createdDate || '') <= today)
-                        .sort((a, b) => (b.createdDate || '').localeCompare(a.createdDate || ''));
-                } else {
-                    todayExtras = state.extraTasks.filter(t => t.createdDate === today).slice(-3);
-                }
+                // 额外任务的日期 = 完成截止时间。显示规则：
+                //   截止当天 24:00 之前（today <= 截止日）且未打卡 → 显示，可打卡；
+                //   已打卡 或 今天已过截止日 → 不在主页面显示。
+                // 截止时间之前家长可随时改期（延期），改完仍会继续显示。
+                const todayExtras = state.extraTasks
+                    .filter(t => {
+                        const deadline = t.createdDate || '';
+                        if (!deadline || today > deadline) return false; // 已过截止日
+                        const completed = state.checkins.some(c => c.taskId === t.id && c.isExtra);
+                        return !completed; // 已打卡不显示
+                    })
+                    .sort((a, b) => (a.createdDate || '').localeCompare(b.createdDate || ''));
 
                 if (todayExtras.length === 0) {
                     container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">暂无额外任务</div>`;
@@ -1778,15 +1791,14 @@
                 }
 
                 container.innerHTML = todayExtras.map(task => {
-                    const completed = state.checkins.some(c => c.taskId === task.id && c.isExtra);
                     return `
-                        <div class="task-item ${completed ? 'completed' : ''}">
+                        <div class="task-item">
                             <div class="task-icon"><img src="icon_gift_card.png" class="zoom-icon" style="width: 26px; height: 26px; object-fit: contain;"></div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(task.name)}</div>
                                 <div class="task-meta">
                                     <span class="tag tag-orange">⭐${task.reward}</span>
-                                    <span class="tag tag-date">${task.createdDate}</span>
+                                    <span class="tag tag-date">截止 ${task.createdDate}</span>
                                 </div>
                             </div>
                             ${currentRole === 'admin' && isAdminAuthenticated ? `
@@ -1794,7 +1806,7 @@
                                 <button class="icon-btn" data-action="edit-extra" data-extra-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
                                 <button class="icon-btn" data-action="delete-extra" data-extra-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
                             </div>` : ''}
-                            <div class="task-check" data-action="toggle-extra" data-extra-id="${task.id}">${completed ? '✓' : ''}</div>
+                            <div class="task-check" data-action="toggle-extra" data-extra-id="${task.id}"></div>
                         </div>
                     `;
                 }).join('');
@@ -2805,8 +2817,11 @@
                         <input id="extraNameInput" type="text" value="${escapeHtml(task.name)}" placeholder="如：拼图奖励" />
                         <label>星值 (-50 到 50)</label>
                         <input id="extraRewardInput" type="number" min="-50" max="50" value="${task.reward}" />
-                        <label>日期</label>
+                        <label>完成截止时间</label>
                         <input id="extraDateInput" type="date" value="${task.createdDate || today}" />
+                        <div style="font-size:12px;color:var(--text-sub);font-weight:700;line-height:1.6;margin-top:6px;">
+                            截止当天 24:00 前可打卡；截止前可随时改期延期。逾期或已完成的任务将不在主页面显示。
+                        </div>
                     `,
                     confirmText: '保存',
                     onConfirm: () => {
