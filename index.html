@@ -10,7 +10,6 @@
     <link rel="apple-touch-icon" href="icon.png">
     <title>HEIDI星旅</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 
@@ -646,14 +645,13 @@
             font-size: 22px; font-weight: 900; color: var(--text-main);
             margin: 2px 4px 0;
         }
-        /* 可用星值区块右侧装饰：贴右下、上边超出一点、随区块缩放、最上层不挡点击 */
         .shop-hero { position: relative; overflow: visible; }
         .hero-decor {
             position: absolute;
             right: 0; bottom: 0;
             height: calc(100% + 56px);
             width: auto;
-            max-width: 70%;
+            max-width: 46%;
             object-fit: contain;
             object-position: bottom right;
             z-index: 5;
@@ -684,7 +682,6 @@
             margin-top: 4px;
         }
         .shop-grid.money-grid { margin-top: 0; }
-        /* 兑换商品卡：与主界面任务卡一致（横向：图标 + 信息 + 勾选圈） */
         .shop-item {
             position: relative;
             display: flex;
@@ -712,7 +709,6 @@
             flex-shrink: 0;
         }
         .shop-item-img img { width: 100%; height: 100%; object-fit: cover; }
-        /* MONEY 固定项：与主界面任务卡一致，图标区透明无底色，图标放到最大 */
         .shop-item-img.bare {
             background: transparent;
             width: 72px; height: 72px;
@@ -800,22 +796,18 @@
             border-radius: 16px; margin-bottom: 8px; font-size: 13px; font-weight: 800;
         }
         .redeem-log-row .meta { color: var(--text-sub); font-size: 11px; font-weight: 700; margin-top: 3px; }
-        /* 统计页两个区块行式完全统一：标签 14px / 数字 18px，数字后跟等高星星 */
         .stat-row .val { display: flex; align-items: center; gap: 4px; font-size: 18px; font-weight: 900; color: var(--accent); line-height: 1; }
         .stat-row .lbl { font-size: 14px; font-weight: 800; }
         .stat-row.hl { background: var(--accent); color: #fff; border-color: var(--accent); }
         .stat-row.hl .lbl, .stat-row.hl .val { color: #fff; }
-        /* 星星图标：1em 与数字等高；高亮行转白 */
         .stat-row .stat-star { width: 1em; height: 1em; object-fit: contain; flex-shrink: 0; }
         .stat-row.hl .stat-star { filter: brightness(0) invert(1); }
-        /* 月底结算奖励：日常灰 0（导出CSV文字色 --text-sub），最后一天蓝 20，均 18px 带等高星星 */
         .stat-row .stat-zero {
             display: flex; align-items: center; gap: 4px;
             color: var(--text-sub); font-size: 18px; font-weight: 900; line-height: 1;
         }
         .stat-row .stat-zero .stat-star { filter: grayscale(1); opacity: .7; }
 
-        /* 页面右下角装饰层：比 fixed-bg(-10) 高一级、比所有内容低，不参与交互 */
         .page-decor {
             position: fixed;
             right: 5%;
@@ -826,16 +818,13 @@
             pointer-events: none;
             user-select: none;
             -webkit-user-select: none;
-            /* 以右下角为锚点放大：只向上、向左扩展，下和右位置保持不变 */
             transform: scale(2);
             transform-origin: bottom right;
         }
-        /* 横屏放大 1.5 倍（同样右下锚点），竖屏保持 2 倍 */
         @media (orientation: landscape) {
             .page-decor { transform: scale(1.5); }
         }
 
-        /* ===== 图片裁剪浮层（1:1 正方形） ===== */
         .crop-overlay {
             position: fixed; inset: 0;
             background: rgba(24, 28, 36, 0.86);
@@ -907,29 +896,18 @@
             cursor: pointer;
             transition: 0.2s;
             padding: 0;
+            position: relative;
         }
         .bottom-btn.active {
             background: #ffffff;
-            transform: none;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
         }
-        /* 双图切换：默认态 / 选中态各一张，避免切换闪烁、且文件缺失可兜底 */
-        .bottom-btn { position: relative; }
         .bottom-btn .nav-icon-active { display: none; }
         .bottom-btn.active .nav-icon-default { display: none; }
         .bottom-btn.active .nav-icon-active { display: block; }
-        /* 双图均为图片原色、不加任何滤镜；仅用透明度区分未选中 / 选中 */
-        .bottom-btn .nav-icon-default {
-            opacity: 0.55;
-        }
-        .bottom-btn .nav-icon-active {
-            opacity: 1;
-        }
-        /* 选中态图缺失时回退：显示默认态图并恢复原色，维持白底蓝图标对比 */
-        .bottom-btn.active.no-active-icon .nav-icon-default {
-            display: block;
-            opacity: 1;
-        }
+        .bottom-btn .nav-icon-default { opacity: 0.55; }
+        .bottom-btn .nav-icon-active { opacity: 1; }
+        .bottom-btn.active.no-active-icon .nav-icon-default { display: block; opacity: 1; }
 
         .modal-overlay {
             position: fixed;
@@ -952,7 +930,6 @@
             max-height: 90vh;
             overflow-y: auto;
         }
-
         .modal-content h3 {
             font-size: 22px;
             margin-bottom: 24px;
@@ -964,9 +941,7 @@
             gap: 8px;
             text-align: center;
         }
-
         .modal-content label { font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; display: block; }
-
         .modal-content input, .modal-content textarea, .modal-content select {
             width: 100%;
             padding: 14px 18px;
@@ -982,7 +957,6 @@
             box-sizing: border-box;
         }
         .modal-content input:focus, .modal-content select:focus { border-color: var(--accent); background: var(--bg-nav); }
-
         .modal-content input[type="date"] {
             height: 50px;
             min-height: 50px;
@@ -991,7 +965,6 @@
             align-items: center;
             padding: 0 14px;
         }
-
         .modal-actions { display: flex; gap: 12px; margin-top: 12px; }
         .modal-actions button {
             flex: 1;
@@ -1053,41 +1026,12 @@
                 gap: 10px;
                 min-width: 0;
             }
-            .shop-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                align-items: start;
-            }
-            /* 横屏：商店左列放主内容、右列只放兑换记录 */
-            .shop-layout {
-                display: grid;
-                grid-template-columns: minmax(0, 1fr) 360px;
-                align-items: start;
-                gap: 20px;
-            }
-            /* MONEY 独立区块横屏保持单列（只一张卡） */
-            .shop-grid.money-grid {
-                display: flex;
-                flex-direction: column;
-            }
-            /* 横屏：统计两列，都靠左，右侧留白 */
-            .stats-layout {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 380px));
-                justify-content: start;
-                align-items: start;
-                gap: 20px;
-            }
-            .task-grid-inner {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-            }
-            #extraTaskList {
-                display: flex;
-                flex-direction: column;
-                gap: 16px;
-            }
+            .shop-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
+            .shop-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; gap: 20px; }
+            .shop-grid.money-grid { display: flex; flex-direction: column; }
+            .stats-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 380px)); justify-content: start; align-items: start; gap: 20px; }
+            .task-grid-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+            #extraTaskList { display: flex; flex-direction: column; gap: 16px; }
         }
     </style>
 </head>
@@ -1100,7 +1044,7 @@
     <div class="app-header">
         <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 儿童模式</button>
         <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 家长模式</button>
-        <button class="header-btn" id="exportCsvBtn"><img src="icon_export.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 导出CSV</button>
+        <button class="header-btn" id="refreshBtn"><img src="icon_export.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 刷新页面</button>
     </div>
 
     <div id="viewHome" class="view-page">
@@ -1209,26 +1153,8 @@
                 </div>
                 <div id="overdueTaskList" class="task-grid-inner" style="margin-bottom:4px;"></div>
             </div>
-
-            <div id="adminTaskLibrarySection" class="hidden section-wrapper">
-                <div class="section-title" style="margin-bottom: 12px;">
-                    <div class="title-left" style="display:flex; align-items:center; gap:8px;">
-                        <img src="icon_book_title.svg" class="zoom-icon" style="width: 18px; height: 18px;">
-                        <span>任务库管理</span>
-                    </div>
-                    <div class="title-right" style="display:flex; align-items:center; gap:8px;">
-                        <button class="btn-primary btn-sm" id="openCreateTaskBtn" style="height: 36px;">+ 新增任务</button>
-                        <button class="btn-outline btn-sm" id="ocrBtn" style="height: 36px; padding: 0 12px;">
-                            <img src="icon_camera.svg" class="zoom-icon" style="width: 14px; height: 14px;">
-                        </button>
-                        <button class="btn-outline btn-sm" id="resetStarsBtn" style="display:none;"></button>
-                    </div>
-                </div>
-                <div id="taskLibraryList" class="task-list" style="margin-top:0;"></div>
-            </div>
         </div>
     </div>
-
     </div>
 
     <div id="viewShop" class="view-page hidden">
@@ -1305,7 +1231,6 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_t96OWboqHhMc4CSJLEuQXQ_TE_xIMdw';
 
         let supabaseClient = null;
-        // CDN 不可达时（如国内网络受限）降级为纯本地模式，保证页面功能照常可用，绝不因外部库缺失而整体崩溃
         if (typeof supabase !== 'undefined' && SUPABASE_URL && SUPABASE_URL !== '替换为您的_SUPABASE_URL') {
             try {
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1317,6 +1242,7 @@
         (function() {
             const STORAGE_KEY = 'star_task_app_v1';
             const ADMIN_PASSWORD = '111';
+            const MONTH_SETTLE_BONUS = 20;
 
             function getBeijingNow() {
                 const now = new Date();
@@ -1336,6 +1262,11 @@
                 const diff = day === 0 ? -6 : 1 - day;
                 d.setDate(d.getDate() + diff);
                 return d;
+            }
+            function getBeijingMonthPrefix(offsetMonths = 0) {
+                const bj = getBeijingNow();
+                const d = new Date(bj.getFullYear(), bj.getMonth() + offsetMonths, 1);
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
             }
             function getSubjectIcon(subject) {
                 const map = {
@@ -1362,6 +1293,7 @@
                 extraTasks: [],
                 shopItems: [],
                 redemptions: [],
+                archive: { lastCleanupMonth: '', months: {} },
                 profile: { name: 'HEIDI', avatar: '' }
             };
 
@@ -1384,6 +1316,7 @@
                         if (!parsed.checkins) parsed.checkins = [];
                         if (!parsed.shopItems) parsed.shopItems = [];
                         if (!parsed.redemptions) parsed.redemptions = [];
+                        if (!parsed.archive) parsed.archive = { lastCleanupMonth: '', months: {} };
                         return parsed;
                     } catch (e) {}
                 }
@@ -1399,11 +1332,10 @@
 
             let saveTimeout = null;
             let isSyncingFromCloud = false;
-            let pendingLocalWrite = false;   // 本地改动尚未上传完成
+            let pendingLocalWrite = false;
             let pendingSince = 0;
 
             function hasPendingLocalWrite() {
-                // 10 秒兜底，避免网络异常时永久阻塞云端读取
                 return pendingLocalWrite && (Date.now() - pendingSince) < 10000;
             }
 
@@ -1423,9 +1355,45 @@
                 }
             }
 
+            // ============ 归档 + 清理：保留最近 3 个自然月 ============
+            // 规则：每次初始化时若当前月 ≠ lastCleanupMonth，则把 "早于 3 个月前边界" 的月份
+            // 汇总归档到 archive.months，再从本地/云端数据中删除，保证星值账目精确。
+            function performCleanupIfNeeded() {
+                if (!state.archive) state.archive = { lastCleanupMonth: '', months: {} };
+                const curMonth = getBeijingMonthPrefix(0);
+                if (state.archive.lastCleanupMonth === curMonth) return false;
+
+                // 保留当月、上月、上上月 → cutoff 为"上上月的月初"
+                const cutoff = getBeijingMonthPrefix(-2);
+
+                const oldMonths = new Set();
+                state.checkins.forEach(c => { if (c.date && c.date.slice(0,7) < cutoff) oldMonths.add(c.date.slice(0,7)); });
+                state.exams.forEach(e => { if (e.date && e.date.slice(0,7) < cutoff) oldMonths.add(e.date.slice(0,7)); });
+                state.extraTasks.forEach(t => { if (t.createdDate && t.createdDate.slice(0,7) < cutoff) oldMonths.add(t.createdDate.slice(0,7)); });
+                state.redemptions.forEach(r => { if (r.date && r.date.slice(0,7) < cutoff) oldMonths.add(r.date.slice(0,7)); });
+
+                oldMonths.forEach(m => {
+                    if (state.archive.months[m]) return;
+                    let settled = 0, hasActivity = false;
+                    state.checkins.forEach(c => { if (c.isExtra && c.date && c.date.startsWith(m)) { settled += (c.reward || 0); hasActivity = true; } });
+                    state.exams.forEach(e => { if (e.date && e.date.startsWith(m)) { settled += getExamStars(e.score); hasActivity = true; } });
+                    if (hasActivity) settled += MONTH_SETTLE_BONUS;
+                    let redeemed = 0;
+                    state.redemptions.forEach(r => { if (r.date && r.date.startsWith(m)) redeemed += (r.cost || 0); });
+                    state.archive.months[m] = { settled, redeemed };
+                });
+
+                state.checkins = state.checkins.filter(c => !(c.date && c.date.slice(0,7) < cutoff));
+                state.exams = state.exams.filter(e => !(e.date && e.date.slice(0,7) < cutoff));
+                state.extraTasks = state.extraTasks.filter(t => !(t.createdDate && t.createdDate.slice(0,7) < cutoff));
+                state.redemptions = state.redemptions.filter(r => !(r.date && r.date.slice(0,7) < cutoff));
+                state.archive.lastCleanupMonth = curMonth;
+                return true;
+            }
+
             async function fetchCloudState() {
                 if (!supabaseClient) return;
-                if (hasPendingLocalWrite()) return;   // 本地刚打卡，别被云端旧数据覆盖
+                if (hasPendingLocalWrite()) return;
                 try {
                     const { data, error } = await supabaseClient.from('app_state').select('state_data').eq('id', 1).single();
                     if (error) throw error;
@@ -1440,7 +1408,12 @@
                             if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
                             return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
                         });
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                        if (!state.archive) state.archive = { lastCleanupMonth: '', months: {} };
+                        if (performCleanupIfNeeded()) {
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                        } else {
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                        }
                         renderAll();
                         isSyncingFromCloud = false;
                     }
@@ -1463,6 +1436,8 @@
                             if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
                             return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
                         });
+                        if (!state.archive) state.archive = { lastCleanupMonth: '', months: {} };
+                        performCleanupIfNeeded();
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                         renderAll();
                         setTimeout(() => { isSyncingFromCloud = false; }, 100);
@@ -1497,21 +1472,11 @@
                 return sum;
             }
 
-            const MONTH_SETTLE_BONUS = 20;   // 每月结算固定奖励
-
-            function getBeijingMonthPrefix(offsetMonths = 0) {
-                const bj = getBeijingNow();
-                const d = new Date(bj.getFullYear(), bj.getMonth() + offsetMonths, 1);
-                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-            }
-
-            // 某月是否产生过星值（有额外任务打卡或考试记录）；空月份不结算 20 奖励，避免凭空累积
             function monthHasActivity(prefix) {
                 return state.checkins.some(c => c.isExtra && c.date && c.date.startsWith(prefix))
                     || state.exams.some(e => e.date && e.date.startsWith(prefix));
             }
 
-            // 某月结算星值 = 额外任务 + 考试 + 20（该月有记录才给）
             function calcMonthSettled(prefix) {
                 let sum = 0;
                 state.checkins.forEach(c => { if (c.isExtra && c.date && c.date.startsWith(prefix)) sum += (c.reward || 0); });
@@ -1520,7 +1485,6 @@
                 return sum;
             }
 
-            // 本月获得（当月未结束 → 尚未结算，不含 20 奖励）
             function calcMonthStars() {
                 const prefix = getBeijingMonthPrefix(0);
                 let extraSum = 0;
@@ -1530,27 +1494,32 @@
                 return { total: extraSum + examSum, extraSum, examSum, monthlyBonus: 0, prefix };
             }
 
-            // 已结算累计：所有"已过完"的月份（本月之前）结算之和，跨月不清零
+            // 已结算累计 = 归档月份 settled 之和 + 现存数据中"过去月份"的结算
             function calcSettledStars() {
                 const cur = getBeijingMonthPrefix(0);
+                let total = 0;
+                const archived = (state.archive && state.archive.months) || {};
+                Object.values(archived).forEach(m => { total += (m.settled || 0); });
                 const months = new Set();
                 state.checkins.forEach(c => { if (c.isExtra && c.date) months.add(c.date.slice(0, 7)); });
                 state.exams.forEach(e => { if (e.date) months.add(e.date.slice(0, 7)); });
-                let total = 0;
                 months.forEach(m => { if (m < cur) total += calcMonthSettled(m); });
                 return total;
             }
 
+            // 已兑换消耗 = 归档月份 redeemed 之和 + 现存 redemptions
             function calcRedeemedStars() {
-                return (state.redemptions || []).reduce((sum, r) => sum + (r.cost || 0), 0);
+                let total = 0;
+                const archived = (state.archive && state.archive.months) || {};
+                Object.values(archived).forEach(m => { total += (m.redeemed || 0); });
+                total += (state.redemptions || []).reduce((sum, r) => sum + (r.cost || 0), 0);
+                return total;
             }
 
-            // 星值商店可用余额 = 已结算累计 − 已兑换核销
             function calcShopBalance() {
                 return calcSettledStars() - calcRedeemedStars();
             }
 
-            // ===== 统一时间基准：全部用北京时间日期字符串 YYYY-MM-DD（字典序即时间序），不再混用 Date 时间戳 =====
             function shiftDateStr(dateStr, days) {
                 const p = (dateStr || '').split('-');
                 if (p.length !== 3) return dateStr;
@@ -1558,49 +1527,43 @@
                 d.setUTCDate(d.getUTCDate() + days);
                 return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
             }
-            // 某任务在某一天是否有打卡
             function isCheckedOnDate(taskId, dateStr) {
                 return state.checkins.some(c => !c.isExtra && c.taskId === taskId && c.date === dateStr);
             }
-            // 周期任务：周期内任意一天打过卡即算完成（只需打一下）
             function isPeriodTaskChecked(task) {
                 const from = task.startDate || '0000-01-01';
                 const to = task.endDate || '9999-12-31';
                 return state.checkins.some(c => !c.isExtra && c.taskId === task.id && c.date >= from && c.date <= to);
             }
-            // 任务三类：每日重复 / 周期任务 / 今日任务（沿用现有字段，不新增必需字段）
             function isDailyTask(task) { return !!task.daily; }
             function isPeriodTask(task) { return !task.daily && !!task.endDate; }
 
             function isTaskCheckedToday(taskId) {
                 return isCheckedOnDate(taskId, getBeijingDateStr());
             }
-            // 任务是否处于有效期（决定能否出现在打卡列表）
             function isTaskInValidPeriod(task, today) {
                 const start = task.startDate || today;
                 if (today < start) return false;
                 if (isDailyTask(task)) return !task.endDate || today <= task.endDate;
                 if (isPeriodTask(task)) return today <= task.endDate;
-                return task.startDate === today;   // 今日任务仅当天有效
+                return task.startDate === today;
             }
             function canTaskCheck(task) {
                 const today = getBeijingDateStr();
                 if (!isTaskInValidPeriod(task, today)) return false;
-                if (isPeriodTask(task) && isPeriodTaskChecked(task)) return false;  // 周期任务只需打一次
+                if (isPeriodTask(task) && isPeriodTaskChecked(task)) return false;
                 return true;
             }
-            // 打卡列表里的"完成态"
             function isTaskCheckedForDisplay(task, today) {
                 if (isPeriodTask(task)) return isPeriodTaskChecked(task);
                 return isCheckedOnDate(task.id, today);
             }
-            // 该任务在指定日期是否"应打卡"（日历标注与未完成任务共用同一判定源）
             function isTaskDueOnDate(task, dateStr) {
                 const start = task.startDate || dateStr;
                 if (dateStr < start) return false;
                 if (isDailyTask(task)) return !task.endDate || dateStr <= task.endDate;
-                if (isPeriodTask(task)) return dateStr === task.endDate;  // 周期任务只在结束日结算
-                return task.startDate === dateStr;                        // 今日任务只在任务日
+                if (isPeriodTask(task)) return dateStr === task.endDate;
+                return task.startDate === dateStr;
             }
             function isTaskDoneOnDate(task, dateStr) {
                 if (isPeriodTask(task)) return isPeriodTaskChecked(task);
@@ -1609,12 +1572,11 @@
 
             function getDayCompletionStatus(dateStr) {
                 const today = getBeijingDateStr();
-                if (dateStr >= today) return 'none';   // 今天及未来不做完成标注
+                if (dateStr >= today) return 'none';
                 const dueTasks = state.tasks.filter(t => isTaskDueOnDate(t, dateStr));
                 const extraTasks = state.extraTasks.filter(t => t.createdDate === dateStr);
                 const total = dueTasks.length + extraTasks.length;
                 if (total === 0) return 'none';
-
                 let completed = 0;
                 dueTasks.forEach(t => { if (isTaskDoneOnDate(t, dateStr)) completed++; });
                 extraTasks.forEach(t => {
@@ -1627,7 +1589,6 @@
                 const name = state.profile.name || 'HEIDI';
                 const avatar = state.profile.avatar || '';
                 const avatarEl = document.getElementById('avatarDisplay');
-
                 if (avatar) {
                     avatarEl.style.backgroundImage = `url(${avatar})`;
                     avatarEl.textContent = '';
@@ -1636,7 +1597,6 @@
                     avatarEl.textContent = '';
                 }
                 document.getElementById('profileName').textContent = name;
-
                 const editBtn = document.getElementById('editProfileBtn');
                 if (currentRole === 'admin' && isAdminAuthenticated) {
                     editBtn.classList.remove('hidden');
@@ -1668,7 +1628,6 @@
                     }
                     cells.push({ day: d.getDate(), isToday, status });
                 }
-
                 grid.innerHTML = cells.map(c => {
                     let cls = 'calendar-day';
                     if (c.isToday) cls += ' today';
@@ -1693,9 +1652,7 @@
                 const isAdminOp = (currentRole === 'admin' && isAdminAuthenticated);
                 const tasks = state.tasks.filter(task => {
                     if (task.category !== category) return false;
-                    // 打过卡的任务仍显示（带完成态）；其余按有效期判断是否该出现
                     if (todayCheckTaskIds.has(task.id)) return true;
-                    // 家长模式：已过截止的周期任务若有打卡，仍显示，便于取消打卡
                     if (isAdminOp && isPeriodTask(task) && isPeriodTaskChecked(task)) return true;
                     return isTaskInValidPeriod(task, today);
                 });
@@ -1792,6 +1749,7 @@
                         ${showAdminActions ? `
                         <div class="task-actions">
                             <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
+                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
                         </div>` : ''}
                         ${checkHtml}
                     </div>
@@ -1806,7 +1764,6 @@
                 const isAdminOp = (currentRole === 'admin' && isAdminAuthenticated);
                 let todayExtras;
                 if (isAdminOp) {
-                    // 家长模式：显示最近 7 天，改过日期的历史任务仍可见、可编辑
                     const from = shiftDateStr(today, -6);
                     todayExtras = state.extraTasks
                         .filter(t => (t.createdDate || '') >= from && (t.createdDate || '') <= today)
@@ -1843,17 +1800,21 @@
                 }).join('');
             }
 
+            // 考试任务：只显示当月
             function renderExams() {
                 const container = document.getElementById('examTaskList');
                 if (!container) return;
 
-                if (state.exams.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">暂无考试记录</div>`;
+                const curMonth = getBeijingMonthPrefix(0);
+                const monthExams = state.exams.filter(e => (e.date || '').startsWith(curMonth));
+
+                if (monthExams.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">本月暂无考试记录</div>`;
                     return;
                 }
 
                 const isAdmin = (currentRole === 'admin' && isAdminAuthenticated);
-                const sortedExams = [...state.exams].sort((a,b) => b.date.localeCompare(a.date));
+                const sortedExams = [...monthExams].sort((a,b) => b.date.localeCompare(a.date));
 
                 container.innerHTML = sortedExams.map(exam => {
                     const stars = exam.score !== null ? getExamStars(exam.score) : 0;
@@ -1898,18 +1859,15 @@
                 if (!container) return;
 
                 const today = getBeijingDateStr();
-                // 每日任务只回溯最近 2 个"已过 24:00"的日期（昨天、前天）；今天仍可打卡，不计入未完成。
-                // 这里只做渲染过滤，绝不删除 state 里的任何数据。
                 const LOOKBACK_DAYS = 2;
                 const lookbackDates = [];
                 for (let i = 1; i <= LOOKBACK_DAYS; i++) lookbackDates.push(shiftDateStr(today, -i));
 
-                const items = [];   // { task, missed: [日期...] }
+                const items = [];
 
                 state.tasks.forEach(task => {
                     const start = task.startDate || today;
                     if (isDailyTask(task)) {
-                        // 每日重复：列出最近两天内漏打卡的日期
                         const missed = lookbackDates.filter(d => {
                             if (d < start) return false;
                             if (task.endDate && d > task.endDate) return false;
@@ -1917,12 +1875,10 @@
                         });
                         if (missed.length > 0) items.push({ task, missed });
                     } else if (isPeriodTask(task)) {
-                        // 周期任务：结束当天过了 24:00 才结算；周期内打过一次即完成
                         if (today > task.endDate && !isPeriodTaskChecked(task)) {
                             items.push({ task, missed: [task.endDate] });
                         }
                     } else {
-                        // 今日任务：任务当天过了 24:00 才显示
                         if (today > start && !isCheckedOnDate(task.id, start)) {
                             items.push({ task, missed: [start] });
                         }
@@ -1951,7 +1907,6 @@
                         tagsHtml += `<span class="tag tag-today">今日任务</span>`;
                     }
 
-                    // 未完成时间：每日任务列出具体漏打卡日期，其余列出结算日
                     const missedLabel = missed.map(d => d.slice(5)).join('、');
                     tagsHtml += `<span class="tag tag-pink">未完成：${missedLabel}</span>`;
 
@@ -1980,38 +1935,9 @@
                 }).join('');
             }
 
-            function renderTaskLibrary() {
-                const container = document.getElementById('taskLibraryList');
-                if (!container) return;
-                if (state.tasks.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);font-weight:800;">暂无任务</div>`;
-                    return;
-                }
-                container.innerHTML = state.tasks.map(task => `
-                    <div class="task-item">
-                        <div class="task-info">
-                            <div class="task-name">
-                                ${escapeHtml(task.name)}
-                                ${task.daily ? '<img src="icon_repeat.svg" class="icon-repeat-small">' : ''}
-                            </div>
-                            <div class="task-meta">
-                                <span class="tag ${getTagClass(task.category)}">${task.category}</span>
-                                ${task.subject ? `<span class="tag ${getTagClass(task.subject)}">${task.subject}</span>` : ''}
-                                ${task.endDate ? `<span class="tag tag-deadline">至 ${task.endDate}</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="task-actions">
-                            <button class="icon-btn" data-action="edit-task" data-task-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
-                            <button class="icon-btn" data-action="delete-task" data-task-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
             function renderStats() {
                 const todaySum = calcTodayStars();
                 const monthData = calcMonthStars();
-
                 document.getElementById('todayStars').innerHTML = `<span>${todaySum}</span><img src="icon_star.svg" style="width: 20px; height: 20px; object-fit: contain;">`;
                 document.getElementById('monthStars').innerHTML = `<span>${monthData.total}</span><img src="icon_star.svg" style="width: 20px; height: 20px; object-fit: contain;">`;
             }
@@ -2019,20 +1945,17 @@
             function updateRoleUI() {
                 const btnAdmin = document.getElementById('btnAdminMode');
                 const btnChild = document.getElementById('btnChildMode');
-                const adminSection = document.getElementById('adminTaskLibrarySection');
                 const addExtraBtn = document.getElementById('addExtraBtn');
                 const collapseBtns = document.querySelectorAll('.collapse-btn');
 
                 if (currentRole === 'admin' && isAdminAuthenticated) {
                     btnAdmin.classList.add('active');
                     btnChild.classList.remove('active');
-                    adminSection.classList.remove('hidden');
                     addExtraBtn.classList.remove('hidden');
                     collapseBtns.forEach(btn => btn.classList.remove('hidden'));
                 } else {
                     btnAdmin.classList.remove('active');
                     btnChild.classList.add('active');
-                    adminSection.classList.add('hidden');
                     addExtraBtn.classList.add('hidden');
                     collapseBtns.forEach(btn => btn.classList.add('hidden'));
                     document.querySelectorAll('.task-list, #inSchoolGroups, #outSchoolGroups, #examTaskList').forEach(el => {
@@ -2052,13 +1975,11 @@
                 renderExtraTasks();
                 renderExams();
                 renderOverdueTasks();
-                renderTaskLibrary();
                 updateRoleUI();
                 if (currentView === 'shop') renderShopPage();
                 if (currentView === 'stats') renderStatsPage();
             }
 
-            // ================= 视图切换 =================
             let currentView = 'home';
             let selectedShopIds = new Set();
 
@@ -2079,22 +2000,20 @@
                 window.scrollTo({ top: 0, behavior: 'auto' });
             }
 
-            // ================= 星值商店 =================
             function uid() {
                 return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
             }
 
-            // 固定兑换商品 money：不写入 state.shopItems，始终存在、不可删除
             const MONEY_ITEM_ID = '__money__';
             const MONEY_ICON = 'icon_shop_money.png';
-            let moneyAmount = 0;   // 本次要兑换的星值（仅内存，兑换后清零）
+            let moneyAmount = 0;
 
             function renderShopPage() {
                 const balanceEl = document.getElementById('shopBalanceNum');
                 if (!balanceEl) return;
                 const balance = Math.max(0, calcShopBalance());
                 balanceEl.textContent = balance;
-                const pending = calcMonthStars().total;   // 本月尚未结算，过月底 24:00 后才进入总星值
+                const pending = calcMonthStars().total;
                 const tip = document.getElementById('shopHeroTip');
                 if (tip) tip.innerHTML = `本月待结算 <b>${pending}</b> 星值`;
 
@@ -2103,7 +2022,6 @@
                 if (addBtn) addBtn.classList.toggle('hidden', !isAdmin);
 
                 const items = state.shopItems || [];
-                // money 为固定项，不参与"已删除商品"清理
                 selectedShopIds = new Set([...selectedShopIds].filter(id =>
                     id === MONEY_ITEM_ID || items.some(i => i.id === id)));
 
@@ -2117,7 +2035,7 @@
                         <div class="shop-item-img bare">
                             <img src="${MONEY_ICON}" alt="" onload="this.nextElementSibling.style.display='none'"
                                  onerror="this.remove()">
-                            <span class="money-fallback">  </span>
+                            <span class="money-fallback">¥</span>
                         </div>
                         <div class="shop-item-info">
                             <div class="shop-item-name">MONEY</div>
@@ -2153,7 +2071,6 @@
                 renderRedeemLog();
             }
 
-            // 兑换记录：渲染在商店页右下方（竖屏在兑换按钮下方）
             function renderRedeemLog() {
                 const el = document.getElementById('shopRedeemLog');
                 if (!el) return;
@@ -2176,7 +2093,6 @@
             }
 
             function toggleShopSelect(id) {
-                // money 打勾前必须填好合法整数（1 ~ 可用星值）
                 if (id === MONEY_ITEM_ID && !selectedShopIds.has(id)) {
                     const balance = Math.max(0, calcShopBalance());
                     const el = document.getElementById('moneyAmountInput');
@@ -2207,7 +2123,6 @@
                     return (state.shopItems || []).find(i => i.id === id);
                 }).filter(Boolean);
 
-                // money 金额再次校验，避免输入被改动后超额
                 if (selectedShopIds.has(MONEY_ITEM_ID)) {
                     if (!moneyAmount || moneyAmount < 1) { showToast('请先填写要兑换的星值', false); return; }
                     if (moneyAmount > balance) { showToast(`不能超过可用星值 ${balance}`, false); return; }
@@ -2243,7 +2158,6 @@
                 });
             }
 
-            // ================= 商品图片裁剪（1:1 正方形，原生实现） =================
             function openImageCropper(src, onDone) {
                 const overlay = document.createElement('div');
                 overlay.className = 'crop-overlay';
@@ -2303,7 +2217,6 @@
                 };
                 if (img.complete && img.naturalWidth) init(); else img.onload = init;
 
-                // 拖动（鼠标 / 单指）
                 stage.addEventListener('pointerdown', (e) => {
                     if (e.isPrimary === false) return;
                     dragging = true; dsx = e.clientX; dsy = e.clientY; dl = left; dt = top;
@@ -2319,13 +2232,11 @@
                 stage.addEventListener('pointerup', endDrag);
                 stage.addEventListener('pointercancel', endDrag);
 
-                // 滚轮缩放
                 stage.addEventListener('wheel', (e) => {
                     e.preventDefault();
                     setZoom(zoom * (e.deltaY < 0 ? 1.1 : 0.9));
                 }, { passive: false });
 
-                // 双指缩放
                 stage.addEventListener('touchstart', (e) => {
                     if (e.touches.length === 2) {
                         dragging = false;
@@ -2347,7 +2258,6 @@
                 }, { passive: false });
                 stage.addEventListener('touchend', () => { pinchDist = 0; }, { passive: true });
 
-                // 滑块缩放
                 zoomInput.addEventListener('input', () => setZoom(parseInt(zoomInput.value, 10) / 100));
 
                 const escHandler = (e) => {
@@ -2399,7 +2309,6 @@
                     `,
                     confirmText: '保存',
                     onConfirm: () => {
-                        // 校验不通过时返回 false → 弹窗保持打开，直接改，不会出现"点了保存却没加上"
                         const errEl = document.getElementById('shopItemErr');
                         const fail = (msg) => {
                             if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
@@ -2437,7 +2346,7 @@
                             });
                         };
                         reader.readAsDataURL(file);
-                        e.target.value = '';   // 允许重复选同一张图
+                        e.target.value = '';
                     });
                 }, 0);
             }
@@ -2460,7 +2369,6 @@
                 });
             }
 
-            // ================= 统计页面 =================
             function renderStatsPage() {
                 const el = document.getElementById('statsPageContent');
                 if (!el) return;
@@ -2469,7 +2377,6 @@
                 const redeemed = calcRedeemedStars();
                 const balance = settled - redeemed;
 
-                // 纯展示：只在当月最后一天显示 20（蓝色，与上方一致），日常显示灰色 0；均带等高星星
                 const bjNow = getBeijingNow();
                 const isMonthLastDay = bjNow.getDate() === new Date(bjNow.getFullYear(), bjNow.getMonth() + 1, 0).getDate();
                 const star = `<img class="stat-star" src="icon_star.svg" alt="">`;
@@ -2504,7 +2411,10 @@
 
             function revokeRedeem(recordId) {
                 const rec = (state.redemptions || []).find(r => r.id === recordId);
-                if (!rec) return;
+                if (!rec) {
+                    showToast('该记录已归档，无法撤销', false);
+                    return;
+                }
                 showModal({
                     title: '撤销兑换',
                     content: `撤销「${rec.name}」的兑换，${rec.cost} 星值将退回可用星值。`,
@@ -2542,11 +2452,10 @@
 
                 const isAdminOp = (currentRole === 'admin' && isAdminAuthenticated);
 
-                // 周期任务：周期内打一次即完成，因此取消也要能取消"非今天"的那一条
                 if (isPeriodTask(task)) {
                     const pIdx = state.checkins.findIndex(c => !c.isExtra && c.taskId === taskId
                         && c.date >= (task.startDate || '0000-01-01') && c.date <= (task.endDate || '9999-12-31'));
-                    const expired = today > (task.endDate || '9999-12-31');   // 过了截止 24:00
+                    const expired = today > (task.endDate || '9999-12-31');
                     if (pIdx !== -1) {
                         if (expired && !isAdminOp) {
                             showToast('该周期任务已截止，不可取消', false);
@@ -2571,7 +2480,6 @@
                     return;
                 }
 
-                // 非周期任务：历史日期的打卡不可取消（跨天不可改），家长模式可操作
                 const existingIndex = state.checkins.findIndex(c => c.date === today && c.taskId === taskId && !c.isExtra);
                 if (existingIndex !== -1) {
                     state.checkins.splice(existingIndex, 1);
@@ -2595,7 +2503,6 @@
 
                 const existingIndex = state.checkins.findIndex(c => c.taskId === extraId && c.isExtra);
                 if (existingIndex !== -1) {
-                    // 统一北京时间：只允许取消当天产生的打卡（家长模式不受限）
                     if (state.checkins[existingIndex].date !== getBeijingDateStr() && currentRole !== 'admin') {
                         showToast('过期的打卡不可取消', false);
                         return;
@@ -2626,24 +2533,6 @@
                         saveState();
                         renderAll();
                         showToast('已删除');
-                    }
-                });
-            }
-
-            function resetStarsConfirm() {
-                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
-                showModal({
-                    title: '重置星值',
-                    content: '确定清空所有考试分数、额外任务与打卡记录吗？（今日和本月星值将归零，不可撤销）',
-                    confirmText: '重置',
-                    danger: true,
-                    onConfirm: () => {
-                        state.checkins = [];
-                        state.extraTasks = [];
-                        state.exams = [];
-                        saveState();
-                        renderAll();
-                        showToast('已重置归零');
                     }
                 });
             }
@@ -2686,7 +2575,6 @@
                     closeModal();
                 };
                 overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
-                // Esc 关闭弹窗（桌面端/外接键盘的常见预期）
                 const onEsc = (e) => {
                     if (e.key === 'Escape') {
                         closeModal();
@@ -2758,11 +2646,8 @@
                 const select = document.getElementById('modalTaskSubjectSelect');
                 const input = document.getElementById('modalTaskSubjectInput');
                 if (!select || !input) return;
-                if (select.value === '__custom__') {
-                    input.style.display = '';
-                } else {
-                    input.style.display = 'none';
-                }
+                if (select.value === '__custom__') input.style.display = '';
+                else input.style.display = 'none';
             };
 
             window.updateSubjectOptions = function() {
@@ -2890,8 +2775,6 @@
                                 const prev = state.tasks[idx];
                                 const dateChanged = prev.startDate !== startDate || (prev.endDate || '') !== (endDate || '') || !!prev.daily !== daily;
                                 state.tasks[idx] = { ...prev, name, note, subject, startDate, endDate, daily };
-                                // 改日期后旧打卡全部作废，必须重新打卡才算完成；
-                                // 日期符合（开始 ≤ 今天 ≤ 结束）时由 isTaskInValidPeriod 自动回到打卡列表
                                 if (dateChanged) {
                                     state.checkins = state.checkins.filter(c => !(c.taskId === task.id && !c.isExtra));
                                 }
@@ -2940,7 +2823,6 @@
                                 state.extraTasks[idx].name = name;
                                 state.extraTasks[idx].reward = reward;
                                 state.extraTasks[idx].createdDate = date;
-                                // 同步该任务的打卡日期，避免任务日期与星值归属月份不一致
                                 state.checkins.forEach(c => {
                                     if (c.taskId === task.id && c.isExtra) { c.date = date; c.reward = reward; }
                                 });
@@ -3004,241 +2886,10 @@
                 });
             }
 
-            function openOcrModal() {
-                if (!(currentRole === 'admin' && isAdminAuthenticated)) return;
-                const today = getBeijingDateStr();
-
-                showModal({
-                    title: '拍照 / 相册 OCR 识别',
-                    contentHTML: `
-                        <div style="margin-bottom:16px; text-align:center;">
-                            <label class="btn-outline" style="display:inline-flex; cursor:pointer; padding:12px 24px; font-size:15px;">
-                                <img src="icon_camera.svg" class="zoom-icon" style="width: 14px; height: 14px;"> 选择图片 / 拍照
-                                <input type="file" accept="image/*" id="ocrFileInput" style="display:none;">
-                            </label>
-                            <div id="ocrStatus" style="margin-top:12px; font-size:13px; color:var(--text-main); font-weight:800;"></div>
-                        </div>
-                        <div id="ocrPreviewContainer" style="display:none; margin-bottom:16px; text-align:center;">
-                            <img id="ocrPreviewImg" style="max-width:100%; max-height:120px; border-radius:16px; border:2px solid var(--border-light);">
-                        </div>
-
-                        <label>识别文字（可编辑，按行拆分）</label>
-                        <textarea id="ocrResult" rows="6" placeholder="识别结果会显示在这里..."></textarea>
-
-                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
-                            <input type="checkbox" id="ocrSplitCheck" checked style="width:20px; height:20px; margin:0; accent-color:var(--accent);" />
-                            <label for="ocrSplitCheck" style="margin:0; font-size:14px; color:var(--text-main); cursor:pointer; font-weight:800;">按换行拆分多个任务</label>
-                        </div>
-
-                        <div style="background:var(--bg-page); padding:16px; border-radius:20px; border: 1px solid var(--border-light);">
-                            <div style="font-size:13px; font-weight:900; color:var(--text-main); margin-bottom:12px;">统一设置（应用给上述任务）</div>
-                            <label style="color:var(--text-main);">分类</label>
-                            <select id="ocrCategory" onchange="updateOcrSubjectOptions()">
-                                <option value="校内任务">校内任务</option>
-                                <option value="校外任务">校外任务</option>
-                            </select>
-                            <label style="color:var(--text-main);">学科</label>
-                            <div id="ocrSubjectContainer">
-                                <select id="ocrSubjectSelect">
-                                    <option value="语文">语文</option>
-                                    <option value="数学">数学</option>
-                                    <option value="英语" selected>英语</option>
-                                    <option value="其它">其它</option>
-                                </select>
-                            </div>
-                            <div style="display:flex; gap:12px; margin-bottom:16px;">
-                                <div style="flex:1;">
-                                    <label style="color:var(--text-main);">开始时间</label>
-                                    <input id="ocrStartDate" type="date" value="${today}" style="margin-bottom:0; background:var(--bg-nav);" />
-                                </div>
-                                <div style="flex:1;">
-                                    <label style="color:var(--text-main);">结束时间(留空即当日)</label>
-                                    <div style="display:flex; gap:6px;">
-                                        <input id="ocrEndDate" type="date" value="" style="margin-bottom:0; background:var(--bg-nav);" />
-                                        <button type="button" class="btn-outline" onclick="document.getElementById('ocrEndDate').value=''" style="padding:0 10px; font-size:12px; height: 50px;">清空</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <label style="color:var(--text-main);">每日重复</label>
-                            <select id="ocrDaily" style="margin-bottom:0; background:var(--bg-nav);">
-                                <option value="false" selected>否</option>
-                                <option value="true">是</option>
-                            </select>
-                        </div>
-                    `,
-                    confirmText: '批量生成',
-                    onConfirm: () => {
-                        const rawText = document.getElementById('ocrResult').value.trim();
-                        if (!rawText) { showToast('请先识别或输入文字', false); return false; }
-
-                        const isSplit = document.getElementById('ocrSplitCheck').checked;
-                        const category = document.getElementById('ocrCategory').value;
-                        let subject = '';
-                        const ocrSelect = document.getElementById('ocrSubjectSelect');
-                        if (category === '校内任务') {
-                            subject = ocrSelect.value;
-                        } else {
-                            if (ocrSelect.value === '__custom__') {
-                                const customVal = (document.getElementById('ocrSubjectInput') || {}).value || '';
-                                subject = customVal.trim() || '其它';
-                            } else {
-                                subject = ocrSelect.value;
-                            }
-                        }
-                        const startDate = document.getElementById('ocrStartDate').value || today;
-                        const endDate = document.getElementById('ocrEndDate').value;
-                        const daily = document.getElementById('ocrDaily').value === 'true';
-
-                        let taskNames = [];
-                        if (isSplit) {
-                            taskNames = rawText.split('\n')
-                                .map(line => line.replace(/^\d+[\.\、\s]+/, '').trim())
-                                .filter(name => name.length > 0);
-                        } else {
-                            taskNames = [rawText.replace(/\n/g, ' ')];
-                        }
-
-                        if (taskNames.length === 0) {
-                            showToast('没有提取到有效任务名', false);
-                            return false;
-                        }
-
-                        taskNames.forEach(name => {
-                            state.tasks.push({
-                                id: 'task_ocr_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
-                                name: name,
-                                daily: daily,
-                                note: 'OCR导入',
-                                category: category,
-                                subject: subject,
-                                startDate: startDate,
-                                endDate: endDate
-                            });
-                        });
-
-                        saveState();
-                        renderAll();
-                        showToast(`成功生成 ${taskNames.length} 个任务`);
-                    }
-                });
-
-                window.toggleOcrCustomSubjectInput = function() {
-                    const select = document.getElementById('ocrSubjectSelect');
-                    const input = document.getElementById('ocrSubjectInput');
-                    if (!select || !input) return;
-                    if (select.value === '__custom__') {
-                        input.style.display = '';
-                    } else {
-                        input.style.display = 'none';
-                    }
-                };
-
-                window.updateOcrSubjectOptions = function() {
-                    const cat = document.getElementById('ocrCategory').value;
-                    const container = document.getElementById('ocrSubjectContainer');
-                    if (cat === '校内任务') {
-                        container.innerHTML = `
-                            <select id="ocrSubjectSelect">
-                                <option value="语文">语文</option>
-                                <option value="数学">数学</option>
-                                <option value="英语">英语</option>
-                                <option value="其它">其它</option>
-                            </select>
-                        `;
-                    } else {
-                        container.innerHTML = `
-                            <select id="ocrSubjectSelect" onchange="toggleOcrCustomSubjectInput()">
-                                <option value="口语">口语</option>
-                                <option value="新东方">新东方</option>
-                                <option value="__custom__">自定义</option>
-                            </select>
-                            <input id="ocrSubjectInput" type="text" placeholder="输入自定义学科" style="margin-top:8px; display:none; margin-bottom:20px; background:var(--bg-nav);" />
-                        `;
-                    }
-                };
-
-                setTimeout(() => {
-                    const fileInput = document.getElementById('ocrFileInput');
-                    const statusEl = document.getElementById('ocrStatus');
-                    const previewContainer = document.getElementById('ocrPreviewContainer');
-                    const previewImg = document.getElementById('ocrPreviewImg');
-                    const resultEl = document.getElementById('ocrResult');
-
-                    if (!fileInput) return;
-
-                    fileInput.addEventListener('change', async (e) => {
-                        const file = e.target.files[0];
-                        if (!file) return;
-
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                            previewContainer.style.display = 'block';
-                            previewImg.src = ev.target.result;
-                        };
-                        reader.readAsDataURL(file);
-
-                        statusEl.innerHTML = '⏳ 正在识别中，请稍候...';
-                        resultEl.value = '';
-
-                        try {
-                            if (typeof Tesseract === 'undefined') {
-                                statusEl.innerHTML = '❌ 识别组件未加载（网络受限），请连通网络后重试，或手动输入任务';
-                                return;
-                            }
-                            const { data: { text } } = await Tesseract.recognize(
-                                file,
-                                'chi_sim+eng',
-                                { logger: m => {
-                                    if (m.status === 'recognizing text') {
-                                        statusEl.innerHTML = `⏳ 识别进度：${Math.round(m.progress * 100)}%`;
-                                    }
-                                }}
-                            );
-
-                            let cleanText = text.split('\n')
-                                .map(l => l.trim())
-                                .filter(l => l.length > 0)
-                                .join('\n');
-
-                            resultEl.value = cleanText;
-                            statusEl.innerHTML = '✅ 识别完成，请在文本框内修改';
-                            if (!cleanText) {
-                                statusEl.innerHTML = '⚠️ 未能识别出文字，请重试';
-                            }
-                        } catch (error) {
-                            console.error('OCR Error:', error);
-                            statusEl.innerHTML = '❌ 识别失败，请检查网络或重试';
-                        }
-                    });
-                }, 100);
-            }
-
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
-                    if (supabaseClient) {
-                        fetchCloudState();
-                    }
+                    if (supabaseClient) fetchCloudState();
                 }
-            });
-
-            let touchStartY = 0;
-            let isPulling = false;
-
-            document.addEventListener('touchstart', (e) => {
-                if (window.scrollY <= 0) {
-                    touchStartY = e.touches[0].clientY;
-                    isPulling = true;
-                }
-            }, { passive: true });
-
-            document.addEventListener('touchend', (e) => {
-                if (!isPulling) return;
-                let distance = e.changedTouches[0].clientY - touchStartY;
-                if (distance > 100 && window.scrollY <= 0) {
-                    window.location.reload();
-                }
-                isPulling = false;
             });
 
             function bindEvents() {
@@ -3251,7 +2902,7 @@
                 document.getElementById('btnAdminMode').addEventListener('click', () => {
                     if (isAdminAuthenticated && currentRole === 'admin') return;
                     showModal({
-                        title: '家长模式验证',
+                        title: '家长验证',
                         contentHTML: `<input id="pwdInput" type="password" placeholder="请输入密码" autofocus style="text-align:center; letter-spacing:5px;" />`,
                         confirmText: '进入',
                         onConfirm: () => {
@@ -3260,7 +2911,7 @@
                                 currentRole = 'admin';
                                 isAdminAuthenticated = true;
                                 renderAll();
-                                showToast('欢迎回来，家长模式');
+                                showToast('欢迎回来，家长');
                                 return true;
                             } else {
                                 alert('密码错误');
@@ -3268,6 +2919,11 @@
                             }
                         }
                     });
+                });
+
+                // 刷新按钮：整页刷新，三个页面均同步
+                document.getElementById('refreshBtn').addEventListener('click', () => {
+                    location.reload();
                 });
 
                 document.body.addEventListener('click', (e) => {
@@ -3299,7 +2955,6 @@
                             renderExams();
                             return;
                         }
-
                         let val = parseFloat(e.target.value);
                         if (e.target.value.trim() === '') {
                             val = null;
@@ -3312,9 +2967,7 @@
                             exam.score = val;
                             saveState();
                             renderAll();
-                            if (val !== null) {
-                                showToast(`分数已录入，获得 ${getExamStars(val)} 星`);
-                            }
+                            if (val !== null) showToast(`分数已录入，获得 ${getExamStars(val)} 星`);
                         }
                     }
                 });
@@ -3322,12 +2975,8 @@
                 document.getElementById('addExamBtn').addEventListener('click', () => openExamModal(null));
                 document.getElementById('addInSchoolBtn').addEventListener('click', () => openTaskModal(null, '校内任务'));
                 document.getElementById('addOutSchoolBtn').addEventListener('click', () => openTaskModal(null, '校外任务'));
-                document.getElementById('openCreateTaskBtn').addEventListener('click', () => openTaskModal(null, '校内任务'));
-
                 document.getElementById('addExtraBtn').addEventListener('click', () => openExtraModal(null));
                 document.getElementById('editProfileBtn').addEventListener('click', openProfileModal);
-                document.getElementById('ocrBtn').addEventListener('click', openOcrModal);
-                document.getElementById('resetStarsBtn').addEventListener('click', resetStarsConfirm);
 
                 document.body.addEventListener('click', (e) => {
                     const target = e.target.closest('[data-action]');
@@ -3388,6 +3037,10 @@
                                 }
                             });
                         }
+                    } else if (action === 'del-shop-item') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) deleteShopItem(target.dataset.shopId);
+                    } else if (action === 'revoke-redeem') {
+                        if (currentRole === 'admin' && isAdminAuthenticated) revokeRedeem(target.dataset.redeemId);
                     }
                 });
 
@@ -3400,63 +3053,42 @@
                     renderCalendar();
                 });
 
-                document.getElementById('exportCsvBtn').addEventListener('click', () => {
-                    const rows = [['日期', '类型', '名称', '详情/分数', '获得星值']];
-                    state.checkins.forEach(c => {
-                        if (c.isExtra) {
-                            const t = state.extraTasks.find(x => x.id === c.taskId);
-                            rows.push([c.date, '额外任务', t ? t.name : '已删除', '-', c.reward + '星']);
-                        } else {
-                            const t = state.tasks.find(x => x.id === c.taskId);
-                            rows.push([c.date, '日常打卡', t ? t.name : '已删除', '-', '见月度奖励']);
-                        }
-                    });
-                    state.exams.forEach(e => {
-                        if (e.score !== null) {
-                            rows.push([e.date, '考试', e.name, e.score + '分', getExamStars(e.score)]);
-                        }
-                    });
-                    const csv = rows.map(r => r.join(',')).join('\n');
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], {type:'text/csv'}));
-                    link.download = `星值记录_${getBeijingDateStr()}.csv`;
-                    link.click();
-                    showToast('CSV 已导出');
+                document.getElementById('addShopItemBtn').addEventListener('click', openShopItemModal);
+                document.getElementById('redeemBtn').addEventListener('click', doRedeem);
+                document.getElementById('clearSelBtn').addEventListener('click', doClearSelection);
+
+                document.body.addEventListener('click', (e) => {
+                    const shopItem = e.target.closest('.shop-item');
+                    if (shopItem && !e.target.closest('[data-action]') && !e.target.closest('#moneyAmountInput')) {
+                        toggleShopSelect(shopItem.dataset.shopId);
+                    }
                 });
 
-                // ===== 底部导航：首页 / 星值商店 / 统计 =====
+                document.body.addEventListener('input', (e) => {
+                    if (e.target.id === 'moneyAmountInput') {
+                        const raw = String(e.target.value || '').replace(/[^0-9]/g, '');
+                        moneyAmount = parseInt(raw, 10) || 0;
+                    }
+                });
+
                 document.querySelectorAll('.bottom-btn').forEach(btn => {
                     btn.addEventListener('click', () => switchView(btn.dataset.view));
                 });
-
-                // ===== 星值商店（统一委托，覆盖 MONEY 卡 / 商品卡 / 兑换记录）=====
-                const shopView = document.getElementById('viewShop');
-                shopView.addEventListener('click', (e) => {
-                    if (e.target.closest('#moneyAmountInput')) return;   // 点输入框不触发勾选
-                    const revokeBtn = e.target.closest('[data-action="revoke-redeem"]');
-                    if (revokeBtn) { revokeRedeem(revokeBtn.dataset.redeemId); return; }
-                    const delBtn = e.target.closest('[data-action="del-shop-item"]');
-                    if (delBtn) { e.stopPropagation(); deleteShopItem(delBtn.dataset.shopId); return; }
-                    const card = e.target.closest('.shop-item');
-                    if (card) toggleShopSelect(card.dataset.shopId);
-                });
-                // 输入金额时同步到内存变量（不重渲染，避免输入框失焦）
-                shopView.addEventListener('input', (e) => {
-                    if (e.target.id !== 'moneyAmountInput') return;
-                    const v = parseInt(String(e.target.value || '').replace(/[^0-9]/g, ''), 10);
-                    moneyAmount = v > 0 ? v : 0;
-                });
-                document.getElementById('redeemBtn').addEventListener('click', doRedeem);
-                document.getElementById('clearSelBtn').addEventListener('click', doClearSelection);
-                document.getElementById('addShopItemBtn').addEventListener('click', openShopItemModal);
-
             }
 
             function init() {
                 if (!state.checkins) state.checkins = [];
                 if (!state.exams) state.exams = [];
                 if (!state.extraTasks) state.extraTasks = [];
+                if (!state.shopItems) state.shopItems = [];
+                if (!state.redemptions) state.redemptions = [];
+                if (!state.archive) state.archive = { lastCleanupMonth: '', months: {} };
                 if (!state.profile) state.profile = { name: 'HEIDI', avatar: '' };
+
+                // 跨月自动清理旧数据并归档
+                if (performCleanupIfNeeded()) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                }
 
                 bindEvents();
                 renderAll();
