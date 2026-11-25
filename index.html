@@ -642,6 +642,24 @@
         }
 
         .view-page { padding-bottom: 90px; }
+        .shop-page-title {
+            font-size: 22px; font-weight: 900; color: var(--text-main);
+            margin: 2px 4px 0;
+        }
+        /* 可用星值区块右侧装饰：贴右下、上边超出一点、随区块缩放、最上层不挡点击 */
+        .shop-hero { position: relative; overflow: visible; }
+        .hero-decor {
+            position: absolute;
+            right: 0; bottom: 0;
+            height: calc(100% + 56px);
+            width: auto;
+            max-width: 46%;
+            object-fit: contain;
+            object-position: bottom right;
+            z-index: 5;
+            pointer-events: none;
+            user-select: none; -webkit-user-select: none;
+        }
         .shop-hero {
             background: linear-gradient(135deg, var(--accent) 0%, #5a9dd4 100%);
             border-radius: var(--radius-wrapper);
@@ -665,7 +683,7 @@
             gap: 12px;
             margin-top: 4px;
         }
-        .shop-grid.money-grid { margin-top: 4px; }
+        .shop-grid.money-grid { margin-top: 0; }
         /* 兑换商品卡：与主界面任务卡一致（横向：图标 + 信息 + 勾选圈） */
         .shop-item {
             position: relative;
@@ -697,14 +715,14 @@
         /* MONEY 固定项：与主界面任务卡一致，图标区透明无底色，图标放到最大 */
         .shop-item-img.bare {
             background: transparent;
-            width: 58px; height: 58px;
+            width: 72px; height: 72px;
             position: relative;
         }
         .shop-item-img.bare img { object-fit: contain; padding: 0; }
         .money-fallback {
             position: absolute; inset: 0;
             display: flex; align-items: center; justify-content: center;
-            font-size: 32px; font-weight: 900; color: var(--accent-warm);
+            font-size: 40px; font-weight: 900; color: var(--accent-warm);
         }
         .shop-item-info {
             flex: 1;
@@ -782,14 +800,20 @@
             border-radius: 16px; margin-bottom: 8px; font-size: 13px; font-weight: 800;
         }
         .redeem-log-row .meta { color: var(--text-sub); font-size: 11px; font-weight: 700; margin-top: 3px; }
-        /* 统计页整体区块：与「本月明细」同款行式，蓝色高亮给「可用星值」 */
-        .stat-row .val { display: flex; align-items: center; gap: 0; font-size: 18px; font-weight: 900; color: var(--accent); line-height: 1; }
+        /* 统计页两个区块行式完全统一：标签 14px / 数字 18px，数字后跟等高星星 */
+        .stat-row .val { display: flex; align-items: center; gap: 4px; font-size: 18px; font-weight: 900; color: var(--accent); line-height: 1; }
         .stat-row .lbl { font-size: 14px; font-weight: 800; }
         .stat-row.hl { background: var(--accent); color: #fff; border-color: var(--accent); }
         .stat-row.hl .lbl, .stat-row.hl .val { color: #fff; }
-        .stat-row .month-bonus-off { color: var(--text-sub); font-size: 13px; font-weight: 800; }
-        .stat-row .month-bonus-on { color: var(--accent); font-size: 18px; font-weight: 900; line-height: 1; }
-        .stat-row.hl .month-bonus-on { color: #fff; }
+        /* 星星图标：1em 与数字等高；高亮行转白 */
+        .stat-row .stat-star { width: 1em; height: 1em; object-fit: contain; flex-shrink: 0; }
+        .stat-row.hl .stat-star { filter: brightness(0) invert(1); }
+        /* 月底结算奖励：日常灰 0（导出CSV文字色 --text-sub），最后一天蓝 20，均 18px 带等高星星 */
+        .stat-row .stat-zero {
+            display: flex; align-items: center; gap: 4px;
+            color: var(--text-sub); font-size: 18px; font-weight: 900; line-height: 1;
+        }
+        .stat-row .stat-zero .stat-star { filter: grayscale(1); opacity: .7; }
 
         /* 页面右下角装饰层：比 fixed-bg(-10) 高一级、比所有内容低，不参与交互 */
         .page-decor {
@@ -802,6 +826,13 @@
             pointer-events: none;
             user-select: none;
             -webkit-user-select: none;
+            /* 以右下角为锚点放大：只向上、向左扩展，下和右位置保持不变 */
+            transform: scale(2);
+            transform-origin: bottom right;
+        }
+        /* 横屏放大 1.5 倍（同样右下锚点），竖屏保持 2 倍 */
+        @media (orientation: landscape) {
+            .page-decor { transform: scale(1.5); }
         }
 
         /* ===== 图片裁剪浮层（1:1 正方形） ===== */
@@ -882,13 +913,21 @@
             transform: none;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
         }
-        /* 蓝底导航：未选中转白且淡，选中态恢复图标原色（--accent 蓝），形成蓝白对比 */
-        .bottom-btn img {
-            filter: brightness(0) invert(1);
+        /* 双图切换：默认态 / 选中态各一张，避免切换闪烁、且文件缺失可兜底 */
+        .bottom-btn { position: relative; }
+        .bottom-btn .nav-icon-active { display: none; }
+        .bottom-btn.active .nav-icon-default { display: none; }
+        .bottom-btn.active .nav-icon-active { display: block; }
+        /* 双图均为图片原色、不加任何滤镜；仅用透明度区分未选中 / 选中 */
+        .bottom-btn .nav-icon-default {
             opacity: 0.55;
         }
-        .bottom-btn.active img {
-            filter: none;
+        .bottom-btn .nav-icon-active {
+            opacity: 1;
+        }
+        /* 选中态图缺失时回退：显示默认态图并恢复原色，维持白底蓝图标对比 */
+        .bottom-btn.active.no-active-icon .nav-icon-default {
+            display: block;
             opacity: 1;
         }
 
@@ -1195,14 +1234,15 @@
     <div id="viewShop" class="view-page hidden">
         <div class="shop-layout">
             <div class="shop-main">
+                <div class="shop-page-title">兑换商店</div>
                 <div class="shop-hero">
                     <div class="shop-hero-label">可用星值</div>
                     <div class="shop-hero-num"><span id="shopBalanceNum">0</span><img src="icon_star.svg" style="width: 26px; height: 26px; object-fit: contain;"></div>
                     <div class="shop-hero-tip" id="shopHeroTip">本月待结算 0 星值</div>
+                    <img class="hero-decor" src="decor_pig.png" alt="" onerror="this.remove()">
                 </div>
 
                 <div class="section-wrapper">
-                    <div class="section-title"><span>MONEY</span></div>
                     <div id="moneyCardSlot" class="shop-grid money-grid"></div>
                 </div>
 
@@ -1238,13 +1278,16 @@
 
     <div class="bottom-bar">
         <button class="bottom-btn active" id="navHome" data-view="home">
-            <img src="icon_nav_home.svg" class="zoom-icon" style="width: 20px; height: 20px;">
+            <img class="zoom-icon nav-icon-default" src="icon_nav_home.svg" style="width: 20px; height: 20px;">
+            <img class="zoom-icon nav-icon-active" src="icon_nav_home_active.svg" style="width: 20px; height: 20px;" onerror="this.closest('.bottom-btn').classList.add('no-active-icon');this.remove()">
         </button>
         <button class="bottom-btn" id="navShop" data-view="shop">
-            <img src="icon_nav_shop.svg" class="zoom-icon" style="width: 20px; height: 20px;">
+            <img class="zoom-icon nav-icon-default" src="icon_nav_shop.svg" style="width: 20px; height: 20px;">
+            <img class="zoom-icon nav-icon-active" src="icon_nav_shop_active.svg" style="width: 20px; height: 20px;" onerror="this.closest('.bottom-btn').classList.add('no-active-icon');this.remove()">
         </button>
         <button class="bottom-btn" id="navStats" data-view="stats">
-            <img src="icon_nav_stats.svg" class="zoom-icon" style="width: 20px; height: 20px;">
+            <img class="zoom-icon nav-icon-default" src="icon_nav_stats.svg" style="width: 20px; height: 20px;">
+            <img class="zoom-icon nav-icon-active" src="icon_nav_stats_active.svg" style="width: 20px; height: 20px;" onerror="this.closest('.bottom-btn').classList.add('no-active-icon');this.remove()">
         </button>
     </div>
 
@@ -2426,32 +2469,33 @@
                 const redeemed = calcRedeemedStars();
                 const balance = settled - redeemed;
 
-                // 纯展示：只在当月最后一天显示 20（蓝色、无图标，与上方一致），日常显示灰色 0
+                // 纯展示：只在当月最后一天显示 20（蓝色，与上方一致），日常显示灰色 0；均带等高星星
                 const bjNow = getBeijingNow();
                 const isMonthLastDay = bjNow.getDate() === new Date(bjNow.getFullYear(), bjNow.getMonth() + 1, 0).getDate();
+                const star = `<img class="stat-star" src="icon_star.svg" alt="">`;
                 const monthBonusCell = isMonthLastDay
-                    ? `<div class="month-bonus-on">20</div>`
-                    : `<div class="month-bonus-off">0</div>`;
+                    ? `<div class="val">20${star}</div>`
+                    : `<div class="stat-zero">0${star}</div>`;
 
                 el.innerHTML = `
                     <div class="stats-layout">
                         <div class="section-wrapper">
                             <div class="section-title"><span>星值统计</span></div>
                             <div style="padding:4px 4px 12px;">
-                                <div class="redeem-log-row stat-row"><div class="lbl">今日获得</div><div class="val">${calcTodayStars()}</div></div>
-                                <div class="redeem-log-row stat-row"><div class="lbl">本月获得（未结算）</div><div class="val">${monthData.total}</div></div>
-                                <div class="redeem-log-row stat-row"><div class="lbl">已结算累计</div><div class="val">${settled}</div></div>
-                                <div class="redeem-log-row stat-row"><div class="lbl">已兑换消耗</div><div class="val">${redeemed}</div></div>
-                                <div class="redeem-log-row stat-row hl"><div class="lbl">可用星值</div><div class="val">${Math.max(0, balance)}</div></div>
+                                <div class="redeem-log-row stat-row"><div class="lbl">今日获得</div><div class="val">${calcTodayStars()}${star}</div></div>
+                                <div class="redeem-log-row stat-row"><div class="lbl">本月获得（未结算）</div><div class="val">${monthData.total}${star}</div></div>
+                                <div class="redeem-log-row stat-row"><div class="lbl">已结算累计</div><div class="val">${settled}${star}</div></div>
+                                <div class="redeem-log-row stat-row"><div class="lbl">已兑换消耗</div><div class="val">${redeemed}${star}</div></div>
+                                <div class="redeem-log-row stat-row hl"><div class="lbl">可用星值</div><div class="val">${Math.max(0, balance)}${star}</div></div>
                             </div>
                         </div>
 
                         <div class="section-wrapper">
                             <div class="section-title"><span>本月明细</span></div>
                             <div style="padding:4px 4px 12px;">
-                                <div class="redeem-log-row"><div>额外任务奖励</div><div style="color:var(--accent);">${monthData.extraSum}</div></div>
-                                <div class="redeem-log-row"><div>考试任务奖励</div><div style="color:var(--accent);">${monthData.examSum}</div></div>
-                                <div class="redeem-log-row"><div>月底结算奖励</div>${monthBonusCell}</div>
+                                <div class="redeem-log-row stat-row"><div class="lbl">额外任务奖励</div><div class="val">${monthData.extraSum}${star}</div></div>
+                                <div class="redeem-log-row stat-row"><div class="lbl">考试任务奖励</div><div class="val">${monthData.examSum}${star}</div></div>
+                                <div class="redeem-log-row stat-row"><div class="lbl">月底结算奖励</div>${monthBonusCell}</div>
                             </div>
                         </div>
                     </div>
