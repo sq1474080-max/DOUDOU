@@ -1099,7 +1099,7 @@
 
     <div class="app-header">
         <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 儿童模式</button>
-        <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 管理员</button>
+        <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 家长模式</button>
         <button class="header-btn" id="exportCsvBtn"><img src="icon_export.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 导出CSV</button>
     </div>
 
@@ -1695,7 +1695,7 @@
                     if (task.category !== category) return false;
                     // 打过卡的任务仍显示（带完成态）；其余按有效期判断是否该出现
                     if (todayCheckTaskIds.has(task.id)) return true;
-                    // 管理员：已过截止的周期任务若有打卡，仍显示，便于取消打卡
+                    // 家长模式：已过截止的周期任务若有打卡，仍显示，便于取消打卡
                     if (isAdminOp && isPeriodTask(task) && isPeriodTaskChecked(task)) return true;
                     return isTaskInValidPeriod(task, today);
                 });
@@ -1806,7 +1806,7 @@
                 const isAdminOp = (currentRole === 'admin' && isAdminAuthenticated);
                 let todayExtras;
                 if (isAdminOp) {
-                    // 管理员：显示最近 7 天，改过日期的历史任务仍可见、可编辑
+                    // 家长模式：显示最近 7 天，改过日期的历史任务仍可见、可编辑
                     const from = shiftDateStr(today, -6);
                     todayExtras = state.extraTasks
                         .filter(t => (t.createdDate || '') >= from && (t.createdDate || '') <= today)
@@ -2571,7 +2571,7 @@
                     return;
                 }
 
-                // 非周期任务：历史日期的打卡不可取消（跨天不可改），管理员可操作
+                // 非周期任务：历史日期的打卡不可取消（跨天不可改），家长模式可操作
                 const existingIndex = state.checkins.findIndex(c => c.date === today && c.taskId === taskId && !c.isExtra);
                 if (existingIndex !== -1) {
                     state.checkins.splice(existingIndex, 1);
@@ -2595,7 +2595,7 @@
 
                 const existingIndex = state.checkins.findIndex(c => c.taskId === extraId && c.isExtra);
                 if (existingIndex !== -1) {
-                    // 统一北京时间：只允许取消当天产生的打卡（管理员不受限）
+                    // 统一北京时间：只允许取消当天产生的打卡（家长模式不受限）
                     if (state.checkins[existingIndex].date !== getBeijingDateStr() && currentRole !== 'admin') {
                         showToast('过期的打卡不可取消', false);
                         return;
@@ -3251,7 +3251,7 @@
                 document.getElementById('btnAdminMode').addEventListener('click', () => {
                     if (isAdminAuthenticated && currentRole === 'admin') return;
                     showModal({
-                        title: '管理员验证',
+                        title: '家长模式验证',
                         contentHTML: `<input id="pwdInput" type="password" placeholder="请输入密码" autofocus style="text-align:center; letter-spacing:5px;" />`,
                         confirmText: '进入',
                         onConfirm: () => {
@@ -3260,7 +3260,7 @@
                                 currentRole = 'admin';
                                 isAdminAuthenticated = true;
                                 renderAll();
-                                showToast('欢迎回来，管理员');
+                                showToast('欢迎回来，家长模式');
                                 return true;
                             } else {
                                 alert('密码错误');
