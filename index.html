@@ -651,7 +651,7 @@
             right: 0; bottom: 0;
             height: calc(100% + 56px);
             width: auto;
-            max-width: 70%;
+            max-width: 46%;
             object-fit: contain;
             object-position: bottom right;
             z-index: 5;
@@ -902,12 +902,31 @@
             background: #ffffff;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
         }
-        .bottom-btn .nav-icon-active { display: none; }
-        .bottom-btn.active .nav-icon-default { display: none; }
-        .bottom-btn.active .nav-icon-active { display: block; }
-        .bottom-btn .nav-icon-default { opacity: 0.55; }
-        .bottom-btn .nav-icon-active { opacity: 1; }
-        .bottom-btn.active.no-active-icon .nav-icon-default { display: block; opacity: 1; }
+
+        /* 新增的图标动画控制 */
+        .nav-icon-svg {
+            width: 20px;
+            height: 20px;
+            display: block;
+            transform-origin: center bottom;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .nav-icon-svg .active-layer {
+            clip-path: inset(100% 0 0 0);
+            transition: clip-path 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .bottom-btn.active .nav-icon-svg {
+            transform: scale(1.15) translateY(-2px);
+            animation: breathe 3s ease-in-out infinite alternate;
+        }
+        .bottom-btn.active .nav-icon-svg .active-layer {
+            clip-path: inset(0 0 0 0);
+        }
+        @keyframes breathe {
+            0% { transform: scale(1.15) translateY(-2px); }
+            100% { transform: scale(1.15) translateY(0px); }
+        }
+        /* 动画控制结束 */
 
         .modal-overlay {
             position: fixed;
@@ -1202,18 +1221,44 @@
         <div id="statsPageContent"></div>
     </div>
 
+    <!-- 底部导航栏（全部替换为带动态注水效果的 SVG） -->
     <div class="bottom-bar">
+        <!-- 首页 -->
         <button class="bottom-btn active" id="navHome" data-view="home">
-            <img class="zoom-icon nav-icon-default" src="icon_nav_home.svg" style="width: 20px; height: 20px;">
-            <img class="zoom-icon nav-icon-active" src="icon_nav_home_active.svg" style="width: 20px; height: 20px;" onerror="this.closest('.bottom-btn').classList.add('no-active-icon');this.remove()">
+            <svg class="nav-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <g fill="#ffffff" opacity="0.7">
+                    <path opacity="0.4" d="M20.0402 6.81969L14.2802 2.78969C12.7102 1.68969 10.3002 1.74969 8.79023 2.91969L3.78023 6.82969C2.78023 7.60969 1.99023 9.20969 1.99023 10.4697V17.3697C1.99023 19.9197 4.06023 21.9997 6.61023 21.9997H17.3902C19.9402 21.9997 22.0102 19.9297 22.0102 17.3797V10.5997C22.0102 9.24969 21.1402 7.58969 20.0402 6.81969Z"/>
+                    <path d="M12 18.75C11.59 18.75 11.25 18.41 11.25 18V15C11.25 14.59 11.59 14.25 12 14.25C12.41 14.25 12.75 14.59 12.75 15V18C12.75 18.41 12.41 18.75 12 18.75Z"/>
+                </g>
+                <g class="active-layer" fill="#74b0e1">
+                    <path opacity="0.4" d="M20.0402 6.81969L14.2802 2.78969C12.7102 1.68969 10.3002 1.74969 8.79023 2.91969L3.78023 6.82969C2.78023 7.60969 1.99023 9.20969 1.99023 10.4697V17.3697C1.99023 19.9197 4.06023 21.9997 6.61023 21.9997H17.3902C19.9402 21.9997 22.0102 19.9297 22.0102 17.3797V10.5997C22.0102 9.24969 21.1402 7.58969 20.0402 6.81969Z"/>
+                    <path d="M12 18.75C11.59 18.75 11.25 18.41 11.25 18V15C11.25 14.59 11.59 14.25 12 14.25C12.41 14.25 12.75 14.59 12.75 15V18C12.75 18.41 12.41 18.75 12 18.75Z"/>
+                </g>
+            </svg>
         </button>
+
+        <!-- 商店 -->
         <button class="bottom-btn" id="navShop" data-view="shop">
-            <img class="zoom-icon nav-icon-default" src="icon_nav_shop.svg" style="width: 20px; height: 20px;">
-            <img class="zoom-icon nav-icon-active" src="icon_nav_shop_active.svg" style="width: 20px; height: 20px;" onerror="this.closest('.bottom-btn').classList.add('no-active-icon');this.remove()">
+            <svg class="nav-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <g fill="#ffffff" opacity="0.7">
+                    <path d="M18.36 6.64H5.64L4.26 20.23C4.21 20.71 4.58 21.13 5.06 21.13H18.93C19.42 21.13 19.79 20.71 19.73 20.23L18.36 6.64ZM18 5.5C18 3.57 16.43 2 14.5 2H9.5C7.57 2 6 3.57 6 5.5H7.5C7.5 4.4 8.4 3.5 9.5 3.5H14.5C15.6 3.5 16.5 4.4 16.5 5.5H18Z"/>
+                </g>
+                <g class="active-layer" fill="#74b0e1">
+                    <path d="M18.36 6.64H5.64L4.26 20.23C4.21 20.71 4.58 21.13 5.06 21.13H18.93C19.42 21.13 19.79 20.71 19.73 20.23L18.36 6.64ZM18 5.5C18 3.57 16.43 2 14.5 2H9.5C7.57 2 6 3.57 6 5.5H7.5C7.5 4.4 8.4 3.5 9.5 3.5H14.5C15.6 3.5 16.5 4.4 16.5 5.5H18Z"/>
+                </g>
+            </svg>
         </button>
+
+        <!-- 统计 -->
         <button class="bottom-btn" id="navStats" data-view="stats">
-            <img class="zoom-icon nav-icon-default" src="icon_nav_stats.svg" style="width: 20px; height: 20px;">
-            <img class="zoom-icon nav-icon-active" src="icon_nav_stats_active.svg" style="width: 20px; height: 20px;" onerror="this.closest('.bottom-btn').classList.add('no-active-icon');this.remove()">
+            <svg class="nav-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <g fill="#ffffff" opacity="0.7">
+                    <path d="M4 20h3v-6H4v6zm6.5 0h3V9h-3v11zm6.5 0h3V4h-3v16z"/>
+                </g>
+                <g class="active-layer" fill="#74b0e1">
+                    <path d="M4 20h3v-6H4v6zm6.5 0h3V9h-3v11zm6.5 0h3V4h-3v16z"/>
+                </g>
+            </svg>
         </button>
     </div>
 
@@ -1294,46 +1339,30 @@
                 shopItems: [],
                 redemptions: [],
                 archive: { lastCleanupMonth: '', months: {} },
-                profile: { name: 'HEIDI', avatar: '' },
-                _rev: 0
+                profile: { name: 'HEIDI', avatar: '' }
             };
-
-            // 统一规范化：本地加载 / 云端拉取 / 实时推送三处共用。
-            // 关键：无论数据来自哪里都补齐全部字段。旧版云端数据缺 shopItems/redemptions 时，
-            // 若不补齐会直接覆盖本地数据造成“商品消失”，也会让 performCleanupIfNeeded 抛错中断。
-            function normalizeState(raw) {
-                const s = (raw && typeof raw === 'object') ? JSON.parse(JSON.stringify(raw)) : {};
-                s.tasks = (s.tasks || []).map(t => {
-                    let cat = t.category;
-                    if (cat === '校内作业') cat = '校内任务';
-                    if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
-                    const sub = t.subject || '其它';
-                    if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
-                    return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
-                });
-                if (!Array.isArray(s.checkins)) s.checkins = [];
-                if (!Array.isArray(s.exams)) s.exams = [];
-                if (!Array.isArray(s.extraTasks)) s.extraTasks = [];
-                if (!Array.isArray(s.shopItems)) s.shopItems = [];
-                if (!Array.isArray(s.redemptions)) s.redemptions = [];
-                if (!s.profile || typeof s.profile !== 'object') s.profile = { name: 'HEIDI', avatar: '' };
-                if (!s.archive || typeof s.archive !== 'object') s.archive = { lastCleanupMonth: '', months: {} };
-                if (!s.archive.months || typeof s.archive.months !== 'object') s.archive.months = {};
-                if (typeof s.archive.lastCleanupMonth !== 'string') s.archive.lastCleanupMonth = '';
-                s._rev = Number.isFinite(s._rev) ? s._rev : 0;
-                return s;
-            }
-
-            // 每次本地改动推高修订号并保持单调，用于拒绝“旧数据覆盖新数据”
-            function bumpRev() {
-                state._rev = Math.max(Date.now(), (state._rev || 0) + 1);
-            }
 
             function loadStateLocal() {
                 const stored = localStorage.getItem(STORAGE_KEY);
                 if (stored) {
                     try {
-                        return normalizeState(JSON.parse(stored));
+                        const parsed = JSON.parse(stored);
+                        parsed.tasks = (parsed.tasks || []).map(t => {
+                            let cat = t.category;
+                            if (cat === '校内作业') cat = '校内任务';
+                            if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
+                            let sub = t.subject || '其它';
+                            if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
+                            return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
+                        });
+                        if (!parsed.profile) parsed.profile = { name: 'HEIDI', avatar: '' };
+                        if (!parsed.exams) parsed.exams = [];
+                        if (!parsed.extraTasks) parsed.extraTasks = [];
+                        if (!parsed.checkins) parsed.checkins = [];
+                        if (!parsed.shopItems) parsed.shopItems = [];
+                        if (!parsed.redemptions) parsed.redemptions = [];
+                        if (!parsed.archive) parsed.archive = { lastCleanupMonth: '', months: {} };
+                        return parsed;
                     } catch (e) {}
                 }
                 return JSON.parse(JSON.stringify(defaultState));
@@ -1355,47 +1384,27 @@
                 return pendingLocalWrite && (Date.now() - pendingSince) < 10000;
             }
 
-            async function uploadStateWithRetry(payload, retries = 2) {
-                for (let attempt = 0; attempt <= retries; attempt++) {
-                    try {
-                        await supabaseClient.from('app_state').upsert({
-                            id: 1, state_data: payload, updated_at: new Date().toISOString()
-                        });
-                        return true;
-                    } catch (error) {
-                        console.warn(`云同步上传失败（第 ${attempt + 1} 次）`, error);
-                        if (attempt < retries) await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
-                    }
-                }
-                return false;
-            }
-
             function saveState() {
-                bumpRev();
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                 if (supabaseClient && !isSyncingFromCloud) {
                     pendingLocalWrite = true;
                     pendingSince = Date.now();
                     if (saveTimeout) clearTimeout(saveTimeout);
                     saveTimeout = setTimeout(async () => {
-                        // 上传时重新取最新 state，避免 debounce 窗口内丢失后续改动
-                        const payload = JSON.parse(JSON.stringify(state));
-                        const ok = await uploadStateWithRetry(payload);
+                        try {
+                            const payload = JSON.parse(JSON.stringify(state));
+                            await supabaseClient.from('app_state').upsert({ id: 1, state_data: payload, updated_at: new Date().toISOString() });
+                        } catch (error) {}
                         pendingLocalWrite = false;
-                        if (!ok) showToast('云端同步失败，数据已存在本机', false);
                     }, 800);
                 }
             }
 
-            // ============ 归档 + 清理：保留最近 3 个自然月 ============
-            // 规则：每次初始化时若当前月 ≠ lastCleanupMonth，则把 "早于 3 个月前边界" 的月份
-            // 汇总归档到 archive.months，再从本地/云端数据中删除，保证星值账目精确。
             function performCleanupIfNeeded() {
                 if (!state.archive) state.archive = { lastCleanupMonth: '', months: {} };
                 const curMonth = getBeijingMonthPrefix(0);
                 if (state.archive.lastCleanupMonth === curMonth) return false;
 
-                // 保留当月、上月、上上月 → cutoff 为"上上月的月初"
                 const cutoff = getBeijingMonthPrefix(-2);
 
                 const oldMonths = new Set();
@@ -1430,34 +1439,47 @@
                     const { data, error } = await supabaseClient.from('app_state').select('state_data').eq('id', 1).single();
                     if (error) throw error;
                     if (data && data.state_data && Object.keys(data.state_data).length > 0) {
-                        const incoming = normalizeState(data.state_data);
-                        // 只接受不比本地旧的版本，防止其他设备的旧数据把刚加的商品覆盖掉
-                        if (incoming._rev < (state._rev || 0)) return;
                         isSyncingFromCloud = true;
-                        state = incoming;
+                        state = data.state_data;
+                        state.tasks = (state.tasks || []).map(t => {
+                            let cat = t.category;
+                            if (cat === '校内作业') cat = '校内任务';
+                            if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
+                            let sub = t.subject || '其它';
+                            if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
+                            return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
+                        });
+                        if (!state.archive) state.archive = { lastCleanupMonth: '', months: {} };
                         performCleanupIfNeeded();
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                         renderAll();
                         isSyncingFromCloud = false;
                     }
-                } catch (error) { console.warn('云同步拉取失败', error); }
+                } catch (error) {}
             }
 
             function setupRealtime() {
                 if (!supabaseClient) return;
                 supabaseClient.channel('app_state_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'app_state' }, payload => {
                     if (hasPendingLocalWrite()) return;
-                    const rawState = payload.new && payload.new.state_data;
-                    if (!rawState || Object.keys(rawState).length === 0) return;
-                    const incoming = normalizeState(rawState);
-                    // 同样拒绝旧版本覆盖；这条路径是“加完商品过一会消失”的最常见来源
-                    if (incoming._rev < (state._rev || 0)) return;
-                    isSyncingFromCloud = true;
-                    state = incoming;
-                    performCleanupIfNeeded();
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                    renderAll();
-                    setTimeout(() => { isSyncingFromCloud = false; }, 100);
+                    const newState = payload.new.state_data;
+                    if (newState && Object.keys(newState).length > 0) {
+                        isSyncingFromCloud = true;
+                        state = newState;
+                        state.tasks = (state.tasks || []).map(t => {
+                            let cat = t.category;
+                            if (cat === '校内作业') cat = '校内任务';
+                            if (cat === '校外作业' || cat === '课外辅导') cat = '校外任务';
+                            let sub = t.subject || '其它';
+                            if (!t.startDate) t.startDate = t.createdDate || '2026-11-01';
+                            return { ...t, category: cat, subject: sub, endDate: t.endDate || '' };
+                        });
+                        if (!state.archive) state.archive = { lastCleanupMonth: '', months: {} };
+                        performCleanupIfNeeded();
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                        renderAll();
+                        setTimeout(() => { isSyncingFromCloud = false; }, 100);
+                    }
                 }).subscribe();
             }
 
@@ -1510,7 +1532,6 @@
                 return { total: extraSum + examSum, extraSum, examSum, monthlyBonus: 0, prefix };
             }
 
-            // 已结算累计 = 归档月份 settled 之和 + 现存数据中"过去月份"的结算
             function calcSettledStars() {
                 const cur = getBeijingMonthPrefix(0);
                 let total = 0;
@@ -1523,7 +1544,6 @@
                 return total;
             }
 
-            // 已兑换消耗 = 归档月份 redeemed 之和 + 现存 redemptions
             function calcRedeemedStars() {
                 let total = 0;
                 const archived = (state.archive && state.archive.months) || {};
@@ -1589,11 +1609,16 @@
             function getDayCompletionStatus(dateStr) {
                 const today = getBeijingDateStr();
                 if (dateStr >= today) return 'none';
-                // 额外任务不记录在未完成任务里：只针对"完成"计星值，日历完成状态只看常规任务
                 const dueTasks = state.tasks.filter(t => isTaskDueOnDate(t, dateStr));
-                if (dueTasks.length === 0) return 'none';
-                const completed = dueTasks.filter(t => isTaskDoneOnDate(t, dateStr)).length;
-                return completed >= dueTasks.length ? 'completed' : 'incomplete';
+                const extraTasks = state.extraTasks.filter(t => t.createdDate === dateStr);
+                const total = dueTasks.length + extraTasks.length;
+                if (total === 0) return 'none';
+                let completed = 0;
+                dueTasks.forEach(t => { if (isTaskDoneOnDate(t, dateStr)) completed++; });
+                extraTasks.forEach(t => {
+                    if (state.checkins.some(c => c.date === dateStr && c.taskId === t.id && c.isExtra)) completed++;
+                });
+                return completed >= total ? 'completed' : 'incomplete';
             }
 
             function renderProfile() {
@@ -1772,18 +1797,16 @@
                 if (!container) return;
 
                 const today = getBeijingDateStr();
-                // 额外任务的日期 = 完成截止时间。显示规则：
-                //   截止当天 24:00 之前（today <= 截止日）且未打卡 → 显示，可打卡；
-                //   已打卡 或 今天已过截止日 → 不在主页面显示。
-                // 截止时间之前家长可随时改期（延期），改完仍会继续显示。
-                const todayExtras = state.extraTasks
-                    .filter(t => {
-                        const deadline = t.createdDate || '';
-                        if (!deadline || today > deadline) return false; // 已过截止日
-                        const completed = state.checkins.some(c => c.taskId === t.id && c.isExtra);
-                        return !completed; // 已打卡不显示
-                    })
-                    .sort((a, b) => (a.createdDate || '').localeCompare(b.createdDate || ''));
+                const isAdminOp = (currentRole === 'admin' && isAdminAuthenticated);
+                let todayExtras;
+                if (isAdminOp) {
+                    const from = shiftDateStr(today, -6);
+                    todayExtras = state.extraTasks
+                        .filter(t => (t.createdDate || '') >= from && (t.createdDate || '') <= today)
+                        .sort((a, b) => (b.createdDate || '').localeCompare(a.createdDate || ''));
+                } else {
+                    todayExtras = state.extraTasks.filter(t => t.createdDate === today).slice(-3);
+                }
 
                 if (todayExtras.length === 0) {
                     container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">暂无额外任务</div>`;
@@ -1791,14 +1814,15 @@
                 }
 
                 container.innerHTML = todayExtras.map(task => {
+                    const completed = state.checkins.some(c => c.taskId === task.id && c.isExtra);
                     return `
-                        <div class="task-item">
+                        <div class="task-item ${completed ? 'completed' : ''}">
                             <div class="task-icon"><img src="icon_gift_card.png" class="zoom-icon" style="width: 26px; height: 26px; object-fit: contain;"></div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(task.name)}</div>
                                 <div class="task-meta">
                                     <span class="tag tag-orange">⭐${task.reward}</span>
-                                    <span class="tag tag-date">截止 ${task.createdDate}</span>
+                                    <span class="tag tag-date">${task.createdDate}</span>
                                 </div>
                             </div>
                             ${currentRole === 'admin' && isAdminAuthenticated ? `
@@ -1806,13 +1830,12 @@
                                 <button class="icon-btn" data-action="edit-extra" data-extra-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
                                 <button class="icon-btn" data-action="delete-extra" data-extra-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
                             </div>` : ''}
-                            <div class="task-check" data-action="toggle-extra" data-extra-id="${task.id}"></div>
+                            <div class="task-check" data-action="toggle-extra" data-extra-id="${task.id}">${completed ? '✓' : ''}</div>
                         </div>
                     `;
                 }).join('');
             }
 
-            // 考试任务：只显示当月
             function renderExams() {
                 const container = document.getElementById('examTaskList');
                 if (!container) return;
@@ -2817,11 +2840,8 @@
                         <input id="extraNameInput" type="text" value="${escapeHtml(task.name)}" placeholder="如：拼图奖励" />
                         <label>星值 (-50 到 50)</label>
                         <input id="extraRewardInput" type="number" min="-50" max="50" value="${task.reward}" />
-                        <label>完成截止时间</label>
+                        <label>日期</label>
                         <input id="extraDateInput" type="date" value="${task.createdDate || today}" />
-                        <div style="font-size:12px;color:var(--text-sub);font-weight:700;line-height:1.6;margin-top:6px;">
-                            截止当天 24:00 前可打卡；截止前可随时改期延期。逾期或已完成的任务将不在主页面显示。
-                        </div>
                     `,
                     confirmText: '保存',
                     onConfirm: () => {
@@ -2936,7 +2956,6 @@
                     });
                 });
 
-                // 刷新按钮：整页刷新，三个页面均同步
                 document.getElementById('refreshBtn').addEventListener('click', () => {
                     location.reload();
                 });
@@ -3100,7 +3119,6 @@
                 if (!state.archive) state.archive = { lastCleanupMonth: '', months: {} };
                 if (!state.profile) state.profile = { name: 'HEIDI', avatar: '' };
 
-                // 跨月自动清理旧数据并归档
                 if (performCleanupIfNeeded()) {
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                 }
