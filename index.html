@@ -1033,28 +1033,6 @@
             .task-grid-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
             #extraTaskList { display: flex; flex-direction: column; gap: 16px; }
         }
-        .nav-home-svg {
-    width: 20px;
-    height: 20px;
-    display: block;
-    transform-origin: center bottom;
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.nav-home-svg .active-layer {
-    clip-path: inset(100% 0 0 0);
-    transition: clip-path 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.bottom-btn.active .nav-home-svg {
-    transform: scale(1.15) translateY(-2px);
-    animation: breathe 3s ease-in-out infinite alternate;
-}
-.bottom-btn.active .nav-home-svg .active-layer {
-    clip-path: inset(0 0 0 0);
-}
-@keyframes breathe {
-    0% { transform: scale(1.15) translateY(-2px); }
-    100% { transform: scale(1.15) translateY(0px); }
-}
     </style>
 </head>
 <body>
@@ -1225,18 +1203,18 @@
     </div>
 
     <div class="bottom-bar">
-       <button class="bottom-btn active" id="navHome" data-view="home">
-    <svg class="nav-home-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <g fill="#ffffff" opacity="0.7">
-            <path opacity="0.4" d="M20.0402 6.81969L14.2802 2.78969C12.7102 1.68969 10.3002 1.74969 8.79023 2.91969L3.78023 6.82969C2.78023 7.60969 1.99023 9.20969 1.99023 10.4697V17.3697C1.99023 19.9197 4.06023 21.9997 6.61023 21.9997H17.3902C19.9402 21.9997 22.0102 19.9297 22.0102 17.3797V10.5997C22.0102 9.24969 21.1402 7.58969 20.0402 6.81969Z"/>
-            <path d="M12 18.75C11.59 18.75 11.25 18.41 11.25 18V15C11.25 14.59 11.59 14.25 12 14.25C12.41 14.25 12.75 14.59 12.75 15V18C12.75 18.41 12.41 18.75 12 18.75Z"/>
-        </g>
-        <g class="active-layer" fill="#74b0e1">
-            <path opacity="0.4" d="M20.0402 6.81969L14.2802 2.78969C12.7102 1.68969 10.3002 1.74969 8.79023 2.91969L3.78023 6.82969C2.78023 7.60969 1.99023 9.20969 1.99023 10.4697V17.3697C1.99023 19.9197 4.06023 21.9997 6.61023 21.9997H17.3902C19.9402 21.9997 22.0102 19.9297 22.0102 17.3797V10.5997C22.0102 9.24969 21.1402 7.58969 20.0402 6.81969Z"/>
-            <path d="M12 18.75C11.59 18.75 11.25 18.41 11.25 18V15C11.25 14.59 11.59 14.25 12 14.25C12.41 14.25 12.75 14.59 12.75 15V18C12.75 18.41 12.41 18.75 12 18.75Z"/>
-        </g>
-    </svg>
-</button>
+        <button class="bottom-btn active" id="navHome" data-view="home">
+            <img class="zoom-icon nav-icon-default" src="icon_nav_home.svg" style="width: 20px; height: 20px;">
+            <img class="zoom-icon nav-icon-active" src="icon_nav_home_active.svg" style="width: 20px; height: 20px;" onerror="this.closest('.bottom-btn').classList.add('no-active-icon');this.remove()">
+        </button>
+        <button class="bottom-btn" id="navShop" data-view="shop">
+            <img class="zoom-icon nav-icon-default" src="icon_nav_shop.svg" style="width: 20px; height: 20px;">
+            <img class="zoom-icon nav-icon-active" src="icon_nav_shop_active.svg" style="width: 20px; height: 20px;" onerror="this.closest('.bottom-btn').classList.add('no-active-icon');this.remove()">
+        </button>
+        <button class="bottom-btn" id="navStats" data-view="stats">
+            <img class="zoom-icon nav-icon-default" src="icon_nav_stats.svg" style="width: 20px; height: 20px;">
+            <img class="zoom-icon nav-icon-active" src="icon_nav_stats_active.svg" style="width: 20px; height: 20px;" onerror="this.closest('.bottom-btn').classList.add('no-active-icon');this.remove()">
+        </button>
     </div>
 
     <div id="toastContainer" class="toast-container"></div>
