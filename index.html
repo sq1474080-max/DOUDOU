@@ -276,12 +276,12 @@
         }
 
         .calendar-card {
-            background: var(--bg-wrapper);
+            background: linear-gradient(135deg, #71c1ff 0%, #3695e3 55%, #2678c9 100%);
             border-radius: var(--radius-card);
             padding: 20px;
-            box-shadow: var(--shadow-soft);
+            box-shadow: 0 8px 20px rgba(54,149,227,.28);
             width: 100%;
-            border: 1px solid var(--border-light);
+            border: none;
         }
 
         .calendar-header {
@@ -294,25 +294,27 @@
 
         .calendar-header .month-label {
             font-weight: 800;
-            color: var(--text-main);
+            color: #ffffff;
             font-size: 18px;
         }
 
         .calendar-nav-btn {
             position: absolute;
-            background: var(--bg-page);
+            background: transparent;
             border: none;
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            font-size: 18px;
+            font-size: 20px;
+            line-height: 1;
             cursor: pointer;
-            color: var(--text-main);
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            font-weight: 700;
         }
+        .calendar-nav-btn:hover { background: transparent; opacity: .75; }
         #prevMonth { left: 0; }
         #nextMonth { right: 0; }
 
@@ -321,7 +323,7 @@
             grid-template-columns: repeat(7, 1fr);
             text-align: center;
             font-size: 12px;
-            color: var(--text-sub);
+            color: rgba(255,255,255,.92);
             margin-bottom: 8px;
             font-weight: 700;
         }
@@ -343,17 +345,19 @@
             font-size: 14px;
             font-weight: 700;
             border-radius: 50%;
-            color: var(--text-main);
+            color: #ffffff;
         }
 
+        /* 今天：白色圆圈底 + 蓝色字 */
         .calendar-day.today {
-            background: var(--accent-light);
-            color: var(--accent);
+            background: #ffffff;
+            color: #2678c9;
             font-weight: 900;
         }
+        /* 已打卡：浅蓝底 + 蓝字（与原"今天"配色互换） */
         .calendar-day.completed {
-            background: var(--accent);
-            color: #ffffff;
+            background: #c0e2f9;
+            color: #2678c9;
             font-weight: 900;
         }
         .calendar-day.incomplete {
@@ -521,13 +525,40 @@
             color: transparent;
             cursor: pointer;
             flex-shrink: 0;
-            transition: 0.2s;
+            transition: background .3s ease, border-color .3s ease;
             background: var(--bg-wrapper);
+            position: relative;
         }
         .task-item.completed .task-check {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: var(--bg-nav);
+            background: #3695e3;
+            border-color: #3695e3;
+        }
+        /* --- 打勾动画 B：扁平粒子迸发 + 勾线描出；取消时反向擦除+粒子内吸+圆回灰 --- */
+        .task-check svg.tick { width: 26px; height: 26px; overflow: visible; position: relative; z-index: 3; }
+        .task-check svg.tick path { fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+        .task-check svg.tick .p1 { stroke-dasharray: 9;  stroke-dashoffset: 9; }
+        .task-check svg.tick .p2 { stroke-dasharray: 17; stroke-dashoffset: 17; }
+        .task-check .spark { position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; border-radius: 50%;
+                             background: #2f8ce0; opacity: 0; pointer-events: none; z-index: 2; }
+        .task-item.completed .task-check svg.tick .p1 { animation: tickDraw .2s ease-out .04s forwards; }
+        .task-item.completed .task-check svg.tick .p2 { animation: tickDraw .26s ease-out .18s forwards; }
+        .task-item.completed .task-check .spark { animation: tickBurst .55s cubic-bezier(.2,.7,.3,1) .12s both; }
+        @keyframes tickDraw { to { stroke-dashoffset: 0; } }
+        @keyframes tickBurst {
+            0%   { transform: translate(0,0) scale(0); opacity: 0; }
+            25%  { opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(.4); opacity: 0; }
+        }
+        /* 取消勾选中间态：勾线反向擦除 + 粒子内吸 + 圆轻微收缩回灰 */
+        .task-check.canceling { animation: tickUnc .34s ease-out both; }
+        .task-check.canceling svg.tick .p1 { animation: tickUndraw .2s ease-out .02s both; }
+        .task-check.canceling svg.tick .p2 { animation: tickUndraw .2s ease-out .1s both; }
+        .task-check.canceling .spark { animation: tickImplode .3s ease-in both; }
+        @keyframes tickUnc { 0% { transform: scale(1); } 45% { transform: scale(.86); } 100% { transform: scale(1); } }
+        @keyframes tickUndraw { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 17; } }
+        @keyframes tickImplode {
+            0%   { transform: translate(var(--dx), var(--dy)) scale(.4); opacity: .9; }
+            100% { transform: translate(0,0) scale(0); opacity: 0; }
         }
 
         .task-actions {
@@ -640,7 +671,12 @@
             flex-shrink: 0;
         }
 
-        .view-page { padding-bottom: 90px; }
+        .view-page { padding-bottom: 90px; touch-action: pan-y; }
+        /* --- 页面区块切换：平滑滑入 + 撞边侧粒子（顶栏/底栏不动） --- */
+        .view-page > .layout-container,
+        .view-page > .shop-layout,
+        .view-page > #statsPageContent { will-change: transform, opacity; }
+        .view-particle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999; }
         .shop-page-title {
             font-size: 22px; font-weight: 900; color: var(--text-main);
             margin: 2px 4px 0;
@@ -659,7 +695,7 @@
             user-select: none; -webkit-user-select: none;
         }
         .shop-hero {
-            background: linear-gradient(135deg, var(--accent) 0%, #5a9dd4 100%);
+            background: linear-gradient(135deg, #71c1ff 0%, #3695e3 55%, #2678c9 100%);
             border-radius: var(--radius-wrapper);
             padding: 24px 26px;
             color: #fff;
@@ -1654,6 +1690,18 @@
                 return 'tag-orange';
             }
 
+            // 打勾动画 B：生成带 SVG 勾线与粒子迸发的圆形勾选框
+            function tickCheckHtml(completed, action, idAttr) {
+                const sparks = [
+                    [-20,-12],[22,-10],[-16,16],[18,18],[0,-24]
+                ].map(p => `<span class="spark" style="--dx:${p[0]}px;--dy:${p[1]}px"></span>`).join('');
+                const tick = `<svg class="tick" viewBox="0 0 36 36">
+                    <path class="p1" d="M10 18.5 L15.5 24"></path>
+                    <path class="p2" d="M15.5 24 L26 12.5"></path>
+                </svg>`;
+                return `<div class="task-check" data-action="${action}" ${idAttr}>${sparks}${tick}</div>`;
+            }
+
             function renderTaskGroup(containerId, category, countBadgeId) {
                 const container = document.getElementById(containerId);
                 if (!container) return;
@@ -1745,7 +1793,7 @@
 
                 const checkHtml = overdue
                     ? `<span class="overdue-badge">未完成</span>`
-                    : `<div class="task-check" data-action="toggle-check" data-task-id="${task.id}">${completed ? '✓' : ''}</div>`;
+                    : tickCheckHtml(completed, 'toggle-check', `data-task-id="${task.id}"`);
 
                 return `
                     <div class="task-item ${completed ? 'completed' : ''} ${overdue ? 'overdue' : ''}" data-task-id="${task.id}">
@@ -1806,7 +1854,7 @@
                                 <button class="icon-btn" data-action="edit-extra" data-extra-id="${task.id}"><img src="icon_edit.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
                                 <button class="icon-btn" data-action="delete-extra" data-extra-id="${task.id}"><img src="icon_delete.svg" class="zoom-icon" style="width: 12px; height: 12px;"></button>
                             </div>` : ''}
-                            <div class="task-check" data-action="toggle-extra" data-extra-id="${task.id}">${completed ? '✓' : ''}</div>
+                            ${tickCheckHtml(completed, 'toggle-extra', `data-extra-id="${task.id}"`)}
                         </div>
                     `;
                 }).join('');
@@ -1994,7 +2042,101 @@
             let currentView = 'home';
             let selectedShopIds = new Set();
 
+            // ===== 页面区块切换动画（顶栏/底栏不动，只动页面内容） =====
+            const VIEW_ORDER = ['home', 'shop', 'stats'];
+            let viewAnimating = false;
+
+            // 左右滑动切换页面（手机/iPad 触屏，桌面可用鼠标拖拽）
+            function bindSwipe() {
+                let sx = 0, sy = 0, active = false, decided = false;
+                const isInteractive = (t) => t && t.closest('button, input, select, textarea, .modal-overlay, .modal-content, [data-action]');
+                document.addEventListener('pointerdown', (e) => {
+                    if (e.button !== undefined && e.button !== 0) return;
+                    if (isInteractive(e.target)) return;
+                    active = true; decided = false; sx = e.clientX; sy = e.clientY;
+                }, { passive: true });
+                document.addEventListener('pointermove', (e) => {
+                    if (!active) return;
+                    const dx = e.clientX - sx, dy = e.clientY - sy;
+                    if (!decided) {
+                        if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { active = false; return; }
+                        if (Math.abs(dx) > 8) decided = true;
+                    }
+                }, { passive: true });
+                const finish = (e) => {
+                    if (!active) return;
+                    active = false;
+                    const dx = e.clientX - sx;
+                    if (Math.abs(dx) < 45) return;
+                    const idx = VIEW_ORDER.indexOf(currentView);
+                    const target = dx < 0 ? idx + 1 : idx - 1;
+                    if (target >= 0 && target < VIEW_ORDER.length && VIEW_ORDER[target] !== currentView) {
+                        switchView(VIEW_ORDER[target]);
+                    }
+                };
+                document.addEventListener('pointerup', finish, { passive: true });
+                document.addEventListener('pointercancel', () => { active = false; }, { passive: true });
+            }
+
+            function viewBlocks(view) {
+                const root = document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1));
+                if (!root) return [];
+                // 取页面内容的顶层块：优先直接子元素，否则取 stage
+                return Array.prototype.slice.call(root.children).filter(el => !el.classList.contains('hidden'));
+            }
+
+            function emitViewParticles(atLeft) {
+                const W = window.innerWidth;
+                const color = 'rgba(214,240,255,.6)';
+                for (let i = 0; i < 4; i++) {
+                    const p = document.createElement('span');
+                    p.className = 'view-particle';
+                    const size = 2.5 + Math.random() * 3;
+                    p.style.width = p.style.height = size + 'px';
+                    p.style.background = color;
+                    p.style.boxShadow = '0 0 4px rgba(200,235,255,.45)';
+                    p.style.left = (atLeft ? 10 : W - 14) + 'px';
+                    p.style.top = (window.innerHeight * .35 + Math.random() * window.innerHeight * .3) + 'px';
+                    document.body.appendChild(p);
+                    const dx = (atLeft ? -1 : 1) * (8 + Math.random() * 16);
+                    const dy = (Math.random() - .5) * 26;
+                    p.animate([
+                        { transform: 'translate(0,0) scale(.5)', opacity: 0 },
+                        { transform: 'translate(' + (dx * .4) + 'px,' + (dy * .4) + 'px) scale(1)', opacity: .4, offset: .3 },
+                        { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.3)', opacity: 0 }
+                    ], { duration: 480 + Math.random() * 160, easing: 'cubic-bezier(.2,.6,.3,1)', fill: 'forwards' })
+                        .onfinish = (function (node) { return function () { node.remove(); }; })(p);
+                }
+            }
+
+            function animateViewSwitch(fromView, toView) {
+                const fromIdx = VIEW_ORDER.indexOf(fromView);
+                const toIdx = VIEW_ORDER.indexOf(toView);
+                const dir = toIdx >= fromIdx ? 1 : -1;
+                const W = window.innerWidth;
+                const oldBlocks = viewBlocks(fromView);
+                const newRoot = document.getElementById('view' + toView.charAt(0).toUpperCase() + toView.slice(1));
+                const newBlocks = newRoot ? Array.prototype.slice.call(newRoot.children) : [];
+                oldBlocks.forEach((blk, i) => {
+                    blk.getAnimations().forEach(a => a.cancel());
+                    blk.animate([
+                        { transform: 'translateX(0)', opacity: 1 },
+                        { transform: 'translateX(' + (-dir * W * .22) + 'px)', opacity: 0 }
+                    ], { duration: 300, delay: i * 25, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'both' });
+                });
+                newBlocks.forEach((blk, i) => {
+                    blk.getAnimations().forEach(a => a.cancel());
+                    blk.animate([
+                        { transform: 'translateX(' + dir * W + 'px)', opacity: 0 },
+                        { transform: 'translateX(0)', opacity: 1 }
+                    ], { duration: 620, delay: 120 + i * 55, easing: 'cubic-bezier(.22,.7,.28,1)', fill: 'both' });
+                });
+                setTimeout(() => emitViewParticles(dir > 0), 120 + 620);
+            }
+
             function switchView(view) {
+                const prevView = currentView;
+                const changed = prevView !== view;
                 currentView = view;
                 ['home', 'shop', 'stats'].forEach(v => {
                     const el = document.getElementById('view' + v.charAt(0).toUpperCase() + v.slice(1));
@@ -2009,6 +2151,7 @@
                 if (view === 'shop') renderShopPage();
                 if (view === 'stats') renderStatsPage();
                 window.scrollTo({ top: 0, behavior: 'auto' });
+                if (changed && !viewAnimating) animateViewSwitch(prevView, view);
             }
 
             function uid() {
@@ -2993,10 +3136,22 @@
                     if (!target) return;
                     const action = target.dataset.action;
 
-                    if (action === 'toggle-check') {
-                        toggleTaskCheck(target.dataset.taskId);
-                    } else if (action === 'toggle-extra') {
-                        toggleExtraCheck(target.dataset.extraId);
+                    if (action === 'toggle-check' || action === 'toggle-extra') {
+                        // 取消勾选：先播反向擦除+粒子内吸，动画结束再改状态
+                        const item = target.closest('.task-item');
+                        const isCancel = item && item.classList.contains('completed');
+                        const doToggle = () => {
+                            if (action === 'toggle-check') toggleTaskCheck(target.dataset.taskId);
+                            else toggleExtraCheck(target.dataset.extraId);
+                        };
+                        if (isCancel) {
+                            target.classList.remove('canceling');
+                            void target.offsetWidth;
+                            target.classList.add('canceling');
+                            setTimeout(doToggle, 340);
+                        } else {
+                            doToggle();
+                        }
                     } else if (action === 'edit-task') {
                         if (currentRole === 'admin' && isAdminAuthenticated) {
                             const task = state.tasks.find(t => t.id === target.dataset.taskId);
@@ -3100,6 +3255,7 @@
                 }
 
                 bindEvents();
+                bindSwipe();
                 renderAll();
 
                 if (supabaseClient) {
