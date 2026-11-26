@@ -50,6 +50,7 @@
         html, body {
             overscroll-behavior-y: none;
             background-color: transparent;
+            overflow-x: hidden;
         }
 
         body {
@@ -671,12 +672,13 @@
             flex-shrink: 0;
         }
 
-        .view-page { padding-bottom: 90px; touch-action: pan-y; }
+        .view-page { padding-bottom: 90px; touch-action: pan-y; overflow-x: clip; }
         /* --- 页面区块切换：平滑滑入 + 撞边侧粒子（顶栏/底栏不动） --- */
         .view-page > .layout-container,
         .view-page > .shop-layout,
         .view-page > #statsPageContent { will-change: transform, opacity; }
-        .view-particle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999; }
+        .view-particle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999;
+                         background: #4a9fe0; box-shadow: 0 0 6px rgba(74,159,224,.75); }
         .shop-page-title {
             font-size: 22px; font-weight: 900; color: var(--text-main);
             margin: 2px 4px 0;
@@ -2046,36 +2048,60 @@
             const VIEW_ORDER = ['home', 'shop', 'stats'];
             let viewAnimating = false;
 
-            // 左右滑动切换页面（手机/iPad 触屏，桌面可用鼠标拖拽）
+            // 左右滑动切换页面（手机/iPad 触屏，桌面可用鼠标拖拽）—— 跟手 + 阻尼回弹
             function bindSwipe() {
-                let sx = 0, sy = 0, active = false, decided = false;
+                let sx = 0, sy = 0, dx = 0, offset = 0, active = false, decided = false;
+                let dragBlocks = [];
                 const isInteractive = (t) => t && t.closest('button, input, select, textarea, .modal-overlay, .modal-content, [data-action]');
                 document.addEventListener('pointerdown', (e) => {
                     if (e.button !== undefined && e.button !== 0) return;
                     if (isInteractive(e.target)) return;
-                    active = true; decided = false; sx = e.clientX; sy = e.clientY;
+                    if (viewAnimating) return;
+                    active = true; decided = false; sx = e.clientX; sy = e.clientY; dx = 0; offset = 0;
                 }, { passive: true });
                 document.addEventListener('pointermove', (e) => {
                     if (!active) return;
-                    const dx = e.clientX - sx, dy = e.clientY - sy;
+                    const mx = e.clientX - sx, my = e.clientY - sy;
                     if (!decided) {
-                        if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { active = false; return; }
-                        if (Math.abs(dx) > 8) decided = true;
+                        if (Math.abs(my) > 10 && Math.abs(my) > Math.abs(mx)) { active = false; return; }
+                        if (Math.abs(mx) > 8) {
+                            decided = true;
+                            const root = getViewRoot(currentView);
+                            dragBlocks = root ? Array.prototype.slice.call(root.children).filter(el => !el.classList.contains('hidden')) : [];
+                        } else return;
                     }
-                }, { passive: true });
-                const finish = (e) => {
+                    const idx = VIEW_ORDER.indexOf(currentView);
+                    const canMove = (mx < 0 && idx < VIEW_ORDER.length - 1) || (mx > 0 && idx > 0);
+                    const factor = canMove ? .45 : .16;
+                    dx = mx; offset = mx * factor;
+                    dragBlocks.forEach(b => { b.style.transform = 'translateX(' + offset + 'px)'; });
+                    e.preventDefault();
+                }, { passive: false });
+                const finish = () => {
                     if (!active) return;
                     active = false;
-                    const dx = e.clientX - sx;
-                    if (Math.abs(dx) < 45) return;
+                    if (!decided) return;
+                    dragBlocks.forEach(b => { b.style.transform = ''; });
                     const idx = VIEW_ORDER.indexOf(currentView);
-                    const target = dx < 0 ? idx + 1 : idx - 1;
-                    if (target >= 0 && target < VIEW_ORDER.length && VIEW_ORDER[target] !== currentView) {
+                    let target = null;
+                    if (dx < -45 && idx < VIEW_ORDER.length - 1) target = idx + 1;
+                    else if (dx > 45 && idx > 0) target = idx - 1;
+                    if (target !== null) {
                         switchView(VIEW_ORDER[target]);
+                    } else if (Math.abs(dx) > 8) {
+                        dragBlocks.forEach(b => {
+                            b.animate([
+                                { transform: 'translateX(' + offset + 'px)' },
+                                { transform: 'translateX(0)' }
+                            ], { duration: 320, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'both' });
+                        });
                     }
+                    dragBlocks = [];
                 };
-                document.addEventListener('pointerup', finish, { passive: true });
-                document.addEventListener('pointercancel', () => { active = false; }, { passive: true });
+                document.addEventListener('pointerup', finish);
+                document.addEventListener('pointercancel', () => {
+                    if (active) finish();
+                });
             }
 
             function viewBlocks(view) {
@@ -2087,36 +2113,54 @@
 
             function emitViewParticles(atLeft) {
                 const W = window.innerWidth;
-                const color = 'rgba(214,240,255,.6)';
-                for (let i = 0; i < 4; i++) {
+                for (let i = 0; i < 5; i++) {
                     const p = document.createElement('span');
                     p.className = 'view-particle';
-                    const size = 2.5 + Math.random() * 3;
+                    const size = 3 + Math.random() * 3.5;
                     p.style.width = p.style.height = size + 'px';
-                    p.style.background = color;
-                    p.style.boxShadow = '0 0 4px rgba(200,235,255,.45)';
-                    p.style.left = (atLeft ? 10 : W - 14) + 'px';
-                    p.style.top = (window.innerHeight * .35 + Math.random() * window.innerHeight * .3) + 'px';
+                    p.style.left = (atLeft ? 12 : W - 16) + 'px';
+                    p.style.top = (window.innerHeight * .32 + Math.random() * window.innerHeight * .36) + 'px';
                     document.body.appendChild(p);
-                    const dx = (atLeft ? -1 : 1) * (8 + Math.random() * 16);
-                    const dy = (Math.random() - .5) * 26;
+                    const dx = (atLeft ? -1 : 1) * (10 + Math.random() * 20);
+                    const dy = (Math.random() - .5) * 30;
                     p.animate([
                         { transform: 'translate(0,0) scale(.5)', opacity: 0 },
-                        { transform: 'translate(' + (dx * .4) + 'px,' + (dy * .4) + 'px) scale(1)', opacity: .4, offset: .3 },
-                        { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.3)', opacity: 0 }
-                    ], { duration: 480 + Math.random() * 160, easing: 'cubic-bezier(.2,.6,.3,1)', fill: 'forwards' })
+                        { transform: 'translate(' + (dx * .4) + 'px,' + (dy * .4) + 'px) scale(1)', opacity: .95, offset: .25 },
+                        { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.4)', opacity: 0 }
+                    ], { duration: 520 + Math.random() * 180, easing: 'cubic-bezier(.2,.6,.3,1)', fill: 'forwards' })
                         .onfinish = (function (node) { return function () { node.remove(); }; })(p);
                 }
             }
 
+            function getViewRoot(v) {
+                return document.getElementById('view' + v.charAt(0).toUpperCase() + v.slice(1));
+            }
+
+            function applyVisibleView(view) {
+                ['home', 'shop', 'stats'].forEach(v => {
+                    const el = getViewRoot(v);
+                    if (el) el.classList.toggle('hidden', v !== view);
+                });
+            }
+
+            // 滑入距离限制在视口宽度以内，避免 translateX 撑宽文档触发移动端自动缩放
+            function slideDistance() {
+                return Math.min(window.innerWidth, 340);
+            }
+
             function animateViewSwitch(fromView, toView) {
+                viewAnimating = true;
                 const fromIdx = VIEW_ORDER.indexOf(fromView);
                 const toIdx = VIEW_ORDER.indexOf(toView);
                 const dir = toIdx >= fromIdx ? 1 : -1;
-                const W = window.innerWidth;
-                const oldBlocks = viewBlocks(fromView);
-                const newRoot = document.getElementById('view' + toView.charAt(0).toUpperCase() + toView.slice(1));
+                const W = slideDistance();
+                const oldRoot = getViewRoot(fromView);
+                const newRoot = getViewRoot(toView);
+                const oldBlocks = oldRoot ? Array.prototype.slice.call(oldRoot.children) : [];
+                // 新页面先解除隐藏，动画期间新旧同时可见（一出一进）
+                if (newRoot) newRoot.classList.remove('hidden');
                 const newBlocks = newRoot ? Array.prototype.slice.call(newRoot.children) : [];
+
                 oldBlocks.forEach((blk, i) => {
                     blk.getAnimations().forEach(a => a.cancel());
                     blk.animate([
@@ -2132,16 +2176,27 @@
                     ], { duration: 620, delay: 120 + i * 55, easing: 'cubic-bezier(.22,.7,.28,1)', fill: 'both' });
                 });
                 setTimeout(() => emitViewParticles(dir > 0), 120 + 620);
+                // 动画结束后隐藏旧页面，并清掉 fill 状态，避免切回时内容透明
+                setTimeout(() => {
+                    if (oldRoot) oldRoot.classList.add('hidden');
+                    oldBlocks.forEach(blk => {
+                        blk.getAnimations().forEach(a => a.cancel());
+                        blk.style.transform = '';
+                        blk.style.opacity = '';
+                    });
+                    newBlocks.forEach(blk => {
+                        blk.getAnimations().forEach(a => a.cancel());
+                        blk.style.transform = '';
+                        blk.style.opacity = '';
+                    });
+                    viewAnimating = false;
+                }, 120 + 620 + 80);
             }
 
             function switchView(view) {
                 const prevView = currentView;
                 const changed = prevView !== view;
                 currentView = view;
-                ['home', 'shop', 'stats'].forEach(v => {
-                    const el = document.getElementById('view' + v.charAt(0).toUpperCase() + v.slice(1));
-                    if (el) el.classList.toggle('hidden', v !== view);
-                });
                 document.querySelectorAll('.bottom-btn').forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.view === view);
                 });
@@ -2151,7 +2206,11 @@
                 if (view === 'shop') renderShopPage();
                 if (view === 'stats') renderStatsPage();
                 window.scrollTo({ top: 0, behavior: 'auto' });
-                if (changed && !viewAnimating) animateViewSwitch(prevView, view);
+                if (changed && !viewAnimating) {
+                    animateViewSwitch(prevView, view);
+                } else if (changed) {
+                    applyVisibleView(view);
+                }
             }
 
             function uid() {
