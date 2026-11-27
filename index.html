@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="HEIDI STAR">
     <link rel="apple-touch-icon" href="icon.png">
+    <link rel="preload" as="image" href="decor_home.webp">
     <title>HEIDI星旅</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -366,6 +367,38 @@
             color: #ffffff;
             font-weight: 900;
         }
+
+        /* ===== 日历历史回看 ===== */
+        .calendar-day.viewable { cursor: pointer; }
+        .calendar-day.viewable:hover { outline: 2px solid rgba(255,255,255,.9); outline-offset: 1px; }
+        .calendar-day.viewing { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--accent); }
+        .calendar-day.future { opacity: .45; }
+        .calendar-day.none { background: transparent; }
+
+        /* 回看时日历内返回按钮：白底、固定在右箭头左侧、仅历史时出现 */
+        .history-back-btn {
+            display: none; position: absolute; right: 40px; top: 50%; transform: translateY(-50%);
+            background: #ffffff; color: #2678c9; border: 1px solid #c0e2f9;
+            border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 900;
+            cursor: pointer; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,.08);
+        }
+        .history-back-btn.show { display: block; }
+        .history-back-btn:hover { background: #f0f8ff; }
+        .history-mode .section-title .btn-outline,
+        .history-mode .section-title .collapse-btn,
+        .history-mode .edit-profile-btn,
+        .history-mode #addExtraBtn { display: none !important; }
+        .history-mode .task-check { cursor: default; }
+
+        /* ===== 页面装饰图淡入淡出（背景固定不变，仅装饰层过渡） ===== */
+        .page-decor { transition: opacity .55s ease; }
+        .page-decor.decor-hidden { opacity: 0; }
+        /* 动画期间的裁剪舞台：避免滑入块撑宽文档 / 露白边 */
+        .view-page { overflow-x: clip; }
+        /* 离场页脱离文档流并叠在顶层，避免新旧两页同时占位撑高页面 */
+        .view-page.view-leaving { position: absolute; top: 0; left: 0; width: 100%; z-index: 2; pointer-events: none; }
+        /* 图片尺寸兜底：消除加载完成前的布局跳动 */
+        img.zoom-icon { display: inline-block; vertical-align: middle; }
 
         .section-title {
             display: flex;
@@ -1100,9 +1133,9 @@
 </head>
 <body>
     <div class="fixed-bg"></div>
-    <img class="page-decor" data-view="home" src="decor_home.png" alt="" onerror="this.remove()">
-    <img class="page-decor hidden" data-view="shop" src="decor_shop.png" alt="" onerror="this.remove()">
-    <img class="page-decor hidden" data-view="stats" src="decor_stats.png" alt="" onerror="this.remove()">
+    <img class="page-decor" data-view="home" src="decor_home.webp" width="220" height="220" alt="" onerror="this.remove()">
+    <img class="page-decor decor-hidden" data-view="shop" data-src="decor_shop.webp" width="220" height="220" alt="">
+    <img class="page-decor decor-hidden" data-view="stats" data-src="decor_stats.webp" width="220" height="220" alt="">
 
     <div class="app-header">
         <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 儿童模式</button>
@@ -1141,6 +1174,7 @@
                     <button class="calendar-nav-btn" id="prevMonth">‹</button>
                     <span class="month-label" id="calendarMonth"></span>
                     <button class="calendar-nav-btn" id="nextMonth">›</button>
+                    <button class="history-back-btn" id="backToTodayBtn">返回</button>
                 </div>
                 <div class="calendar-weekdays">
                     <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
@@ -1228,7 +1262,7 @@
                     <div class="shop-hero-label">可用星值</div>
                     <div class="shop-hero-num"><span id="shopBalanceNum">0</span><img src="icon_star.svg" style="width: 26px; height: 26px; object-fit: contain;"></div>
                     <div class="shop-hero-tip" id="shopHeroTip">本月待结算 0 星值</div>
-                    <img class="hero-decor" src="decor_pig.png" alt="" onerror="this.remove()">
+                    <img class="hero-decor" src="decor_pig.webp" alt="" onerror="this.remove()">
                 </div>
 
                 <div class="section-wrapper">
@@ -1329,14 +1363,14 @@
             }
             function getSubjectIcon(subject) {
                 const map = {
-                    '语文': 'icon_subject_chinese.png',
-                    '数学': 'icon_subject_math.png',
-                    '英语': 'icon_subject_english.png',
-                    '其它': 'icon_subject_other.png',
-                    '口语': 'icon_subject_oral.png',
-                    '新东方': 'icon_subject_xdf.png'
+                    '语文': 'icon_subject_chinese.webp',
+                    '数学': 'icon_subject_math.webp',
+                    '英语': 'icon_subject_english.webp',
+                    '其它': 'icon_subject_other.webp',
+                    '口语': 'icon_subject_oral.webp',
+                    '新东方': 'icon_subject_xdf.webp'
                 };
-                return map[subject] || 'icon_subject_custom.png';
+                return map[subject] || 'icon_subject_custom.webp';
             }
 
             const defaultTasks = [
@@ -1385,6 +1419,14 @@
             let state = loadStateLocal();
             let currentRole = 'child';
             let isAdminAuthenticated = false;
+
+            /* ===== 日历历史回看：内存状态，刷新即回到今天 ===== */
+            let viewingDate = null;
+            function getViewDate() { return viewingDate || getBeijingDateStr(); }
+            function getViewMonthPrefix() {
+                const d = new Date(getViewDate() + 'T00:00:00');
+                return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+            }
 
             const bjInit = getBeijingNow();
             let calendarWeekStart = getMondayOf(bjInit);
@@ -1513,7 +1555,7 @@
             }
 
             function calcTodayStars() {
-                const today = getBeijingDateStr();
+                const today = getViewDate();
                 let sum = 0;
                 state.checkins.forEach(c => {
                     if (c.date === today && c.isExtra) sum += (c.reward || 0);
@@ -1538,7 +1580,7 @@
             }
 
             function calcMonthStars() {
-                const prefix = getBeijingMonthPrefix(0);
+                const prefix = getViewMonthPrefix();
                 let extraSum = 0;
                 let examSum = 0;
                 state.checkins.forEach(c => { if (c.isExtra && c.date && c.date.startsWith(prefix)) extraSum += (c.reward || 0); });
@@ -1676,13 +1718,18 @@
                         if (s === 'completed') status = 'completed';
                         else if (s === 'incomplete') status = 'incomplete';
                     }
-                    cells.push({ day: d.getDate(), isToday, status });
+                    const retainFrom = getBeijingMonthPrefix(-2) + '-01'; // 数据保留边界：当前月往前 2 个月
+                    cells.push({ day: d.getDate(), isToday, status, dateStr, isFuture, inRetain: dateStr >= retainFrom && dateStr <= todayStr });
                 }
                 grid.innerHTML = cells.map(c => {
                     let cls = 'calendar-day';
                     if (c.isToday) cls += ' today';
                     else if (c.status) cls += ' ' + c.status;
-                    return `<div class="${cls}">${c.day}</div>`;
+                    if (!c.status && !c.isToday) cls += ' none';
+                    if (c.isFuture) cls += ' future';
+                    if (c.inRetain && !c.isFuture) cls += ' viewable';
+                    if (viewingDate && c.dateStr === viewingDate) cls += ' viewing';
+                    return `<div class="${cls}" data-date="${c.dateStr}">${c.day}</div>`;
                 }).join('');
             }
 
@@ -1708,7 +1755,7 @@
                 const container = document.getElementById(containerId);
                 if (!container) return;
 
-                const today = getBeijingDateStr();
+                const today = getViewDate();
                 const todayCheckTaskIds = new Set(state.checkins.filter(c => c.date === today && !c.isExtra).map(c => c.taskId));
 
                 const isAdminOp = (currentRole === 'admin' && isAdminAuthenticated);
@@ -1768,7 +1815,7 @@
 
             function renderTaskItem(task, completed, overdue) {
                 const showAdminActions = (currentRole === 'admin' && isAdminAuthenticated);
-                const today = getBeijingDateStr();
+                const today = getViewDate();
 
                 let tagsHtml = '';
                 if (task.subject) {
@@ -1822,7 +1869,7 @@
                 const container = document.getElementById('extraTaskList');
                 if (!container) return;
 
-                const today = getBeijingDateStr();
+                const today = getViewDate();
                 const isAdminOp = (currentRole === 'admin' && isAdminAuthenticated);
                 let todayExtras;
                 if (isAdminOp) {
@@ -1843,7 +1890,7 @@
                     const completed = state.checkins.some(c => c.taskId === task.id && c.isExtra);
                     return `
                         <div class="task-item ${completed ? 'completed' : ''}">
-                            <div class="task-icon"><img src="icon_gift_card.png" class="zoom-icon" style="width: 26px; height: 26px; object-fit: contain;"></div>
+                            <div class="task-icon"><img src="icon_gift_card.webp" class="zoom-icon" style="width: 26px; height: 26px; object-fit: contain;"></div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(task.name)}</div>
                                 <div class="task-meta">
@@ -1866,7 +1913,7 @@
                 const container = document.getElementById('examTaskList');
                 if (!container) return;
 
-                const curMonth = getBeijingMonthPrefix(0);
+                const curMonth = getViewMonthPrefix();
                 const monthExams = state.exams.filter(e => (e.date || '').startsWith(curMonth));
 
                 if (monthExams.length === 0) {
@@ -1894,7 +1941,7 @@
                     return `
                         <div class="task-item">
                             <div class="task-icon">
-                                <img src="icon_exam_card.png" class="zoom-icon" style="width: 26px; height: 26px; object-fit: contain;">
+                                <img src="icon_exam_card.webp" class="zoom-icon" style="width: 26px; height: 26px; object-fit: contain;">
                             </div>
                             <div class="task-info">
                                 <div class="task-name">${escapeHtml(exam.name)}</div>
@@ -1919,7 +1966,7 @@
                 const container = document.getElementById('overdueTaskList');
                 if (!container) return;
 
-                const today = getBeijingDateStr();
+                const today = getViewDate();
                 const LOOKBACK_DAYS = 2;
                 const lookbackDates = [];
                 for (let i = 1; i <= LOOKBACK_DAYS; i++) lookbackDates.push(shiftDateStr(today, -i));
@@ -2001,6 +2048,19 @@
                 const monthData = calcMonthStars();
                 document.getElementById('todayStars').innerHTML = `<span>${todaySum}</span><img src="icon_star.svg" style="width: 20px; height: 20px; object-fit: contain;">`;
                 document.getElementById('monthStars').innerHTML = `<span>${monthData.total}</span><img src="icon_star.svg" style="width: 20px; height: 20px; object-fit: contain;">`;
+                const dayLabel = document.querySelector('.stats-card.today .stats-label');
+                const monLabel = document.querySelector('.stats-card.month .stats-label');
+                if (dayLabel) dayLabel.textContent = viewingDate ? '当日获得' : '今日获得';
+                if (monLabel) monLabel.textContent = viewingDate ? '当月获得' : '本月获得';
+            }
+
+            function updateHistoryUI() {
+                const backBtn = document.getElementById('backToTodayBtn');
+                const homePage = document.getElementById('viewHome');
+                if (!backBtn || !homePage) return;
+                // 仅回看历史时显示返回按钮；今天不显示
+                backBtn.classList.toggle('show', !!viewingDate);
+                homePage.classList.toggle('history-mode', !!viewingDate);
             }
 
             function updateRoleUI() {
@@ -2030,6 +2090,7 @@
             function renderAll() {
                 renderProfile();
                 renderStats();
+                updateHistoryUI();
                 renderCalendar();
                 renderInSchoolTasks();
                 renderOutSchoolTasks();
@@ -2066,8 +2127,7 @@
                         if (Math.abs(my) > 10 && Math.abs(my) > Math.abs(mx)) { active = false; return; }
                         if (Math.abs(mx) > 8) {
                             decided = true;
-                            const root = getViewRoot(currentView);
-                            dragBlocks = root ? Array.prototype.slice.call(root.children).filter(el => !el.classList.contains('hidden')) : [];
+                            dragBlocks = viewBlocks(currentView);
                         } else return;
                     }
                     const idx = VIEW_ORDER.indexOf(currentView);
@@ -2107,8 +2167,17 @@
             function viewBlocks(view) {
                 const root = document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1));
                 if (!root) return [];
-                // 取页面内容的顶层块：优先直接子元素，否则取 stage
-                return Array.prototype.slice.call(root.children).filter(el => !el.classList.contains('hidden'));
+                // 取页面内的多个模块卡片，形成"先后到达"的错落感（preview-slide 效果）
+                const pick = (sel) => Array.prototype.slice.call(root.querySelectorAll(sel)).filter(el => el.offsetParent !== null);
+                let blocks;
+                if (view === 'home') {
+                    blocks = pick('.profile-stats-bar, .calendar-card, .left-panel > .section-wrapper, .right-panel > .section-wrapper');
+                } else if (view === 'shop') {
+                    blocks = pick('.shop-page-title, .shop-hero, .shop-main > .section-wrapper, .shop-actions, .shop-side > .section-wrapper');
+                } else {
+                    blocks = pick('.stats-layout > .section-wrapper');
+                }
+                return blocks.length ? blocks : Array.prototype.slice.call(root.children).filter(el => !el.classList.contains('hidden'));
             }
 
             function emitViewParticles(atLeft) {
@@ -2156,10 +2225,12 @@
                 const W = slideDistance();
                 const oldRoot = getViewRoot(fromView);
                 const newRoot = getViewRoot(toView);
-                const oldBlocks = oldRoot ? Array.prototype.slice.call(oldRoot.children) : [];
+                const oldBlocks = viewBlocks(fromView);
                 // 新页面先解除隐藏，动画期间新旧同时可见（一出一进）
                 if (newRoot) newRoot.classList.remove('hidden');
-                const newBlocks = newRoot ? Array.prototype.slice.call(newRoot.children) : [];
+                const newBlocks = viewBlocks(toView);
+                // 离场页脱离文档流叠在上层，避免两页同时占位撑高页面
+                if (oldRoot) oldRoot.classList.add('view-leaving');
 
                 oldBlocks.forEach((blk, i) => {
                     blk.getAnimations().forEach(a => a.cancel());
@@ -2178,7 +2249,7 @@
                 setTimeout(() => emitViewParticles(dir > 0), 120 + 620);
                 // 动画结束后隐藏旧页面，并清掉 fill 状态，避免切回时内容透明
                 setTimeout(() => {
-                    if (oldRoot) oldRoot.classList.add('hidden');
+                    if (oldRoot) { oldRoot.classList.add('hidden'); oldRoot.classList.remove('view-leaving'); }
                     oldBlocks.forEach(blk => {
                         blk.getAnimations().forEach(a => a.cancel());
                         blk.style.transform = '';
@@ -2201,7 +2272,14 @@
                     btn.classList.toggle('active', btn.dataset.view === view);
                 });
                 document.querySelectorAll('.page-decor').forEach(img => {
-                    img.classList.toggle('hidden', img.dataset.view !== view);
+                    const active = img.dataset.view === view;
+                    // 切到某页时才加载其装饰图（data-src → src），避免首屏并发下载
+                    if (active && img.dataset.src && !img.getAttribute('src')) {
+                        img.setAttribute('src', img.dataset.src);
+                        delete img.dataset.src;
+                    }
+                    // 淡入淡出：用透明度过渡替代瞬间 hidden
+                    img.classList.toggle('decor-hidden', !active);
                 });
                 if (view === 'shop') renderShopPage();
                 if (view === 'stats') renderStatsPage();
@@ -2218,7 +2296,7 @@
             }
 
             const MONEY_ITEM_ID = '__money__';
-            const MONEY_ICON = 'icon_shop_money.png';
+            const MONEY_ICON = 'icon_shop_money.webp';
             let moneyAmount = 0;
 
             function renderShopPage() {
@@ -2268,7 +2346,7 @@
                         <div class="shop-item-img">
                             ${item.image
                                 ? `<img src="${item.image}" alt="">`
-                                : `<img src="icon_gift_card.png" alt="" style="object-fit: contain; padding: 6px;">`}
+                                : `<img src="icon_gift_card.webp" alt="" style="object-fit: contain; padding: 6px;">`}
                         </div>
                         <div class="shop-item-info">
                             <div class="shop-item-name">${escapeHtml(item.name)}</div>
@@ -3195,6 +3273,15 @@
                     if (!target) return;
                     const action = target.dataset.action;
 
+                    // 历史回看：只读，拦截所有写操作
+                    if (viewingDate) {
+                        const writeActions = ['toggle-check','toggle-extra','edit-task','delete-task','edit-extra','delete-extra','edit-exam','delete-exam','revoke-redeem'];
+                        if (writeActions.indexOf(action) !== -1) {
+                            showToast('历史记录为只读，返回今天才能修改', false);
+                            return;
+                        }
+                    }
+
                     if (action === 'toggle-check' || action === 'toggle-extra') {
                         // 取消勾选：先播反向擦除+粒子内吸，动画结束再改状态
                         const item = target.closest('.task-item');
@@ -3275,6 +3362,30 @@
                 document.getElementById('nextMonth').addEventListener('click', () => {
                     calendarWeekStart = new Date(calendarWeekStart.getFullYear(), calendarWeekStart.getMonth(), calendarWeekStart.getDate() + 7);
                     renderCalendar();
+                });
+
+                // 历史回看：点日历可查看的日期 → 切换成那天的视图
+                document.getElementById('calendarGrid').addEventListener('click', (e) => {
+                    const cell = e.target.closest('.calendar-day.viewable');
+                    if (!cell) return;
+                    const dateStr = cell.dataset.date;
+                    if (dateStr === getBeijingDateStr()) {
+                        viewingDate = null;
+                    } else {
+                        viewingDate = dateStr;
+                        const d = new Date(dateStr + 'T00:00:00');
+                        calendarWeekStart = getMondayOf(d);
+                    }
+                    renderAll();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                // 返回今天
+                document.getElementById('backToTodayBtn').addEventListener('click', () => {
+                    viewingDate = null;
+                    calendarWeekStart = getMondayOf(getBeijingNow());
+                    renderAll();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
 
                 document.getElementById('addShopItemBtn').addEventListener('click', openShopItemModal);
