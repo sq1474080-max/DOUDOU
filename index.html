@@ -712,13 +712,80 @@
             flex-shrink: 0;
         }
 
+        /* --- 全部打卡庆祝：拉炮彩纸 + 毛玻璃 + 庆祝卡片 --- */
+        .celebrate-layer {
+            position: fixed; inset: 0; z-index: 3000;
+            display: none; align-items: center; justify-content: center;
+            background: rgba(30, 52, 78, .16);
+            -webkit-backdrop-filter: blur(9px) saturate(.9);
+            backdrop-filter: blur(9px) saturate(.9);
+            opacity: 0;
+            transition: opacity .38s ease;
+            pointer-events: none;
+        }
+        .celebrate-layer.open { display: flex; }
+        .celebrate-layer.show { opacity: 1; pointer-events: auto; }
+        .celebrate-glow {
+            position: absolute; inset: 0; pointer-events: none; opacity: 0;
+            background: radial-gradient(circle at 50% 82%, rgba(255,232,160,.52) 0%, rgba(255,232,160,0) 46%);
+            transition: opacity .35s ease;
+        }
+        .celebrate-glow.on { opacity: 1; }
+        #celebrateCanvas {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
+        }
+        .celebrate-card {
+            position: relative; z-index: 2;
+            width: min(320px, 82vw);
+            background: linear-gradient(180deg, #ffffff 0%, #f4faff 100%);
+            border-radius: 28px;
+            padding: 36px 24px 22px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(38,86,140,.28), 0 0 0 1px rgba(255,255,255,.7) inset;
+            transform: scale(.55) translateY(24px);
+            opacity: 0;
+            transition: transform .62s cubic-bezier(.18,1.5,.4,1), opacity .35s ease;
+        }
+        .celebrate-layer.show .celebrate-card { transform: scale(1) translateY(0); opacity: 1; }
+        .celebrate-badge {
+            width: 78px; height: 78px; margin: -64px auto 12px; border-radius: 50%;
+            background: linear-gradient(140deg, #8fd0ff, #3695e3 60%, #2678c9);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 12px 26px rgba(54,149,227,.45), 0 0 0 8px rgba(255,255,255,.7);
+            animation: celebratePulse 2.2s ease-in-out infinite;
+        }
+        .celebrate-badge svg { width: 38px; height: 38px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.12)); }
+        .celebrate-card h3 { margin: 8px 0 8px; font-size: 21px; font-weight: 900; letter-spacing: .3px; color: #25313f; }
+        .celebrate-card p { margin: 0 0 16px; font-size: 13px; font-weight: 700; color: #7d8b9b; line-height: 1.65; }
+        .celebrate-stars {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #fff5da; color: #c98a12; font-weight: 900; font-size: 20px;
+            padding: 8px 18px; border-radius: 999px; margin-bottom: 18px;
+            box-shadow: 0 6px 16px rgba(230,170,40,.18);
+        }
+        .celebrate-stars img { width: 20px; height: 20px; }
+        .celebrate-stars.hidden { display: none; }
+        .celebrate-btn {
+            width: 100%; border: none; cursor: pointer;
+            background: linear-gradient(135deg, #4aa6ef, #2b7fd0);
+            color: #fff; font-size: 14px; font-weight: 900; letter-spacing: .5px;
+            padding: 14px; border-radius: 16px;
+            box-shadow: 0 10px 22px rgba(43,127,208,.35);
+            transition: transform .15s ease, box-shadow .15s ease;
+            font-family: inherit;
+        }
+        .celebrate-btn:active { transform: scale(.97); box-shadow: 0 5px 14px rgba(43,127,208,.3); }
+        @keyframes celebratePulse {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-4px) scale(1.04); }
+        }
+
         .view-page { padding-bottom: 90px; touch-action: pan-y; }
-        /* --- 页面区块切换：平滑滑入 + 撞边侧粒子（顶栏/底栏不动） --- */
+        /* --- 页面区块切换：平滑滑入（顶栏/底栏不动） --- */
         .view-page > .layout-container,
         .view-page > .shop-layout,
         .view-page > #statsPageContent { will-change: transform, opacity; }
-        .view-particle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999;
-                         background: #4a9fe0; box-shadow: 0 0 6px rgba(74,159,224,.75); }
         .shop-page-title {
             font-size: 22px; font-weight: 900; color: var(--text-main);
             margin: 2px 4px 0;
@@ -899,8 +966,18 @@
             transform: scale(2);
             transform-origin: bottom right;
         }
+        /* 主页装饰：水平镜像并移到左下角（不改图片文件，纯 CSS 翻转）
+           让图的右边缘对齐距左 5% 的位置（right:95%），再以右边缘为原点镜像放大，
+           镜像后会向右展开，视觉左边界正好落在 5% 处，不会溢出屏幕外 */
+        .page-decor[data-view="home"] {
+            right: 95%;
+            left: auto;
+            transform: scale(-2, 2);
+            transform-origin: bottom right;
+        }
         @media (orientation: landscape) {
             .page-decor { transform: scale(1.5); }
+            .page-decor[data-view="home"] { transform: scale(-1.5, 1.5); }
         }
 
         .crop-overlay {
@@ -1320,6 +1397,26 @@
         <button class="bottom-btn" id="navStats" data-view="stats"><span class="nav-lottie" data-view="stats"></span></button>
     </div>
 
+    <!-- 全部打卡庆祝层 -->
+    <div class="celebrate-layer" id="celebrateLayer">
+        <div class="celebrate-glow" id="celebrateGlow"></div>
+        <canvas id="celebrateCanvas"></canvas>
+        <div class="celebrate-card" id="celebrateCard">
+            <div class="celebrate-badge">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2.6l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.6 6.6 19.5l1-6.1L3.2 9.1l6.1-.9L12 2.6z" fill="#fff"/>
+                </svg>
+            </div>
+            <h3>今日全部完成！</h3>
+            <p id="celebrateDesc">今天该做的都做完啦<br>今天也超棒的</p>
+            <div class="celebrate-stars" id="celebrateStars">
+                <img src="icon_star.svg" alt="">
+                <span id="celebrateStarNum">+0</span>
+            </div>
+            <button class="celebrate-btn" id="celebrateBtn">收下这份快乐</button>
+        </div>
+    </div>
+
     <div id="toastContainer" class="toast-container"></div>
     <div id="modalRoot"></div>
 
@@ -1678,19 +1775,27 @@
                 return isCheckedOnDate(task.id, dateStr);
             }
 
+            // 当天完成判断：只以"必须完成的任务"为准，与底部未完成任务清单一致
+            // 额外任务属于可选奖励（不做也不算未完成），不参与日历判定
             function getDayCompletionStatus(dateStr) {
                 const today = getBeijingDateStr();
                 if (dateStr >= today) return 'none';
                 const dueTasks = state.tasks.filter(t => isTaskDueOnDate(t, dateStr));
-                const extraTasks = state.extraTasks.filter(t => t.createdDate === dateStr);
-                const total = dueTasks.length + extraTasks.length;
+                const total = dueTasks.length;
                 if (total === 0) return 'none';
                 let completed = 0;
                 dueTasks.forEach(t => { if (isTaskDoneOnDate(t, dateStr)) completed++; });
-                extraTasks.forEach(t => {
-                    if (state.checkins.some(c => c.date === dateStr && c.taskId === t.id && c.isExtra)) completed++;
-                });
                 return completed >= total ? 'completed' : 'incomplete';
+            }
+
+            // 今天"必须完成"的任务：到期日就是今天的才纳入（周期任务只在截止日当天算），考试任务不计入
+            function getTodayRequiredTasks() {
+                const today = getBeijingDateStr();
+                return state.tasks.filter(t => isTaskDueOnDate(t, today));
+            }
+            function getTodayPendingRequiredTasks() {
+                const today = getBeijingDateStr();
+                return getTodayRequiredTasks().filter(t => !isTaskDoneOnDate(t, today));
             }
 
             function renderProfile() {
@@ -2188,38 +2293,6 @@
                 return blocks.length ? blocks : Array.prototype.slice.call(root.children).filter(el => !el.classList.contains('hidden'));
             }
 
-            // 单个区块滑到位时，沿它撞击那一侧的边迸发粒子（离场区块不调用）
-            function emitViewParticlesForBlock(blk, dir) {
-                if (!blk || !blk.isConnected) return;
-                const rect = blk.getBoundingClientRect();
-                if (rect.width < 1 || rect.bottom < 0 || rect.top > window.innerHeight) return;
-                // 向左滑入时前缘在左边，向右滑入时前缘在右边
-                const atLeft = dir > 0;
-                const edgeX = atLeft ? rect.left + 2 : rect.right - 2;
-                const weight = Math.min(1, Math.max(0, rect.height / 240));
-                const count = 4 + Math.round(weight * 3);
-                for (let i = 0; i < count; i++) {
-                    const p = document.createElement('span');
-                    p.className = 'view-particle';
-                    const size = 3 + Math.random() * 3.5;
-                    p.style.width = p.style.height = size + 'px';
-                    p.style.left = edgeX + 'px';
-                    const rawTop = rect.top + rect.height * (.1 + Math.random() * .8);
-                    p.style.top = Math.max(6, Math.min(window.innerHeight - 6, rawTop)) + 'px';
-                    document.body.appendChild(p);
-                    // 与滑动方向相反：从撞边处往回迸发，像火星溅开
-                    const dx = (atLeft ? 1 : -1) * (14 + Math.random() * 26);
-                    const dy = (Math.random() - .5) * 74;
-                    p.animate([
-                        { transform: 'translate(0,0) scale(.3)', opacity: 0 },
-                        { transform: 'translate(' + (dx * .35) + 'px,' + (dy * .35) + 'px) scale(1)', opacity: 1, offset: .16 },
-                        { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.7)', opacity: .8, offset: .58 },
-                        { transform: 'translate(' + (dx * 1.2) + 'px,' + (dy + 16) + 'px) scale(0)', opacity: 0 }
-                    ], { duration: 640 + Math.random() * 220, easing: 'cubic-bezier(.15,.55,.3,1)', fill: 'forwards' })
-                        .onfinish = (function (node) { return function () { node.remove(); }; })(p);
-                }
-            }
-
             function getViewRoot(v) {
                 return document.getElementById('view' + v.charAt(0).toUpperCase() + v.slice(1));
             }
@@ -2267,25 +2340,15 @@
                     ], { duration: 300, delay: i * 25, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'both' });
                 });
                 const ENTER_DELAY = 120, ENTER_STAGGER = 55, ENTER_DURATION = 620;
-                // ease-out 曲线下区块在约 70% 时间点位移已到 97.6%（视觉上基本到位），
-                // 在该时刻迸发粒子而不是等动画 100% 结束，形成"谁先到位谁先迸发"的同步感
-                const BURST_AT = 0.7;
                 newBlocks.forEach((blk, i) => {
                     blk.getAnimations().forEach(a => a.cancel());
                     blk.animate([
                         { transform: 'translateX(' + dir * W + 'px)', opacity: 0 },
                         { transform: 'translateX(0)', opacity: 1 }
                     ], { duration: ENTER_DURATION, delay: ENTER_DELAY + i * ENTER_STAGGER, easing: 'cubic-bezier(.22,.7,.28,1)', fill: 'both' });
-                    // 离场区块不加粒子；每个区块在自身基本到位时迸发，谁先到谁先发
-                    (function (block, dir) {
-                        setTimeout(() => {
-                            if (!viewAnimating) return;
-                            emitViewParticlesForBlock(block, dir);
-                        }, ENTER_DELAY + i * ENTER_STAGGER + ENTER_DURATION * BURST_AT);
-                    })(blk, dir);
                 });
                 // 动画结束后隐藏旧页面，并清掉 fill 状态，避免切回时内容透明
-                // 等最后一个进场区块也到位后再清理，避免提前打断动画导致粒子与滑块不同步
+                // 等最后一个进场区块也到位后再清理，避免提前打断动画
                 const cleanupAt = ENTER_DELAY + Math.max(0, newBlocks.length - 1) * ENTER_STAGGER + ENTER_DURATION + 80;
                 setTimeout(() => {
                     if (oldRoot) {
@@ -2388,10 +2451,10 @@
 
                 const otherCards = items.map(item => `
                     <div class="shop-item ${selectedShopIds.has(item.id) ? 'selected' : ''}" data-shop-id="${item.id}">
-                        <div class="shop-item-img">
+                        <div class="shop-item-img ${item.image ? '' : 'bare'}">
                             ${item.image
                                 ? `<img src="${item.image}" alt="">`
-                                : `<img src="icon_gift_card.webp" alt="" style="object-fit: contain; padding: 6px;">`}
+                                : `<img src="decor_shop.webp" alt="" style="object-fit: contain;">`}
                         </div>
                         <div class="shop-item-info">
                             <div class="shop-item-name">${escapeHtml(item.name)}</div>
@@ -2813,6 +2876,7 @@
                     }
                     saveState();
                     renderAll();
+                    maybeCelebrateToday();
                     return;
                 }
 
@@ -2830,6 +2894,7 @@
                 }
                 saveState();
                 renderAll();
+                maybeCelebrateToday();
             }
 
             function toggleExtraCheck(extraId) {
@@ -2852,6 +2917,7 @@
                 }
                 saveState();
                 renderAll();
+                maybeCelebrateToday();
             }
 
             function deleteTaskConfirm(taskId) {
@@ -3456,6 +3522,179 @@
                 });
             }
 
+            // ===== 全部打卡庆祝：双侧拉炮彩纸 + 毛玻璃 =====
+            const CELEB_COLORS = ['#3695e3', '#71c1ff', '#ffd166', '#ff8fab', '#7ee0c0', '#c792ea', '#ffffff'];
+            let celebCtx = null;
+            let celebParticles = [];
+            let celebRaf = null;
+            let celebRunning = false;
+
+            function celebPrepareCanvas() {
+                const canvas = document.getElementById('celebrateCanvas');
+                if (!canvas) return null;
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                const W = window.innerWidth, H = window.innerHeight;
+                canvas.width = Math.round(W * dpr);
+                canvas.height = Math.round(H * dpr);
+                const ctx = canvas.getContext('2d');
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                celebCtx = ctx;
+                return ctx;
+            }
+
+            function celebStarPath(ctx, cx, cy, outer, inner, rot) {
+                ctx.beginPath();
+                for (let i = 0; i < 10; i++) {
+                    const r = i % 2 === 0 ? outer : inner;
+                    const a = rot + i * Math.PI / 5 - Math.PI / 2;
+                    const x = cx + Math.cos(a) * r;
+                    const y = cy + Math.sin(a) * r;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+            }
+
+            function spawnCelebBurst() {
+                const W = window.innerWidth, H = window.innerHeight;
+                for (let side = 0; side < 2; side++) {
+                    const isLeft = side === 0;
+                    const ox = isLeft ? 6 : W - 6;
+                    const oy = H + 6;
+                    // 朝屏幕中上方喷射
+                    const baseAngle = isLeft ? -Math.PI / 3.05 : -Math.PI + Math.PI / 3.05;
+                    for (let i = 0; i < 82; i++) {
+                        const angle = baseAngle + (Math.random() - .5) * 1.05;
+                        const speed = 15 + Math.random() * 12;
+                        const shape = Math.random();
+                        celebParticles.push({
+                            x: ox, y: oy,
+                            vx: Math.cos(angle) * speed,
+                            vy: Math.sin(angle) * speed,
+                            w: 5 + Math.random() * 7,
+                            h: 9 + Math.random() * 9,
+                            rot: Math.random() * Math.PI * 2,
+                            vrot: (Math.random() - .5) * .35,
+                            color: CELEB_COLORS[(Math.random() * CELEB_COLORS.length) | 0],
+                            shape: shape < .22 ? 'star' : (shape < .45 ? 'circle' : 'strip'),
+                            life: 1,
+                            decay: .006 + Math.random() * .008,
+                            gravity: .42 + Math.random() * .16,
+                            drag: .988,
+                            wobble: Math.random() * Math.PI * 2
+                        });
+                    }
+                }
+            }
+
+            function celebTick() {
+                if (!celebRunning || !celebCtx) return;
+                const W = window.innerWidth, H = window.innerHeight;
+                const ctx = celebCtx;
+                ctx.clearRect(0, 0, W, H);
+                for (let i = celebParticles.length - 1; i >= 0; i--) {
+                    const p = celebParticles[i];
+                    p.vx *= p.drag;
+                    p.vy = p.vy * p.drag + p.gravity;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.rot += p.vrot;
+                    p.wobble += .18;
+                    p.life -= p.decay;
+                    if (p.life <= 0 || p.y > H + 80) { celebParticles.splice(i, 1); continue; }
+                    ctx.save();
+                    ctx.globalAlpha = Math.max(0, Math.min(1, p.life * 1.25));
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot);
+                    ctx.fillStyle = p.color;
+                    if (p.shape === 'star') {
+                        celebStarPath(ctx, 0, 0, p.w * .9, p.w * .4, p.wobble * .2);
+                        ctx.fill();
+                    } else if (p.shape === 'circle') {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, p.w * .42, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else {
+                        const flip = .35 + Math.abs(Math.cos(p.wobble)) * .65;
+                        ctx.fillRect(-p.w / 2 * flip, -p.h / 2, p.w * flip, p.h);
+                    }
+                    ctx.restore();
+                }
+                if (celebParticles.length > 0) {
+                    celebRaf = requestAnimationFrame(celebTick);
+                } else {
+                    celebRunning = false;
+                    ctx.clearRect(0, 0, W, H);
+                }
+            }
+
+            function showCelebration() {
+                const layer = document.getElementById('celebrateLayer');
+                if (!layer) return;
+                const today = getBeijingDateStr();
+                // 今日完成项数（必做任务 + 额外任务）
+                const required = getTodayRequiredTasks().length;
+                const extraDone = state.checkins.filter(c => c.isExtra && c.date === today).length;
+                // 今日星值（额外奖励 + 考试）
+                let stars = 0;
+                state.checkins.forEach(c => { if (c.isExtra && c.date === today) stars += (c.reward || 0); });
+                state.exams.forEach(e => { if (e.date === today) stars += getExamStars(e.score); });
+
+                const desc = document.getElementById('celebrateDesc');
+                if (desc) desc.innerHTML = `今天 ${required + extraDone} 项打卡全部搞定<br>今天也超棒的`;
+                const starWrap = document.getElementById('celebrateStars');
+                const starNum = document.getElementById('celebrateStarNum');
+                if (starWrap && starNum) {
+                    if (stars > 0) { starNum.textContent = '+' + stars; starWrap.classList.remove('hidden'); }
+                    else { starWrap.classList.add('hidden'); }
+                }
+
+                // 重置状态
+                if (celebRaf) { cancelAnimationFrame(celebRaf); celebRaf = null; }
+                celebParticles = [];
+                celebRunning = false;
+                layer.classList.remove('show');
+                layer.classList.add('open');
+                const glow = document.getElementById('celebrateGlow');
+                if (glow) glow.classList.remove('on');
+                celebPrepareCanvas();
+
+                requestAnimationFrame(() => {
+                    layer.classList.add('show');
+                    if (glow) glow.classList.add('on');
+                    spawnCelebBurst();
+                    celebRunning = true;
+                    celebRaf = requestAnimationFrame(celebTick);
+                    setTimeout(() => { if (glow) glow.classList.remove('on'); }, 950);
+                });
+            }
+
+            function dismissCelebration() {
+                const layer = document.getElementById('celebrateLayer');
+                if (!layer) return;
+                layer.classList.remove('show');
+                setTimeout(() => {
+                    layer.classList.remove('open');
+                    if (celebRaf) { cancelAnimationFrame(celebRaf); celebRaf = null; }
+                    celebRunning = false;
+                    celebParticles = [];
+                    if (celebCtx) celebCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                }, 400);
+            }
+
+            // 触发条件：儿童模式 + 非历史回看 + 今天"必须完成"的任务全部打卡（考试任务与额外任务都不参与判定）
+            // 额外任务是可选奖励，未完成不阻断庆祝；每天只弹一次
+            function maybeCelebrateToday() {
+                if (currentRole !== 'child') return;
+                if (viewingDate) return;
+                const today = getBeijingDateStr();
+                if (state.lastCelebratedDate === today) return;
+                if (getTodayRequiredTasks().length === 0) return;
+                if (getTodayPendingRequiredTasks().length > 0) return;
+                state.lastCelebratedDate = today;
+                saveState();
+                setTimeout(showCelebration, 420);
+            }
+
             function init() {
                 if (!state.checkins) state.checkins = [];
                 if (!state.exams) state.exams = [];
@@ -3472,6 +3711,13 @@
                 bindEvents();
                 bindSwipe();
                 renderAll();
+
+                // 庆祝层关闭交互
+                const celebBtn = document.getElementById('celebrateBtn');
+                if (celebBtn) celebBtn.addEventListener('click', dismissCelebration);
+                const celebLayer = document.getElementById('celebrateLayer');
+                if (celebLayer) celebLayer.addEventListener('click', (e) => { if (e.target === celebLayer) dismissCelebration(); });
+                window.addEventListener('resize', () => { if (celebRunning) celebPrepareCanvas(); });
 
                 if (supabaseClient) {
                     fetchCloudState();
