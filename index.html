@@ -1432,6 +1432,32 @@
             font-size:11px;font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(11,52,92,.25)}
         .stm-upimg:active{transform:scale(.94)}
         .stm-upimg.hidden{display:none}
+
+        /* ===== 横屏：统计页三列等宽（形象 / 星值统计 / 本月明细） ===== */
+        @media (orientation: landscape) {
+            #statsPageContent {
+                display: grid !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 14px !important;
+                align-items: start !important;
+            }
+            /* 打平 stats-layout，使其两个 section-wrapper 直接成为三列中的第2、3列 */
+            #statsPageContent .stats-layout {
+                display: contents !important;
+            }
+            #statsPageContent .starman-card {
+                margin: 0 !important;
+                padding: 16px 18px 18px !important;
+                min-height: 0 !important;
+            }
+            #statsPageContent .starman-card .stm-figure { height: 150px !important; }
+            #statsPageContent .starman-card .stm-figure-img { height: 138px !important; }
+            #statsPageContent .starman-card .stm-num { font-size: 32px !important; }
+            #statsPageContent .starman-card .stm-name { font-size: 22px !important; transform:none !important; }
+            #statsPageContent .starman-card .stm-lock-tag { transform:none !important; vertical-align:middle; }
+            #statsPageContent .starman-card .stm-state { min-height: 0 !important; }
+            #statsPageContent .stats-layout > .section-wrapper { margin: 0 !important; }
+        }
     </style>
 </head>
 <body>
@@ -2265,8 +2291,12 @@
                 if (!container) return;
 
                 const today = getViewDate();
-                // 家长/儿童模式统一按查看日期筛选，避免出现"已完成但非当天"的任务在家长模式多显示
-                const todayExtras = state.extraTasks.filter(t => t.createdDate === today).slice(-3);
+                // 额外任务设置的日期是"截止完成时间"：从添加当天起，一直显示到截止日 24 点结束。
+                // addedDate 为实际添加当天（老数据无此字段时回退为 createdDate，保持旧行为）。
+                const todayExtras = state.extraTasks.filter(t => {
+                    const added = t.addedDate || t.createdDate;
+                    return added <= today && today <= t.createdDate;
+                }).slice(-3);
 
                 if (todayExtras.length === 0) {
                     container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-sub);background:transparent;border-radius:var(--radius-card);font-weight:800;">暂无额外任务</div>`;
@@ -2274,7 +2304,8 @@
                 }
 
                 container.innerHTML = todayExtras.map(task => {
-                    const completed = state.checkins.some(c => c.taskId === task.id && c.isExtra && c.date === today);
+                    // 完成日不晚于查看日即视为已完成（横跨多个显示日时完成状态延续）
+                    const completed = state.checkins.some(c => c.taskId === task.id && c.isExtra && c.date <= today);
                     return `
                         <div class="task-item ${completed ? 'completed' : ''}">
                             <div class="task-icon"><img src="icon_gift_card.webp" class="zoom-icon" style="width: 26px; height: 26px; object-fit: contain;"></div>
@@ -3248,7 +3279,8 @@
                     state.checkins.splice(existingIndex, 1);
                     showToast(`取消额外任务`);
                 } else {
-                    state.checkins.push({ date: extraTask.createdDate || today, taskId: extraId, reward: extraTask.reward, timestamp: Date.now(), isExtra: true });
+                    // 按实际完成当天记账，星值归属正确的日期（而不是任务截止日）
+                    state.checkins.push({ date: today, taskId: extraId, reward: extraTask.reward, timestamp: Date.now(), isExtra: true });
                     const rewardStr = extraTask.reward >= 0 ? '+' + extraTask.reward : extraTask.reward;
                     showToast(`完成额外任务 ${rewardStr}星`);
                 }
@@ -3536,7 +3568,7 @@
                         <input id="extraNameInput" type="text" value="${escapeHtml(task.name)}" placeholder="如：拼图奖励" />
                         <label>星值 (-50 到 50)</label>
                         <input id="extraRewardInput" type="number" min="-50" max="50" value="${task.reward}" />
-                        <label>日期</label>
+                        <label>截止日期（从今天起显示到该日 24 点）</label>
                         <input id="extraDateInput" type="date" value="${task.createdDate || today}" />
                     `,
                     confirmText: '保存',
@@ -3554,8 +3586,9 @@
                                 state.extraTasks[idx].name = name;
                                 state.extraTasks[idx].reward = reward;
                                 state.extraTasks[idx].createdDate = date;
+                                // 完成记录保留实际完成日，只同步星值，避免星值归属被改到截止日
                                 state.checkins.forEach(c => {
-                                    if (c.taskId === task.id && c.isExtra) { c.date = date; c.reward = reward; }
+                                    if (c.taskId === task.id && c.isExtra) { c.reward = reward; }
                                 });
                             }
                         } else {
@@ -3563,7 +3596,8 @@
                                 id: 'extra_' + Date.now(),
                                 name: name,
                                 reward: reward,
-                                createdDate: date
+                                createdDate: date,
+                                addedDate: getBeijingDateStr()   // 实际添加当天：任务从这天开始显示
                             });
                         }
                         saveState();
