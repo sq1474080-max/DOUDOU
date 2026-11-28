@@ -419,7 +419,7 @@
         .view-page.view-leaving { position: absolute; margin: 0; z-index: 2; pointer-events: none; }
         /* 顶部透明占位：模拟原顶部导航 + 双倍卡片高度，硬性撑起页面上沿、把内容整体下移。
            完全透明、不拦截点击，肉眼不可见但真实占据布局空间。调整 --top-spacer-h 即可微调下移量。 */
-        :root { --top-spacer-h: 104px; }
+        :root { --top-spacer-h: 52px; }
         .top-nav-spacer { height: var(--top-spacer-h); flex: 0 0 var(--top-spacer-h); background: transparent; pointer-events: none; }
         /* 图片尺寸兜底：消除加载完成前的布局跳动 */
         img.zoom-icon { display: inline-block; vertical-align: middle; }
