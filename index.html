@@ -77,9 +77,8 @@
         }
 
         .app-header {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
             margin-bottom: 12px;
             background: var(--bg-nav);
@@ -109,8 +108,8 @@
             color: var(--text-main);
             background: var(--bg-card);
         }
-        /* 家长模式下的导出/导入图标组（占据原刷新按钮位置） */
-        .admin-tools { display:flex; align-items:center; justify-content:center; gap:6px; }
+        /* 导出/导入图标组：固定在顶栏右侧 */
+        .admin-tools { display:flex; align-items:center; justify-content:flex-end; gap:6px; }
         .admin-tool-btn {
             width:34px; height:34px; flex:0 0 34px;
             display:grid; place-items:center;
@@ -405,8 +404,9 @@
         .history-mode .task-check { cursor: default; }
 
         /* ===== 页面装饰图淡入淡出（背景固定不变，仅装饰层过渡） ===== */
-        .page-decor { transition: opacity .55s ease; }
-        .page-decor.decor-hidden { opacity: 0; }
+        /* 装饰图切换：旧图快速淡出、新图延迟淡入，避免新旧两张图半透明叠加造成"旧图标残留" */
+        .page-decor { transition: opacity .4s ease .24s; }
+        .page-decor.decor-hidden { opacity: 0; transition: opacity .16s ease 0s; }
         /* 裁剪舞台扩展到整个屏幕边缘（抵消 body 左右 padding），滑动时不再露出灰白细边 */
         .view-page {
             margin-left: -20px;
@@ -1301,52 +1301,137 @@
         @keyframes stmLockBreak{0%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(1.8) rotate(35deg);opacity:0}}
         .stm-figure.just-unlocked .stm-figure-lock{animation:stmLockBreak .5s ease forwards}
 
-        /* 解锁动画层：永远盖在所有区块之上 */
+        /* 解锁动画层：永远盖在所有区块之上 —— 弹出 → 停留 → 化星 → 五角星飞向底栏（设计预览原效果） */
         .stm-anim{
-            position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;
+            position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;
             background:radial-gradient(110% 76% at 50% 30%,rgba(24,74,124,.78),rgba(7,15,25,.94) 76%);
             -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);overflow:hidden;
+            opacity:0;pointer-events:none;transition:opacity .3s ease;
         }
-        .stm-anim.open{display:flex}
+        .stm-anim.open{opacity:1;pointer-events:auto}
         .stm-anim-stage{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
             width:100%;height:100%;padding-bottom:12vh}
-        .stm-anim-halo{position:absolute;left:50%;top:46%;width:340px;height:340px;border-radius:50%;
+        /* 光晕呼吸 */
+        .stm-anim-halo{position:absolute;left:50%;top:38%;width:340px;height:340px;border-radius:50%;
             transform:translate(-50%,-50%);pointer-events:none;opacity:0;
             background:radial-gradient(circle,rgba(255,255,255,.42),rgba(255,255,255,0) 62%)}
-        .stm-anim.open .stm-anim-halo{animation:stmHalo 3.4s linear forwards}
-        @keyframes stmHalo{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}
-            16%{opacity:.9;transform:translate(-50%,-50%) scale(1)}
-            57%{opacity:.5;transform:translate(-50%,-50%) scale(1.05)}
-            100%{opacity:0;transform:translate(-50%,-50%) scale(1.1)}}
+        .stm-anim.open .stm-anim-halo{opacity:1;animation:stmHaloBreath 2.4s ease-in-out infinite}
+        @keyframes stmHaloBreath{0%,100%{transform:translate(-50%,-50%) scale(.94);opacity:.75}50%{transform:translate(-50%,-50%) scale(1.06);opacity:1}}
+        /* 四角火花闪烁 */
+        .stm-sparks{position:absolute;inset:0;pointer-events:none}
+        .stm-spark{position:absolute;width:14px;height:14px;opacity:0;color:#FFF3D6}
+        .stm-anim.open .stm-spark{animation:stmSparkTwinkle 1.8s ease-in-out infinite}
+        @keyframes stmSparkTwinkle{0%,100%{opacity:0;transform:scale(.4) rotate(0)}45%{opacity:.9;transform:scale(1) rotate(45deg)}}
+        /* 形象：弹出 → 化星（缩小模糊淡出） */
         .stm-anim-fig{position:relative;z-index:10;height:266px;width:auto;max-width:70vw;opacity:0;
             transform:scale(.28);filter:drop-shadow(0 22px 30px rgba(0,0,0,.35))}
         .stm-anim-fig img{height:266px;width:auto;max-width:70vw;display:block}
-        .stm-anim.open .stm-anim-fig{animation:stmFig 3.4s linear forwards}
-        @keyframes stmFig{
-            0%{opacity:0;transform:scale(.28)}
-            9%{opacity:1;transform:scale(1.08)}
-            15.3%{opacity:1;transform:scale(1)}
-            44%{opacity:1;transform:scale(1)}
-            57.4%{opacity:0;transform:scale(.66) translateY(-8px)}
-            100%{opacity:0;transform:scale(.66) translateY(-8px)}}
+        .stm-anim.open .stm-anim-fig{animation:stmFigPop .52s cubic-bezier(.22,.9,.3,1.28) both}
+        @keyframes stmFigPop{0%{opacity:0;transform:scale(.28) rotate(-10deg)}62%{opacity:1;transform:scale(1.08) rotate(2deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+        .stm-anim.open .stm-anim-fig.out{animation:stmFigOut .34s ease forwards}
+        @keyframes stmFigOut{to{opacity:0;transform:scale(.66);filter:blur(2px)}}
+        /* 文字：淡入 → 淡出 */
         .stm-anim-txt{position:relative;z-index:3;text-align:center;color:#fff;margin-top:6px;opacity:0}
-        .stm-anim.open .stm-anim-txt{animation:stmTxt 3.4s linear forwards}
-        @keyframes stmTxt{0%,18%{opacity:0;transform:translateY(8px)}
-            24%,44%{opacity:1;transform:translateY(0)}
-            57.4%,100%{opacity:0;transform:translateY(-8px)}}
-        .stm-anim-new{font-family:Nunito,sans-serif;font-size:11px;font-weight:900;letter-spacing:.34em;opacity:.7}
-        .stm-anim-name{font-size:26px;font-weight:900;letter-spacing:.04em;margin:2px 0 4px;
-            text-shadow:0 2px 10px rgba(0,0,0,.4)}
-        .stm-anim-day{font-size:12px;font-weight:700;opacity:.8}
-        .stm-anim-star{position:fixed;z-index:4;left:50%;top:50%;width:88px;height:88px;opacity:0;
-            transform:translate(-50%,-50%);pointer-events:none;
-            color:#FFD87A;filter:drop-shadow(0 0 16px rgba(255,216,122,.7))}
-        .stm-anim-star svg{width:100%;height:100%;display:block}
-        .stm-trail{position:fixed;z-index:3;width:15px;height:15px;background:#FFD87A;opacity:0;pointer-events:none;
-            clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%)}
-        .stm-nav-hit{animation:stmNavHit .5s ease}
-        @keyframes stmNavHit{0%{transform:scale(1)}40%{transform:scale(1.32)}100%{transform:scale(1)}}
+        .stm-anim.open .stm-anim-txt{animation:stmTxtIn .5s .18s ease both}
+        @keyframes stmTxtIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+        .stm-anim.open .stm-anim-txt.out{animation:stmTxtOut .3s ease forwards}
+        @keyframes stmTxtOut{to{opacity:0;transform:translateY(-8px)}}
+        .stm-anim-new{font-family:Nunito,sans-serif;font-size:11px;font-weight:800;letter-spacing:.3em;opacity:.7;text-transform:uppercase}
+        .stm-anim-name{font-size:26px;font-weight:900;margin-top:6px;letter-spacing:.02em;text-shadow:0 2px 10px rgba(0,0,0,.4)}
+        .stm-anim-day{font-size:11.5px;font-weight:700;opacity:.8;margin-top:6px}
+        /* 五角星：弹出 → 弧线飞向底栏 → 命中 */
+        .stm-anim-star{position:fixed;z-index:6;width:132px;height:132px;opacity:0;
+            left:50%;top:36%;margin:-66px 0 0 -66px;color:#FFD87A;
+            will-change:transform,opacity;pointer-events:none}
+        .stm-anim-star svg{width:100%;height:100%;filter:drop-shadow(0 0 22px rgba(255,216,122,.65))}
+        .stm-anim.open .stm-anim-star.show{animation:stmStarIn .42s cubic-bezier(.2,.9,.3,1.3) forwards}
+        @keyframes stmStarIn{0%{opacity:0;transform:scale(.2) rotate(-30deg)}70%{opacity:1;transform:scale(1.12) rotate(6deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+        .stm-anim.open .stm-anim-star.fly{animation:stmStarFly .98s cubic-bezier(.5,.02,.5,1) forwards}
+        @keyframes stmStarFly{
+            0%{opacity:1;transform:translate(0,0) scale(1) rotate(0)}
+            45%{opacity:1;transform:translate(calc(var(--dx)*.42),calc(var(--dy)*.42 - 120px)) scale(.82) rotate(150deg)}
+            100%{opacity:.1;transform:translate(var(--dx),var(--dy)) scale(.16) rotate(330deg)}
+        }
+        .stm-nav-hit{animation:stmNavHit .5s .95s ease both}
+        @keyframes stmNavHit{0%{transform:scale(1)}30%{transform:scale(1.28);filter:drop-shadow(0 0 10px rgba(46,134,214,.85))}60%{transform:scale(.94)}100%{transform:scale(1)}}
 
+
+        /* ================= 预览：界面重构 ================= */
+        body { padding-top: 18px; }
+        .home-controls { position: fixed; top: 10px; left: 10px; z-index: 800; display: flex; align-items: center; gap: 8px; }
+        .circle-btn { width:34px; height:34px; flex:0 0 34px; border-radius:50%; border:1px solid var(--border-light);
+            background:var(--bg-card); color:var(--text-sub); display:grid; place-items:center; cursor:pointer;
+            box-shadow:var(--shadow-soft); transition:transform .18s ease, background .18s ease; padding:0;
+            -webkit-tap-highlight-color:transparent; }
+        .circle-btn:active { transform:scale(.9); }
+        .circle-btn svg { width:17px; height:17px; display:block; }
+        .settings-toggle { background:var(--accent); color:#fff; border-color:var(--accent); }
+        .settings-pop { display:flex; gap:8px; opacity:0; transform:translateX(-10px) scale(.92); pointer-events:none;
+            transition:opacity .22s ease, transform .22s cubic-bezier(.22,.7,.28,1); }
+        .settings-pop.open { opacity:1; transform:none; pointer-events:auto; }
+        /* 头像：纯圆形、无变形、背景与页面一致 */
+        .profile-stats-bar { flex-direction:column; gap:12px; }
+        .profile-card { flex-direction:row; align-items:center; justify-content:flex-start; gap:14px; padding:12px 16px; }
+        .avatar-container { width:62px; height:62px; flex:0 0 62px; border-radius:50%; animation:none; background:var(--bg-page); box-shadow:inset -4px -4px 12px rgba(0,0,0,.05); }
+        .profile-greeting { font-size:20px; font-weight:900; color:var(--text-main); line-height:1.2; }
+        .profile-greeting .hi { color:var(--accent); margin-right:5px; }
+        .profile-card .edit-profile-btn { margin-left:auto; }
+        /* 星值卡片：独立一行、左右并列、与日历同宽 */
+        #profileCardNew + .stats-group { width:100%; flex-direction:row; gap:12px; }
+        .stats-group .stats-card { flex:1 1 0; min-width:0; }
+        /* 图鉴：文字左对齐 + 名字放大2.5倍右上偏移 + 图片放大 */
+        .starman-card .stm-info, .starman-card .stm-info * { text-align:left; }
+        .starman-card .stm-info { align-items:flex-start; }
+        .stm-state { min-height:54px; }
+        .stm-name { font-size:32px; font-weight:900; display:inline-block; transform:translate(12px,-6px); letter-spacing:-1.5px; line-height:1.05; }
+        .stm-lock-tag { font-size:11px; font-weight:800; opacity:.75; margin-left:8px; vertical-align:middle; }
+        .stm-figure { height:262px; }
+        .stm-figure-img { height:246px; }
+        .stm-anim-fig { height:334px; }
+        .stm-anim-fig img { height:334px; }
+        @media (orientation: landscape) { .stm-figure{height:222px;} .stm-figure-img{height:208px;} }
+
+        /* ===== 预览v2：头像框透明 / 设置按钮仅首页 / 头像淡入淡出 / 图鉴恢复原尺寸+间距 ===== */
+        .profile-card { position:relative; background:transparent !important; border:none !important; box-shadow:none !important; padding:0 !important; }
+        .edit-profile-btn { display:none !important; }
+        #avatarContainer { cursor:pointer; }
+        /* 设置按钮：头像行最右、垂直居中、更大；弹出组向左展开 */
+        .home-controls { position:absolute; right:0; left:auto; top:50%; transform:translateY(-50%); width:46px; height:46px; display:flex; align-items:center; z-index:800; }
+        .home-controls .circle-btn { width:40px; height:40px; flex:0 0 40px; }
+        .home-controls .circle-btn svg { width:20px; height:20px; }
+        .home-controls .settings-toggle { width:46px; height:46px; flex:0 0 46px; }
+        .settings-pop { position:absolute; right:54px; top:50%; display:flex; gap:8px;
+            opacity:0; transform:translateY(-50%) scale(.92); pointer-events:none;
+            transition:opacity .22s ease, transform .22s cubic-bezier(.22,.7,.28,1); }
+        .settings-pop.open { opacity:1; transform:translateY(-50%) scale(1); pointer-events:auto; }
+        /* 头像区切换页：独立淡入淡出，不参与卡片滑动 */
+        .profile-stats-bar { transition:none; }
+        /* 图鉴：撤销上一版的整体放大，恢复原始尺寸 */
+        .stm-figure { height:210px !important; }
+        .stm-figure-img { height:196px !important; }
+        .stm-anim-fig { height:266px !important; }
+        .stm-anim-fig img { height:266px !important; }
+        @media (orientation: landscape) { .stm-figure{height:210px !important;} .stm-figure-img{height:196px !important;} }
+        /* 图鉴文字：左对齐 + 间距协调 */
+        .stm-label { margin-bottom:2px; }
+        .stm-num { margin:8px 0 2px !important; }
+        .stm-sub { margin-top:0; }
+        .stm-info-foot { padding-top:8px !important; }
+        .stm-state { min-height:54px; }
+        .stm-name { transform:translate(0,-12px) !important; }
+        .stm-lock-tag { margin-left:0 !important; transform:translateY(-12px); display:inline-block; }
+        .stm-prog { margin-top:5px !important; }
+        /* 解锁动效演示按钮 */
+        .demo-unlock-btn { position:fixed; right:12px; bottom:104px; z-index:900; height:40px; padding:0 14px;
+            border:none; border-radius:20px; background:#ff8a3d; color:#fff; font-size:12px; font-weight:900;
+            box-shadow:0 6px 18px rgba(255,138,61,.45); cursor:pointer; }
+        .demo-unlock-btn:active { transform:scale(.94); }
+        /* 家长模式：图鉴形象换图按钮（仅动态WebP） */
+        .stm-upimg{position:absolute;z-index:8;right:8px;top:8px;height:26px;padding:0 10px;
+            border:none;border-radius:13px;background:rgba(255,255,255,.9);color:#2A79C6;
+            font-size:11px;font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(11,52,92,.25)}
+        .stm-upimg:active{transform:scale(.94)}
+        .stm-upimg.hidden{display:none}
     </style>
 </head>
 <body>
@@ -1355,34 +1440,32 @@
     <img class="page-decor decor-hidden" data-view="shop" data-src="decor_shop.webp" width="220" height="220" alt="">
     <img class="page-decor decor-hidden" data-view="stats" data-src="decor_stats.webp" width="220" height="220" alt="">
 
-    <div class="app-header">
-        <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 儿童模式</button>
-        <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 家长模式</button>
-        <button class="header-btn" id="refreshBtn"><img src="icon_export.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 刷新页面</button>
-        <div class="admin-tools hidden" id="adminTools">
-            <button class="admin-tool-btn" id="btnBackup" title="导出备份" aria-label="导出备份">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg>
-            </button>
-            <button class="admin-tool-btn" id="btnImport" title="导入恢复" aria-label="导入恢复">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M4 17v3h16v-3"/></svg>
-            </button>
-        </div>
-        <input type="file" id="importFile" accept="application/json,.json" class="hidden">
-    </div>
+    <input type="file" id="importFile" accept="application/json,.json" class="hidden">
 
     <div id="viewHome" class="view-page">
     <div class="layout-container">
         <div class="left-panel">
             <div class="profile-stats-bar">
-                <div class="profile-card">
-                    <div class="avatar-container">
+                <div class="profile-card" id="profileCardNew">
+                    <div class="avatar-container" id="avatarContainer">
                         <div class="avatar" id="avatarDisplay"></div>
                         <div class="avatar-eye left"></div>
                         <div class="avatar-eye right"></div>
                         <div class="avatar-smile"></div>
                     </div>
-                    <div class="profile-name" id="profileName">HEIDI</div>
+                    <div class="profile-greeting"><span class="hi">Hi,</span> <span id="profileName">HEIDI</span></div>
                     <button class="edit-profile-btn hidden" id="editProfileBtn">编辑资料</button>
+                    <div class="home-controls">
+                        <button class="circle-btn settings-toggle" id="settingsToggle" type="button" aria-label="设置">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </button>
+                        <div class="settings-pop" id="settingsPop">
+                            <button class="circle-btn" id="btnRoleToggle" type="button" title="家长模式" aria-label="家长模式"><svg id="roleToggleSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+                            <button class="circle-btn" id="refreshBtn" type="button" title="刷新页面" aria-label="刷新页面"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></button>
+                            <button class="circle-btn" id="btnImport" type="button" title="上传数据" aria-label="上传数据"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 17v3h16v-3"/></svg></button>
+                            <button class="circle-btn" id="btnBackup" type="button" title="下载数据" aria-label="下载数据"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="M7 11l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg></button>
+                        </div>
+                    </div>
                 </div>
                 <div class="stats-group">
                     <div class="stats-card today">
@@ -1558,18 +1641,26 @@
     </div>
 
     <div id="toastContainer" class="toast-container"></div>
-    <!-- 星星人解锁动画层（最高图层） -->
+    <!-- 星星人解锁动画层（最高图层）：弹出 → 停留 → 化星 → 五角星飞向底栏 -->
     <div class="stm-anim" id="stmAnim" aria-hidden="true">
         <div class="stm-anim-stage">
             <div class="stm-anim-halo"></div>
+            <div class="stm-sparks">
+                <svg class="stm-spark" style="left:24%;top:26%" viewBox="-10 -10 20 20"><path d="M0 -8 Q2 -2 8 0 Q2 2 0 8 Q-2 2 -8 0 Q-2 -2 0 -8 Z" fill="currentColor"/></svg>
+                <svg class="stm-spark" style="left:70%;top:20%;animation-delay:.25s" viewBox="-10 -10 20 20"><path d="M0 -8 Q2 -2 8 0 Q2 2 0 8 Q-2 2 -8 0 Q-2 -2 0 -8 Z" fill="currentColor"/></svg>
+                <svg class="stm-spark" style="left:16%;top:52%;animation-delay:.55s" viewBox="-10 -10 20 20"><path d="M0 -8 Q2 -2 8 0 Q2 2 0 8 Q-2 2 -8 0 Q-2 -2 0 -8 Z" fill="currentColor"/></svg>
+                <svg class="stm-spark" style="left:80%;top:48%;animation-delay:.8s" viewBox="-10 -10 20 20"><path d="M0 -8 Q2 -2 8 0 Q2 2 0 8 Q-2 2 -8 0 Q-2 -2 0 -8 Z" fill="currentColor"/></svg>
+            </div>
             <div class="stm-anim-fig" id="stmAnimFig"></div>
-            <div class="stm-anim-txt">
+            <div class="stm-anim-txt" id="stmAnimTxt">
                 <div class="stm-anim-new">NEW</div>
                 <div class="stm-anim-name" id="stmAnimName"></div>
                 <div class="stm-anim-day" id="stmAnimDay"></div>
             </div>
         </div>
-        <div class="stm-anim-star" id="stmAnimStar"><svg viewBox="-20 -20 40 40"><path d="M0 -18 L4.7 -5.6 L18 -5.6 L7.4 2.2 L11.2 15 L0 7.2 L-11.2 15 L-7.4 2.2 L-18 -5.6 L-4.7 -5.6 Z" fill="currentColor"/></svg></div>
+        <div class="stm-anim-star" id="stmAnimStar">
+            <svg viewBox="-20 -20 40 40"><path d="M0 -10 Q2.8 -2.8 10 0 Q2.8 2.8 0 10 Q-2.8 2.8 -10 0 Q-2.8 -2.8 0 -10 Z" fill="currentColor" transform="scale(1.6)"/></svg>
+        </div>
     </div>
     <div id="modalRoot"></div>
 
@@ -2359,34 +2450,30 @@
             }
 
             function updateRoleUI() {
-                const btnAdmin = document.getElementById('btnAdminMode');
-                const btnChild = document.getElementById('btnChildMode');
+                const roleToggle = document.getElementById('btnRoleToggle');
+                const roleToggleIcon = document.getElementById('roleToggleIcon');
+                const roleToggleText = document.getElementById('roleToggleText');
                 const addExtraBtn = document.getElementById('addExtraBtn');
                 const collapseBtns = document.querySelectorAll('.collapse-btn');
-                const btnBackup = document.getElementById('btnBackup');
-                const btnImport = document.getElementById('btnImport');
-                const adminTools = document.getElementById('adminTools');
-                const refreshBtn = document.getElementById('refreshBtn');
+                const isAdmin = currentRole === 'admin' && isAdminAuthenticated;
 
-                if (currentRole === 'admin' && isAdminAuthenticated) {
-                    btnAdmin.classList.add('active');
-                    btnChild.classList.remove('active');
+                // 合并后的切换按钮：当前儿童模式→显示"家长模式"(点击进入家长)，当前家长模式→显示"儿童模式"(点击切回)
+                if (roleToggle) {
+                    roleToggle.classList.toggle('active', isAdmin);
+                    if (roleToggleText) roleToggleText.textContent = isAdmin ? '儿童模式' : '家长模式';
+                    var rsvg = document.getElementById('roleToggleSvg');
+                    if (rsvg) rsvg.innerHTML = isAdmin
+                        ? '<circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>'
+                        : '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>';
+                    var upBtn = document.getElementById('stmUpImgBtn');
+                    if (upBtn) upBtn.classList.toggle('hidden', !isAdmin);
+                }
+
+                if (isAdmin) {
                     addExtraBtn.classList.remove('hidden');
-                    // 家长模式：隐藏刷新页面，显示导出/导入图标组（占据原刷新按钮位置）
-                    if (refreshBtn) refreshBtn.classList.add('hidden');
-                    if (adminTools) adminTools.classList.remove('hidden');
-                    if (btnBackup) btnBackup.classList.remove('hidden');
-                    if (btnImport) btnImport.classList.remove('hidden');
                     collapseBtns.forEach(btn => btn.classList.remove('hidden'));
                 } else {
-                    btnAdmin.classList.remove('active');
-                    btnChild.classList.add('active');
                     addExtraBtn.classList.add('hidden');
-                    // 儿童模式：显示刷新页面，隐藏导出/导入图标组
-                    if (refreshBtn) refreshBtn.classList.remove('hidden');
-                    if (adminTools) adminTools.classList.add('hidden');
-                    if (btnBackup) btnBackup.classList.add('hidden');
-                    if (btnImport) btnImport.classList.add('hidden');
                     collapseBtns.forEach(btn => btn.classList.add('hidden'));
                     document.querySelectorAll('.task-list, #inSchoolGroups, #outSchoolGroups, #examTaskList').forEach(el => {
                         el.style.display = '';
@@ -2499,7 +2586,7 @@
                 const pick = (sel) => Array.prototype.slice.call(root.querySelectorAll(sel)).filter(el => el.offsetParent !== null);
                 let blocks;
                 if (view === 'home') {
-                    blocks = pick('.profile-stats-bar, .calendar-card, .left-panel > .section-wrapper, .right-panel > .section-wrapper');
+                    blocks = pick('.calendar-card, .left-panel > .section-wrapper, .right-panel > .section-wrapper');
                 } else if (view === 'shop') {
                     blocks = pick('.shop-page-title, .shop-hero, .shop-main > .section-wrapper, .shop-actions, .shop-side > .section-wrapper');
                 } else {
@@ -2533,14 +2620,15 @@
                 const W = slideDistance();
                 const oldRoot = getViewRoot(fromView);
                 const newRoot = getViewRoot(toView);
+                // clearViewAnimState 已把目标页显示、离场页隐藏。要正确测量离场页原位，
+                // 必须先隐藏目标页，让离场页成为文档流中唯一可见页——否则两页同时在文档流里，
+                // 离场页(排在后面)会被目标页挤到屏幕下方，量出错误坐标导致变形残影。
+                if (newRoot) newRoot.classList.add('hidden');
+                if (oldRoot) oldRoot.classList.remove('hidden');
                 const oldBlocks = viewBlocks(fromView);
                 // 先记录离场页在页面中的真实位置（body 已设为定位上下文）
                 const bodyRect = document.body.getBoundingClientRect();
                 const oldRect = oldRoot ? oldRoot.getBoundingClientRect() : null;
-                // 新页面先解除隐藏，动画期间新旧同时可见（一出一进）
-                if (newRoot) newRoot.classList.remove('hidden');
-                if (oldRoot) oldRoot.classList.remove('hidden');
-                const newBlocks = viewBlocks(toView);
                 // 离场页脱离文档流叠在上层，按原位置定位，避免跳到视口顶端产生边界感
                 if (oldRoot && oldRect) {
                     oldRoot.style.top = (oldRect.top - bodyRect.top) + 'px';
@@ -2548,6 +2636,9 @@
                     oldRoot.style.width = oldRect.width + 'px';
                     oldRoot.classList.add('view-leaving');
                 }
+                // 离场页已脱离文档流，此时解除目标页隐藏，它会回到正常顶部位置
+                if (newRoot) newRoot.classList.remove('hidden');
+                const newBlocks = viewBlocks(toView);
 
                 oldBlocks.forEach((blk, i) => {
                     blk.getAnimations().forEach(a => a.cancel());
@@ -2556,6 +2647,11 @@
                         { transform: 'translateX(' + (-dir * W * .22) + 'px)', opacity: 0 }
                     ], { duration: 300, delay: i * 25, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'both' });
                 });
+                // 头像区不参与卡片滑动，独立慢慢淡出/淡入，避免切换违和感
+                const oldHead = oldRoot ? oldRoot.querySelector('.profile-stats-bar') : null;
+                const newHead = newRoot ? newRoot.querySelector('.profile-stats-bar') : null;
+                if (oldHead) { oldHead.getAnimations().forEach(a=>a.cancel()); oldHead.animate([{opacity:1},{opacity:0}], {duration:300, easing:'ease', fill:'both'}); }
+                if (newHead) { newHead.getAnimations().forEach(a=>a.cancel()); newHead.animate([{opacity:0},{opacity:1}], {duration:520, delay:80, easing:'ease', fill:'both'}); }
                 const ENTER_DELAY = 120, ENTER_STAGGER = 55, ENTER_DURATION = 620;
                 newBlocks.forEach((blk, i) => {
                     blk.getAnimations().forEach(a => a.cancel());
@@ -2588,6 +2684,9 @@
                         blk.style.transform = '';
                         blk.style.opacity = '';
                     });
+                    const cHead = getViewRoot(currentView) ? getViewRoot(currentView).querySelector('.profile-stats-bar') : null;
+                    if (cHead) { cHead.getAnimations().forEach(a=>a.cancel()); cHead.style.opacity = ''; }
+                    if (oldHead) { oldHead.getAnimations().forEach(a=>a.cancel()); oldHead.style.opacity = ''; }
                     // 终极保险：动画收尾后强制确保"当前视图可见、区块不残留透明"，杜绝任何竞态留白
                     ['home','shop','stats'].forEach(v => {
                         const el = getViewRoot(v);
@@ -3261,19 +3360,10 @@
                         if (!file) return;
                         const reader = new FileReader();
                         reader.onload = (ev) => {
-                            const img = new Image();
-                            img.onload = () => {
-                                const maxSize = 200;
-                                let w = img.width, h = img.height;
-                                if (w > h) { if (w > maxSize) { h = h * maxSize / w; w = maxSize; } }
-                                else { if (h > maxSize) { w = w * maxSize / h; h = maxSize; } }
-                                const canvas = document.createElement('canvas');
-                                canvas.width = w; canvas.height = h;
-                                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                                pendingAvatar = canvas.toDataURL('image/jpeg', 0.85);
-                                preview.style.backgroundImage = `url(${pendingAvatar})`;
-                            };
-                            img.src = ev.target.result;
+                            openImageCropper(ev.target.result, (cropped) => {
+                                pendingAvatar = cropped;
+                                preview.style.backgroundImage = `url(${cropped})`;
+                            });
                         };
                         reader.readAsDataURL(file);
                     });
@@ -3531,14 +3621,14 @@
             });
 
             function bindEvents() {
-                document.getElementById('btnChildMode').addEventListener('click', () => {
-                    currentRole = 'child';
-                    isAdminAuthenticated = false;
-                    renderAll();
-                });
-
-                document.getElementById('btnAdminMode').addEventListener('click', () => {
-                    if (isAdminAuthenticated && currentRole === 'admin') return;
+                // 合并后的模式切换按钮：家长模式点它切回儿童；儿童模式点它弹密码进家长
+                document.getElementById('btnRoleToggle').addEventListener('click', () => {
+                    if (currentRole === 'admin' && isAdminAuthenticated) {
+                        currentRole = 'child';
+                        isAdminAuthenticated = false;
+                        renderAll();
+                        return;
+                    }
                     showModal({
                         title: '家长验证',
                         contentHTML: `<input id="pwdInput" type="password" placeholder="请输入密码" autofocus style="text-align:center; letter-spacing:5px;" />`,
@@ -4091,6 +4181,8 @@
                         </div>
                     </div>
                     <div class="stm-carousel">
+                        <button class="stm-upimg hidden" id="stmUpImgBtn" type="button" title="更换形象图（动态WebP）">换图</button>
+                        <input type="file" id="stmAnimFile" accept="image/webp,.webp" class="hidden">
                         <button class="stm-arrow prev hidden" id="stmPrev" type="button" aria-label="上一个">‹</button>
                         <div class="stm-figure" id="stmFigure">
                             <img class="stm-figure-img" id="stmFigImg" src="" alt="">
@@ -4120,17 +4212,17 @@
                     img.style.opacity = '0';
                     img.style.transform = 'scale(.9)';
                     setTimeout(()=>{
-                        img.src = item.img; img.alt = item.name;
+                        img.src = item.animImg || item.img; img.alt = item.name;
                         fig.classList.toggle('locked', !unlocked);
                         img.style.opacity = ''; img.style.transform = '';
                     }, 140);
                 } else {
-                    img.src = item.img; img.alt = item.name;
+                    img.src = item.animImg || item.img; img.alt = item.name;
                     fig.classList.toggle('locked', !unlocked);
                     img.style.opacity = ''; img.style.transform = '';
                 }
 
-                if (stateEl) stateEl.textContent = unlocked ? `已解锁：${item.name}` : `${item.name}（未解锁）`;
+                if (stateEl) stateEl.innerHTML = `<span class="stm-name">${item.name}</span>` + (unlocked ? '' : `<span class="stm-lock-tag">未解锁</span>`);
                 if (progEl) progEl.textContent = unlocked
                     ? '累计完美打卡解锁'
                     : `再完成打卡 ${Math.max(0,item.days - days)} 天解锁`;
@@ -4160,6 +4252,27 @@
                     const curUnlocked = days >= STARMAN_LIST[stmCurIndex].days;
                     if (curUnlocked && stmCurIndex < STARMAN_LIST.length-1){ stmCurIndex++; stmUpdateFigure(true); }
                 });
+
+                // 家长模式：换图（动态WebP，原样保存，不裁剪）
+                const upBtn = document.getElementById('stmUpImgBtn');
+                const upFile = document.getElementById('stmAnimFile');
+                if (upBtn && upFile){
+                    // 卡片每次渲染后按当前角色重设显隐（家长模式才显示换图）
+                    upBtn.classList.toggle('hidden', !(currentRole === 'admin' && isAdminAuthenticated));
+                    upBtn.addEventListener('click', ()=>upFile.click());
+                    upFile.addEventListener('change', ()=>{
+                        const file = upFile.files && upFile.files[0];
+                        if (!file) return;
+                        if (file.size > 2*1024*1024){ alert('图片请控制在 2MB 以内，避免占用过多存储'); upFile.value=''; return; }
+                        const reader = new FileReader();
+                        reader.onload = (ev)=>{
+                            const item = STARMAN_LIST[stmCurIndex];
+                            if (window.stmSetAnimImg) window.stmSetAnimImg(item.id, ev.target.result);
+                            showToast('已更新「'+item.name+'」的图鉴形象');
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
 
                 stmUpdateFigure(false);
 
@@ -4199,67 +4312,69 @@
                 }
             }
 
-            // 3.4 秒四步解锁动画
+            // 3.5 秒四步解锁动画（设计预览原效果）：弹出 → 停留 → 化星 → 五角星飞向底栏
+            var stmAnimTimers = [];
+            function stmClearAnimTimers(){ stmAnimTimers.forEach(clearTimeout); stmAnimTimers = []; }
             function stmPlayUnlock(item, days){
                 const layer = document.getElementById('stmAnim');
                 const fig = document.getElementById('stmAnimFig');
+                const txt = document.getElementById('stmAnimTxt');
                 const name = document.getElementById('stmAnimName');
                 const day = document.getElementById('stmAnimDay');
                 const star = document.getElementById('stmAnimStar');
+                const nav = document.getElementById('navStats');
                 if (!layer || !fig || !star) return;
 
+                // 解锁大图始终用静态首帧 img，绝不加载动态 animImg：
+                // 全屏弹层若播放动态 WebP 会持续解码、拖慢动画与滚动，故此处与图鉴卡片分离。
                 fig.innerHTML = `<img src="${item.img}" alt="${item.name}">`;
                 name.textContent = item.name;
                 day.textContent = `第 ${days} 个完美打卡日`;
 
-                // 重置动画
+                // 复位（清掉上一次残留的计时器与状态）
+                stmClearAnimTimers();
                 layer.classList.remove('open');
-                star.style.transition = 'none'; star.style.opacity = '0';
-                document.querySelectorAll('.stm-trail').forEach(e=>e.remove());
+                fig.classList.remove('out');
+                if (txt) txt.classList.remove('out');
+                star.classList.remove('show','fly');
+                if (nav) nav.classList.remove('stm-nav-hit');
                 void layer.offsetWidth;
+
+                // 计算五角星飞向底栏统计图标的位移（star 以自身中心定位，scale 系数≈1）
+                const sr = star.getBoundingClientRect();
+                const nr = nav ? nav.getBoundingClientRect() : {left:window.innerWidth/2, top:window.innerHeight-40, width:40, height:40};
+                const scale = sr.width / (star.offsetWidth || 1) || 1;
+                const dx = (nr.left + nr.width/2 - (sr.left + sr.width/2)) / scale;
+                const dy = (nr.top + nr.height/2 - (sr.top + sr.height/2)) / scale;
+                layer.style.setProperty('--dx', dx + 'px');
+                layer.style.setProperty('--dy', dy + 'px');
+
+                // ① 弹出：舞台淡入 + 光晕呼吸 + 形象弹出 + 文字淡入 + 火花闪烁
                 layer.classList.add('open');
 
-                // 飞行终点：底栏第三个图标（统计页）
-                setTimeout(()=>{
-                    const nav = document.getElementById('navStats');
-                    const box = nav ? nav.getBoundingClientRect() : {left:window.innerWidth/2, top:window.innerHeight-40, width:40, height:40};
-                    const tx = box.left + box.width/2;
-                    const ty = box.top + box.height/2;
-                    const sx = window.innerWidth/2;
-                    const sy = window.innerHeight*0.5 - 0; // 与 .stm-anim-star 初始 top:50% 对齐
-                    const dx = tx - sx, dy = ty - sy;
-
-                    // 飞行拖尾
-                    const trail = document.createElement('div');
-                    trail.className = 'stm-trail';
-                    document.body.appendChild(trail);
-
-                    star.style.transition = 'transform 1.45s cubic-bezier(.55,.02,.72,.36), opacity 1.45s linear';
-                    star.style.opacity = '1';
-                    star.style.transform = `translate(-50%,-50%)`;
+                // ③ 化星（1500ms）：形象缩小模糊淡出、文字淡出，同位置五角星弹出
+                stmAnimTimers.push(setTimeout(function(){
+                    fig.classList.add('out');
+                    if (txt) txt.classList.add('out');
+                    star.classList.remove('show','fly');
                     void star.offsetWidth;
-                    star.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(.16) rotate(330deg)`;
-                    star.style.opacity = '0.02';
+                    star.classList.add('show');
+                }, 1500));
 
-                    trail.style.transition = 'left 1.45s cubic-bezier(.55,.02,.72,.36), top 1.45s cubic-bezier(.55,.02,.72,.36), opacity 1.45s linear';
-                    trail.style.left = sx + 'px'; trail.style.top = sy + 'px'; trail.style.opacity = '.45';
-                    void trail.offsetWidth;
-                    trail.style.left = tx + 'px'; trail.style.top = ty + 'px'; trail.style.opacity = '0';
+                // ④ 飞行（1950ms）：五角星沿弧线飞向底栏，图标命中弹一下
+                stmAnimTimers.push(setTimeout(function(){
+                    star.classList.add('fly');
+                    if (nav){ void nav.offsetWidth; nav.classList.add('stm-nav-hit'); }
+                }, 1950));
 
-                    // 命中：图标弹一下
-                    setTimeout(()=>{
-                        if (nav){ nav.classList.remove('stm-nav-hit'); void nav.offsetWidth; nav.classList.add('stm-nav-hit'); }
-                        setTimeout(()=>{ if (nav) nav.classList.remove('stm-nav-hit'); }, 520);
-                    }, 1400);
-                }, 1950);
-
-                // 收尾
-                setTimeout(()=>{
+                // 收尾（3500ms）
+                stmAnimTimers.push(setTimeout(function(){
                     layer.classList.remove('open');
-                    star.style.transition = 'none'; star.style.opacity = '0';
-                    star.style.transform = 'translate(-50%,-50%)';
-                    document.querySelectorAll('.stm-trail').forEach(e=>e.remove());
-                }, 3400);
+                    fig.classList.remove('out');
+                    if (txt) txt.classList.remove('out');
+                    star.classList.remove('show','fly');
+                    if (nav) nav.classList.remove('stm-nav-hit');
+                }, 3500));
             }
 
             // 首次加载：同步账本并把已达成形象静默标记为已播（不播动画）
@@ -4274,6 +4389,18 @@
                 saveState(true); // 初始化只写本地，禁止用本地（可能为空）状态覆盖云端
             }
 
+            // 家长模式上传动态 WebP 后调用：只写入图鉴卡片的 animImg，不影响解锁弹层
+            window.stmSetAnimImg = function(id, dataUrl){
+                var item = STARMAN_LIST.find(function(s){ return s.id === id; });
+                if (!item) return false;
+                item.animImg = dataUrl || null;   // null = 恢复静态图
+                stmUpdateFigure(false);           // 立即刷新图鉴卡片
+                return true;
+            };
+            window.previewUnlockDemo = function(){
+                var item = STARMAN_LIST[1] || STARMAN_LIST[0];
+                stmPlayUnlock(item, item.days);
+            };
             init();
         })();
     </script>
@@ -4412,6 +4539,29 @@
     start();
   }
 })();
+</script>
+
+<script>
+(function(){
+  var t=document.getElementById('settingsToggle'), p=document.getElementById('settingsPop');
+  if(t&&p){
+    t.addEventListener('click',function(e){e.stopPropagation();p.classList.toggle('open');});
+    document.addEventListener('click',function(e){ if(!e.target.closest('.home-controls')) p.classList.remove('open'); });
+    p.addEventListener('click',function(e){ e.stopPropagation(); });
+  }
+  var av=document.getElementById('avatarContainer');
+  if(av){ av.addEventListener('click',function(){
+    var eb=document.getElementById('editProfileBtn');
+    if(eb && !eb.classList.contains('hidden')) eb.click();
+  }); }
+})();
+</script>
+    <button class="demo-unlock-btn" id="demoUnlockBtn" type="button">演示解锁动效</button>
+<script>
+document.getElementById('demoUnlockBtn').addEventListener('click', function(e){
+  e.stopPropagation();
+  if (window.previewUnlockDemo) window.previewUnlockDemo();
+});
 </script>
 </body>
 </html>
