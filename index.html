@@ -264,9 +264,9 @@
             box-shadow: var(--shadow-card);
             border: 1px solid var(--border-light);
         }
-        .stats-card.today { background: var(--accent); color: #ffffff; border-color: var(--accent); }
+        .stats-card.today { background: var(--bg-wrapper); color: var(--text-main); }
         .stats-card.month { background: var(--bg-wrapper); color: var(--text-main); }
-        .stats-card.today .stats-number { color: #ffffff; }
+        .stats-card.today .stats-number { color: var(--accent); }
 
         .stats-label {
             font-size: 14px;
@@ -417,6 +417,10 @@
         }
         /* 离场页脱离文档流并叠在顶层；top/left/width 由 JS 按实际位置写入，避免跳到视口顶端 */
         .view-page.view-leaving { position: absolute; margin: 0; z-index: 2; pointer-events: none; }
+        /* 顶部透明占位：模拟原顶部导航 + 双倍卡片高度，硬性撑起页面上沿、把内容整体下移。
+           完全透明、不拦截点击，肉眼不可见但真实占据布局空间。调整 --top-spacer-h 即可微调下移量。 */
+        :root { --top-spacer-h: 104px; }
+        .top-nav-spacer { height: var(--top-spacer-h); flex: 0 0 var(--top-spacer-h); background: transparent; pointer-events: none; }
         /* 图片尺寸兜底：消除加载完成前的布局跳动 */
         img.zoom-icon { display: inline-block; vertical-align: middle; }
 
@@ -1042,7 +1046,8 @@
             transform: translateX(-50%);
             width: calc(100% - 40px);
             max-width: 400px;
-            background: var(--accent);
+            /* 渐变蓝底栏：使用全站统一渐变蓝（与日历/兑换商店可用星值底图一致），仅改背景色，图标/白圈等图形一律不动 */
+            background: linear-gradient(135deg, #71c1ff 0%, #3695e3 55%, #2678c9 100%);
             padding: 10px 20px;
             display: flex;
             justify-content: space-around;
@@ -1372,7 +1377,7 @@
         /* 头像：纯圆形、无变形、背景与页面一致 */
         .profile-stats-bar { flex-direction:column; gap:12px; }
         .profile-card { flex-direction:row; align-items:center; justify-content:flex-start; gap:14px; padding:12px 16px; }
-        .avatar-container { width:62px; height:62px; flex:0 0 62px; border-radius:50%; animation:none; background:var(--bg-page); box-shadow:inset -4px -4px 12px rgba(0,0,0,.05); }
+        .avatar-container { width:62px; height:62px; flex:0 0 62px; border-radius:50%; animation:none; background:var(--bg-page); box-shadow:inset -4px -4px 12px rgba(0,0,0,.05), 0 0 0 1.5px #ffffff; }
         .profile-greeting { font-size:20px; font-weight:900; color:var(--text-main); line-height:1.2; }
         .profile-greeting .hi { color:var(--accent); margin-right:5px; }
         .profile-card .edit-profile-btn { margin-left:auto; }
@@ -1421,11 +1426,6 @@
         .stm-name { transform:translate(0,-12px) !important; }
         .stm-lock-tag { margin-left:0 !important; transform:translateY(-12px); display:inline-block; }
         .stm-prog { margin-top:5px !important; }
-        /* 解锁动效演示按钮 */
-        .demo-unlock-btn { position:fixed; right:12px; bottom:104px; z-index:900; height:40px; padding:0 14px;
-            border:none; border-radius:20px; background:#ff8a3d; color:#fff; font-size:12px; font-weight:900;
-            box-shadow:0 6px 18px rgba(255,138,61,.45); cursor:pointer; }
-        .demo-unlock-btn:active { transform:scale(.94); }
         /* 家长模式：图鉴形象换图按钮（仅动态WebP） */
         .stm-upimg{position:absolute;z-index:8;right:8px;top:8px;height:26px;padding:0 10px;
             border:none;border-radius:13px;background:rgba(255,255,255,.9);color:#2A79C6;
@@ -1441,6 +1441,9 @@
     <img class="page-decor decor-hidden" data-view="stats" data-src="decor_stats.webp" width="220" height="220" alt="">
 
     <input type="file" id="importFile" accept="application/json,.json" class="hidden">
+
+    <!-- 顶部透明占位：仅为撑高页面、整体下移内容，肉眼不可见 -->
+    <div class="top-nav-spacer" aria-hidden="true"></div>
 
     <div id="viewHome" class="view-page">
     <div class="layout-container">
@@ -4397,10 +4400,6 @@
                 stmUpdateFigure(false);           // 立即刷新图鉴卡片
                 return true;
             };
-            window.previewUnlockDemo = function(){
-                var item = STARMAN_LIST[1] || STARMAN_LIST[0];
-                stmPlayUnlock(item, item.days);
-            };
             init();
         })();
     </script>
@@ -4421,9 +4420,12 @@
   var dotX = null;
 
   function centerOf(btn) {
-    var barRect = document.querySelector('.bottom-bar').getBoundingClientRect();
+    var bar = document.querySelector('.bottom-bar');
+    var barRect = bar.getBoundingClientRect();
     var btnRect = btn.getBoundingClientRect();
-    return btnRect.left - barRect.left + btnRect.width / 2 - 26;
+    // .nav-dot 的 left:0 参照底栏 padding box（含 1px 边框），扣掉边框使白圈中心与图标中心严格重合
+    var borderLeft = parseFloat(getComputedStyle(bar).borderLeftWidth) || 0;
+    return btnRect.left - barRect.left - borderLeft + btnRect.width / 2 - 26;
   }
 
   // 果冻胶囊：用连续函数烘焙关键帧，位移平滑 S 曲线 + 形变连续脉冲，全程速度不跳变
@@ -4555,13 +4557,6 @@
     if(eb && !eb.classList.contains('hidden')) eb.click();
   }); }
 })();
-</script>
-    <button class="demo-unlock-btn" id="demoUnlockBtn" type="button">演示解锁动效</button>
-<script>
-document.getElementById('demoUnlockBtn').addEventListener('click', function(e){
-  e.stopPropagation();
-  if (window.previewUnlockDemo) window.previewUnlockDemo();
-});
 </script>
 </body>
 </html>
