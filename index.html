@@ -78,6 +78,7 @@
 
         .app-header {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
@@ -108,6 +109,18 @@
             color: var(--text-main);
             background: var(--bg-card);
         }
+        /* 家长模式下的导出/导入图标组（占据原刷新按钮位置） */
+        .admin-tools { display:flex; align-items:center; justify-content:center; gap:6px; }
+        .admin-tool-btn {
+            width:34px; height:34px; flex:0 0 34px;
+            display:grid; place-items:center;
+            border:none; border-radius:9px; cursor:pointer;
+            background:transparent; color:var(--text-sub);
+            padding:0; transition:background .2s ease,color .2s ease;
+        }
+        .admin-tool-btn:hover { background:var(--bg-card); color:var(--accent); }
+        .admin-tool-btn:active { background:var(--bg-card); }
+        .admin-tool-btn svg { width:17px; height:17px; display:block; }
 
         .layout-container {
             display: flex;
@@ -1220,43 +1233,73 @@
         /* ============ 星星人图鉴 ============ */
         .starman-card{
             position:relative; z-index:120; overflow:visible;
-            margin:6px 0 14px; min-height:232px;
+            margin:6px 0 14px; min-height:250px;
             background:linear-gradient(135deg,#71c1ff 0%,#3695e3 55%,#2678c9 100%);
             border-radius:var(--radius-wrapper);
-            padding:24px 26px; color:#fff; box-shadow:none;
+            padding:22px 24px 26px; color:#fff; box-shadow:none;
+            display:flex; align-items:stretch; gap:10px;
         }
         .stm-glow{
             position:absolute; right:-10px; top:-26px; width:250px; height:250px; border-radius:50%;
             background:radial-gradient(circle,rgba(255,255,255,.28),transparent 66%);
             pointer-events:none; z-index:1;
         }
-        .stm-label{position:relative;z-index:2;font-size:14px;font-weight:800;letter-spacing:.5px;opacity:.94}
+        /* 左侧：标题/天数/状态 */
+        .stm-info{position:relative;z-index:2;flex:0 0 38%;min-width:0;display:flex;flex-direction:column}
+        .stm-label{font-size:14px;font-weight:800;letter-spacing:.5px;opacity:.94}
         .stm-label span{font-size:12px;font-weight:700;opacity:.75;letter-spacing:0}
-        .stm-num{position:relative;z-index:2;display:flex;align-items:baseline;gap:4px;
-            font-size:42px;font-weight:900;line-height:1;margin:10px 0 6px;letter-spacing:-.02em}
+        .stm-num{display:flex;align-items:baseline;gap:4px;
+            font-size:42px;font-weight:900;line-height:1;margin:10px 0 4px;letter-spacing:-.02em}
         .stm-num span{font-size:14px;font-weight:800;opacity:.9}
-        .stm-sub{position:relative;z-index:2;font-size:12px;font-weight:700;opacity:.72;letter-spacing:.3px}
-        .stm-dots{position:relative;z-index:2;display:flex;gap:8px;margin-top:16px}
-        .stm-dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;overflow:hidden;
-            background:linear-gradient(140deg,#5fafec,#2a79c6);border:1px solid rgba(255,255,255,.85);
-            box-shadow:0 2px 6px rgba(10,45,80,.22)}
-        .stm-dot img{width:100%;height:100%;object-fit:cover;display:block;object-position:center 18%}
-        .stm-dot.locked{background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.55)}
-        .stm-dot.locked::after{content:"";width:7px;height:6px;border-radius:2px;background:rgba(255,255,255,.75);
-            box-shadow:0 -4px 0 -1.5px rgba(255,255,255,.75)}
-        .stm-hint{position:absolute;left:26px;bottom:16px;z-index:3;text-align:left;
-            font-size:11.5px;font-weight:700;line-height:1.45;opacity:.9;letter-spacing:.2px}
-        .stm-fig{
-            position:absolute; z-index:2147483000 !important;
-            right:4px; bottom:10px; height:250px; width:auto; pointer-events:none;
-            filter:drop-shadow(0 12px 16px rgba(11,52,92,.2));
+        .stm-sub{font-size:12px;font-weight:700;opacity:.72;letter-spacing:.3px}
+        .stm-info-foot{margin-top:auto;padding-top:10px}
+        .stm-state{font-size:13px;font-weight:800;line-height:1.5;min-height:38px;opacity:.95}
+        .stm-prog{font-size:11.5px;font-weight:700;opacity:.8;line-height:1.45;margin-top:2px}
+        /* 右侧：单一形象展示区 */
+        .stm-carousel{position:relative;z-index:3;flex:1 1 62%;min-width:0;display:flex;align-items:center;justify-content:center}
+        .stm-figure{
+            position:relative;width:100%;height:210px;
+            display:flex;align-items:center;justify-content:center;
         }
-        .stm-fig img{height:250px;width:auto;display:block}
-        .stm-fig.locked img{filter:brightness(0) invert(1);opacity:.42}
-        .stm-lock{position:absolute;z-index:2147483001 !important;right:102px;bottom:164px;
-            width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.94);
-            display:grid;place-items:center;box-shadow:0 6px 14px rgba(11,52,92,.25);pointer-events:none}
-        .stm-lock svg{width:16px;height:16px}
+        .stm-figure-img{
+            height:196px;width:auto;max-width:100%;display:block;object-fit:contain;
+            filter:drop-shadow(0 12px 16px rgba(11,52,92,.2));
+            transform:scale(1);opacity:1;
+            transition:transform .3s cubic-bezier(.22,.7,.28,1),opacity .3s ease,filter .3s ease;
+        }
+        /* 未解锁：模糊剪影，看不透 */
+        .stm-figure.locked .stm-figure-img{
+            filter:grayscale(1) brightness(0) invert(1) blur(2.4px);
+            opacity:.32;transform:scale(.94);
+        }
+        .stm-figure-lock{
+            position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+            width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.96);
+            display:grid;place-items:center;box-shadow:0 6px 16px rgba(11,52,92,.3);
+            pointer-events:none;
+        }
+        .stm-figure-lock svg{width:21px;height:21px}
+        .stm-figure:not(.locked) .stm-figure-lock{display:none}
+        /* 左右箭头：透明底，只留符号 */
+        .stm-arrow{
+            position:absolute;top:50%;transform:translateY(-50%);z-index:6;
+            width:40px;height:56px;border:none;cursor:pointer;
+            background:transparent;color:#fff;
+            font-size:40px;font-weight:300;line-height:1;
+            display:grid;place-items:center;
+            text-shadow:0 2px 8px rgba(11,52,92,.5);
+            transition:opacity .2s ease,transform .2s ease;
+            padding:0;user-select:none;-webkit-tap-highlight-color:transparent;
+        }
+        .stm-arrow:active{transform:translateY(-50%) scale(.86)}
+        .stm-arrow.prev{left:-6px}
+        .stm-arrow.next{right:-6px}
+        .stm-arrow.hidden{display:none}
+        /* 解锁亮起动画 */
+        @keyframes stmUnlockPop{0%{transform:scale(.3);opacity:0}55%{transform:scale(1.14);opacity:1}100%{transform:scale(1);opacity:1}}
+        .stm-figure.just-unlocked .stm-figure-img{animation:stmUnlockPop .55s cubic-bezier(.22,.9,.3,1.28) both}
+        @keyframes stmLockBreak{0%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(1.8) rotate(35deg);opacity:0}}
+        .stm-figure.just-unlocked .stm-figure-lock{animation:stmLockBreak .5s ease forwards}
 
         /* 解锁动画层：永远盖在所有区块之上 */
         .stm-anim{
@@ -1316,6 +1359,15 @@
         <button class="header-btn" id="btnChildMode"><img src="icon_child.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 儿童模式</button>
         <button class="header-btn" id="btnAdminMode"><img src="icon_admin.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 家长模式</button>
         <button class="header-btn" id="refreshBtn"><img src="icon_export.svg" class="zoom-icon" style="width: 12px; height: 12px;"> 刷新页面</button>
+        <div class="admin-tools hidden" id="adminTools">
+            <button class="admin-tool-btn" id="btnBackup" title="导出备份" aria-label="导出备份">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg>
+            </button>
+            <button class="admin-tool-btn" id="btnImport" title="导入恢复" aria-label="导入恢复">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M4 17v3h16v-3"/></svg>
+            </button>
+        </div>
+        <input type="file" id="importFile" accept="application/json,.json" class="hidden">
     </div>
 
     <div id="viewHome" class="view-page">
@@ -1656,8 +1708,19 @@
                 return pendingLocalWrite && (Date.now() - pendingSince) < 10000;
             }
 
-            function saveState() {
+            // 判断一份 state 是否含有真实用户数据（区别于全新空状态）
+            function hasRealData(s){
+                if (!s) return false;
+                return !!( (s.checkins && s.checkins.length) || (s.exams && s.exams.length)
+                    || (s.starman && s.starman.perfectDays && s.starman.perfectDays.length)
+                    || (s.extraTasks && s.extraTasks.length) || (s.redemptions && s.redemptions.length)
+                    || (s.shopItems && s.shopItems.length) );
+            }
+
+            // localOnly=true 时只写本地，不推云端（用于初始化，避免空状态覆盖云端）
+            function saveState(localOnly) {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                if (localOnly) return;
                 if (supabaseClient && !isSyncingFromCloud) {
                     pendingLocalWrite = true;
                     pendingSince = Date.now();
@@ -1711,9 +1774,19 @@
                 try {
                     const { data, error } = await supabaseClient.from('app_state').select('state_data').eq('id', 1).single();
                     if (error) throw error;
-                    if (data && data.state_data && Object.keys(data.state_data).length > 0) {
+                    const cloud = data && data.state_data;
+                    const cloudHas = cloud && Object.keys(cloud).length > 0 && hasRealData(cloud);
+                    const localHas = hasRealData(state);
+                    // 云端为空/无实质数据，但本地有真实数据：以本地为准，回推覆盖云端（防丢失/用于恢复）
+                    if (!cloudHas && localHas) {
                         isSyncingFromCloud = true;
-                        state = data.state_data;
+                        await supabaseClient.from('app_state').upsert({ id: 1, state_data: state, updated_at: new Date().toISOString() });
+                        isSyncingFromCloud = false;
+                        return;
+                    }
+                    if (cloudHas) {
+                        isSyncingFromCloud = true;
+                        state = cloud;
                         state.tasks = (state.tasks || []).map(t => {
                             let cat = t.category;
                             if (cat === '校内作业') cat = '校内任务';
@@ -1737,6 +1810,9 @@
                 supabaseClient.channel('app_state_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'app_state' }, payload => {
                     if (hasPendingLocalWrite()) return;
                     const newState = payload.new.state_data;
+                    const incomingHas = newState && Object.keys(newState).length > 0 && hasRealData(newState);
+                    // 收到空数据时，若本地有真实数据则忽略，避免把本地冲掉
+                    if (!incomingHas && hasRealData(state)) return;
                     if (newState && Object.keys(newState).length > 0) {
                         isSyncingFromCloud = true;
                         state = newState;
@@ -2287,16 +2363,30 @@
                 const btnChild = document.getElementById('btnChildMode');
                 const addExtraBtn = document.getElementById('addExtraBtn');
                 const collapseBtns = document.querySelectorAll('.collapse-btn');
+                const btnBackup = document.getElementById('btnBackup');
+                const btnImport = document.getElementById('btnImport');
+                const adminTools = document.getElementById('adminTools');
+                const refreshBtn = document.getElementById('refreshBtn');
 
                 if (currentRole === 'admin' && isAdminAuthenticated) {
                     btnAdmin.classList.add('active');
                     btnChild.classList.remove('active');
                     addExtraBtn.classList.remove('hidden');
+                    // 家长模式：隐藏刷新页面，显示导出/导入图标组（占据原刷新按钮位置）
+                    if (refreshBtn) refreshBtn.classList.add('hidden');
+                    if (adminTools) adminTools.classList.remove('hidden');
+                    if (btnBackup) btnBackup.classList.remove('hidden');
+                    if (btnImport) btnImport.classList.remove('hidden');
                     collapseBtns.forEach(btn => btn.classList.remove('hidden'));
                 } else {
                     btnAdmin.classList.remove('active');
                     btnChild.classList.add('active');
                     addExtraBtn.classList.add('hidden');
+                    // 儿童模式：显示刷新页面，隐藏导出/导入图标组
+                    if (refreshBtn) refreshBtn.classList.remove('hidden');
+                    if (adminTools) adminTools.classList.add('hidden');
+                    if (btnBackup) btnBackup.classList.add('hidden');
+                    if (btnImport) btnImport.classList.add('hidden');
                     collapseBtns.forEach(btn => btn.classList.add('hidden'));
                     document.querySelectorAll('.task-list, #inSchoolGroups, #outSchoolGroups, #examTaskList').forEach(el => {
                         el.style.display = '';
@@ -2327,6 +2417,25 @@
             // ===== 页面区块切换动画（顶栏/底栏不动，只动页面内容） =====
             const VIEW_ORDER = ['home', 'shop', 'stats'];
             let viewAnimating = false;
+            let viewAnimCleanupTimer = null;
+            // 强制清理所有视图切换动画残留：快速连点时避免旧定时器把当前页误隐藏、或区块停在 opacity:0
+            function clearViewAnimState() {
+                if (viewAnimCleanupTimer) { clearTimeout(viewAnimCleanupTimer); viewAnimCleanupTimer = null; }
+                ['home','shop','stats'].forEach(v => {
+                    const root = getViewRoot(v);
+                    if (!root) return;
+                    root.classList.remove('view-leaving');
+                    root.style.top = ''; root.style.left = ''; root.style.width = '';
+                    if (v !== currentView) root.classList.add('hidden');
+                    else root.classList.remove('hidden');
+                    root.querySelectorAll('.section-wrapper, .profile-stats-bar, .calendar-card, .shop-hero, .shop-page-title, .shop-actions, .starman-card').forEach(blk => {
+                        blk.getAnimations().forEach(a => a.cancel());
+                        blk.style.transform = '';
+                        blk.style.opacity = '';
+                    });
+                });
+                viewAnimating = false;
+            }
 
             // 左右滑动切换页面（手机/iPad 触屏，桌面可用鼠标拖拽）—— 跟手 + 阻尼回弹
             function bindSwipe() {
@@ -2394,7 +2503,8 @@
                 } else if (view === 'shop') {
                     blocks = pick('.shop-page-title, .shop-hero, .shop-main > .section-wrapper, .shop-actions, .shop-side > .section-wrapper');
                 } else {
-                    blocks = pick('.stats-layout > .section-wrapper');
+                    // 图鉴卡片作为统计页首块，与其它区块一起走统一的翻页进场动画
+                    blocks = pick('.starman-card, .stats-layout > .section-wrapper');
                 }
                 return blocks.length ? blocks : Array.prototype.slice.call(root.children).filter(el => !el.classList.contains('hidden'));
             }
@@ -2429,6 +2539,7 @@
                 const oldRect = oldRoot ? oldRoot.getBoundingClientRect() : null;
                 // 新页面先解除隐藏，动画期间新旧同时可见（一出一进）
                 if (newRoot) newRoot.classList.remove('hidden');
+                if (oldRoot) oldRoot.classList.remove('hidden');
                 const newBlocks = viewBlocks(toView);
                 // 离场页脱离文档流叠在上层，按原位置定位，避免跳到视口顶端产生边界感
                 if (oldRoot && oldRect) {
@@ -2456,9 +2567,12 @@
                 // 动画结束后隐藏旧页面，并清掉 fill 状态，避免切回时内容透明
                 // 等最后一个进场区块也到位后再清理，避免提前打断动画
                 const cleanupAt = ENTER_DELAY + Math.max(0, newBlocks.length - 1) * ENTER_STAGGER + ENTER_DURATION + 80;
-                setTimeout(() => {
-                    if (oldRoot) {
+                viewAnimCleanupTimer = setTimeout(() => {
+                    viewAnimCleanupTimer = null;
+                    if (oldRoot && getViewRoot(currentView) !== oldRoot) {
                         oldRoot.classList.add('hidden');
+                    }
+                    if (oldRoot) {
                         oldRoot.classList.remove('view-leaving');
                         oldRoot.style.top = '';
                         oldRoot.style.left = '';
@@ -2474,6 +2588,19 @@
                         blk.style.transform = '';
                         blk.style.opacity = '';
                     });
+                    // 终极保险：动画收尾后强制确保"当前视图可见、区块不残留透明"，杜绝任何竞态留白
+                    ['home','shop','stats'].forEach(v => {
+                        const el = getViewRoot(v);
+                        if (el) el.classList.toggle('hidden', v !== currentView);
+                    });
+                    const curRoot = getViewRoot(currentView);
+                    if (curRoot) {
+                        curRoot.querySelectorAll('.section-wrapper, .starman-card, .shop-hero, .shop-page-title, .shop-actions, .profile-stats-bar, .calendar-card').forEach(blk => {
+                            blk.getAnimations().forEach(a => a.cancel());
+                            if (parseFloat(getComputedStyle(blk).opacity) < 0.05) blk.style.opacity = '1';
+                            blk.style.transform = '';
+                        });
+                    }
                     viewAnimating = false;
                 }, cleanupAt);
             }
@@ -2498,10 +2625,9 @@
                 if (view === 'shop') renderShopPage();
                 if (view === 'stats') renderStatsPage();
                 window.scrollTo({ top: 0, behavior: 'auto' });
-                if (changed && !viewAnimating) {
+                if (changed) {
+                    clearViewAnimState();
                     animateViewSwitch(prevView, view);
-                } else if (changed) {
-                    applyVisibleView(view);
                 }
             }
 
@@ -2912,6 +3038,7 @@
                         </div>
                     </div>
                 `;
+                stmBindCarousel();
             }
 
             function revokeRedeem(recordId) {
@@ -3436,6 +3563,51 @@
                     location.reload();
                 });
 
+                // 导出备份：把全部本地数据下载成 JSON 文件
+                document.getElementById('btnBackup').addEventListener('click', () => {
+                    try {
+                        const payload = JSON.stringify(state, null, 2);
+                        const blob = new Blob([payload], { type: 'application/json;charset=utf-8' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        const d = new Date(getBeijingNow());
+                        const stamp = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                        a.href = url; a.download = `星星人打卡数据_${stamp}.json`;
+                        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                        setTimeout(() => URL.revokeObjectURL(url), 1500);
+                        showToast('备份已下载，请妥善保存');
+                    } catch (e) { alert('导出失败：' + e.message); }
+                });
+
+                // 导入恢复：读取备份 JSON，确认后覆盖本地并同步云端
+                const importFile = document.getElementById('importFile');
+                document.getElementById('btnImport').addEventListener('click', () => { importFile.value = ''; importFile.click(); });
+                importFile.addEventListener('change', () => {
+                    const file = importFile.files && importFile.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        let parsed;
+                        try { parsed = JSON.parse(reader.result); }
+                        catch (e) { alert('文件解析失败，请选择正确的备份 JSON'); return; }
+                        if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.checkins)) {
+                            alert('这不是有效的打卡备份文件'); return;
+                        }
+                        const n = (parsed.checkins || []).length;
+                        const pd = ((parsed.starman && parsed.starman.perfectDays) || []).length;
+                        if (!confirm(`确认恢复这份备份吗？\n打卡记录 ${n} 条，完美打卡 ${pd} 天。\n恢复后会覆盖当前数据并同步到云端。`)) return;
+                        state = parsed;
+                        if (!state.archive) state.archive = { lastCleanupMonth: '', months: {} };
+                        if (!state.starman) state.starman = { perfectDays: [], unlockedIds: [] };
+                        stmSync();
+                        stmBootstrap();
+                        saveState(); // 同步到云端
+                        renderAll();
+                        showToast('数据已恢复并同步');
+                    };
+                    reader.readAsText(file, 'utf-8');
+                });
+
                 document.body.addEventListener('click', (e) => {
                     if (e.target.closest('.collapse-btn')) {
                         const btn = e.target.closest('.collapse-btn');
@@ -3901,41 +4073,109 @@
             }
 
             // 图鉴卡片 HTML
+            let stmPendingFocus = -1; // 解锁后待聚焦的形象索引
+            let stmCurIndex = 0;      // 当前展示的形象索引（逐级揭示）
+
             function stmRenderCard(){
                 stmInitState();
                 const days = stmCalcDays();
-                const idx = stmDisplayIndex(days);
-                const next = stmNextInfo(days);
-                const shown = idx >= 0 ? STARMAN_LIST[idx] : null;
-                const hint = next
-                    ? `再完成打卡 ${next.remain} 天<br>解锁${next.name}`
-                    : `已解锁全部形象<br>新朋友筹备中`;
-
-                const dots = STARMAN_LIST.map((s,i)=>
-                    i <= idx
-                        ? `<div class="stm-dot"><img src="${s.img}" alt=""></div>`
-                        : `<div class="stm-dot locked"></div>`
-                ).join('');
-
-                let fig;
-                if (shown){
-                    fig = `<div class="stm-fig"><img src="${shown.img}" alt="${shown.name}"></div>`;
-                } else {
-                    fig = `<div class="stm-fig locked"><img src="${STARMAN_LIST[0].img}" alt=""></div>`
-                        + `<div class="stm-lock"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="10" rx="2.4" fill="#2A79C6"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="#2A79C6" stroke-width="2" fill="none"/></svg></div>`;
-                }
-
                 return `<div class="starman-card">
                     <div class="stm-glow"></div>
-                    <div class="stm-label">星星人图鉴</div>
-                    <div class="stm-num">${days}<span>天</span></div>
-                    <div class="stm-sub">累计完美打卡日</div>
-                    <div class="stm-dots">${dots}</div>
-                    ${fig}
-                    <div class="stm-hint">${hint}</div>
+                    <div class="stm-info">
+                        <div class="stm-label">星星人图鉴</div>
+                        <div class="stm-num">${days}<span>天</span></div>
+                        <div class="stm-sub">累计完美打卡日</div>
+                        <div class="stm-info-foot">
+                            <div class="stm-state" id="stmState"></div>
+                            <div class="stm-prog" id="stmProg"></div>
+                        </div>
+                    </div>
+                    <div class="stm-carousel">
+                        <button class="stm-arrow prev hidden" id="stmPrev" type="button" aria-label="上一个">‹</button>
+                        <div class="stm-figure" id="stmFigure">
+                            <img class="stm-figure-img" id="stmFigImg" src="" alt="">
+                            <div class="stm-figure-lock" id="stmFigLock"><svg viewBox="0 0 24 24" fill="none"><rect x="6" y="10.5" width="12" height="10" rx="2.4" fill="#2A79C6"/><path d="M9 10.5V8a3 3 0 0 1 6 0v2.5" stroke="#2A79C6" stroke-width="2" fill="none"/></svg></div>
+                        </div>
+                        <button class="stm-arrow next hidden" id="stmNext" type="button" aria-label="下一个">›</button>
+                    </div>
                 </div>`;
             }
 
+            // 根据当前索引渲染单一形象 + 逐级箭头 + 文字
+            function stmUpdateFigure(anim){
+                const fig = document.getElementById('stmFigure');
+                const img = document.getElementById('stmFigImg');
+                const prev = document.getElementById('stmPrev');
+                const next = document.getElementById('stmNext');
+                const stateEl = document.getElementById('stmState');
+                const progEl = document.getElementById('stmProg');
+                if (!fig || !img || !prev || !next) return;
+                const days = stmCalcDays();
+                const idx = Math.max(0, Math.min(STARMAN_LIST.length-1, stmCurIndex));
+                const item = STARMAN_LIST[idx];
+                const unlocked = days >= item.days;
+
+                if (anim) {
+                    // 卡片内部形象切换的平滑过渡（250-350ms），不影响整页翻页动画
+                    img.style.opacity = '0';
+                    img.style.transform = 'scale(.9)';
+                    setTimeout(()=>{
+                        img.src = item.img; img.alt = item.name;
+                        fig.classList.toggle('locked', !unlocked);
+                        img.style.opacity = ''; img.style.transform = '';
+                    }, 140);
+                } else {
+                    img.src = item.img; img.alt = item.name;
+                    fig.classList.toggle('locked', !unlocked);
+                    img.style.opacity = ''; img.style.transform = '';
+                }
+
+                if (stateEl) stateEl.textContent = unlocked ? `已解锁：${item.name}` : `${item.name}（未解锁）`;
+                if (progEl) progEl.textContent = unlocked
+                    ? '累计完美打卡解锁'
+                    : `再完成打卡 ${Math.max(0,item.days - days)} 天解锁`;
+
+                // 上一个：不在第一个就显示
+                prev.classList.toggle('hidden', idx <= 0);
+                // 下一个：仅当"当前形象已解锁"且"还有下一个"才显示（解锁后才会出现下一箭头）
+                const hasNext = idx < STARMAN_LIST.length - 1;
+                next.classList.toggle('hidden', !(unlocked && hasNext));
+            }
+
+            // 绑定逐级揭示交互
+            function stmBindCarousel(){
+                const prev = document.getElementById('stmPrev');
+                const next = document.getElementById('stmNext');
+                const days = stmCalcDays();
+                const displayIdx = stmDisplayIndex(days);
+
+                // 初始定位：优先聚焦新解锁形象，否则定位到已解锁的最后一个（全未解锁则 0）
+                if (stmPendingFocus >= 0) stmCurIndex = stmPendingFocus;
+                else stmCurIndex = displayIdx >= 0 ? displayIdx : 0;
+
+                if (prev) prev.addEventListener('click', ()=>{
+                    if (stmCurIndex > 0){ stmCurIndex--; stmUpdateFigure(true); }
+                });
+                if (next) next.addEventListener('click', ()=>{
+                    const curUnlocked = days >= STARMAN_LIST[stmCurIndex].days;
+                    if (curUnlocked && stmCurIndex < STARMAN_LIST.length-1){ stmCurIndex++; stmUpdateFigure(true); }
+                });
+
+                stmUpdateFigure(false);
+
+                // 若刚解锁：播放锁弹开 + 颜色点亮
+                if (stmPendingFocus >= 0){
+                    const fig = document.getElementById('stmFigure');
+                    if (fig){
+                        fig.classList.remove('locked');
+                        fig.classList.add('just-unlocked');
+                        setTimeout(()=>fig.classList.remove('just-unlocked'), 700);
+                    }
+                    stmPendingFocus = -1;
+                }
+            }
+
+            // 打卡变化后调用：判定新解锁 / 回退 / 动画
             // 打卡变化后调用：判定新解锁 / 回退 / 动画
             function stmOnCheckinChange(){
                 stmSync();
@@ -3954,6 +4194,7 @@
                 if (hit){
                     state.starman.unlockedIds.push(hit.id);
                     saveState();
+                    stmPendingFocus = STARMAN_LIST.indexOf(hit); // 解锁后自动聚焦该形象
                     setTimeout(()=>stmPlayUnlock(hit, now), 460);
                 }
             }
@@ -4030,7 +4271,7 @@
                         state.starman.unlockedIds.push(s.id);
                 });
                 stmPrevDays = days;
-                saveState();
+                saveState(true); // 初始化只写本地，禁止用本地（可能为空）状态覆盖云端
             }
 
             init();
